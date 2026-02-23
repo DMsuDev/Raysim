@@ -91,6 +91,7 @@ add_executable(${PROJECT_NAME}
     # Implementation sources
     ${RAYSIM_SOURCES_DIR}/Color.cpp
     ${RAYSIM_SOURCES_DIR}/Canvas.cpp
+    ${RAYSIM_SOURCES_DIR}/FontManager.cpp
 
     # Application entry point
     examples/main.cpp
@@ -134,6 +135,17 @@ if(ENABLE_DEBUG)
     target_compile_definitions(${PROJECT_NAME} PRIVATE AG_DEBUG)
     message(STATUS "Debug mode enabled: Assertions and logging will be active")
 endif()
+
+# ============================================================================
+# COPY RESOURCES TO OUTPUT DIRECTORY
+# ============================================================================
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/resources
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/resources
+    COMMENT "Copying resources to output directory"
+)
 
 # ============================================================================
 # BUILD SUMMARY

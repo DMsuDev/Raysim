@@ -3,6 +3,7 @@
 #include <string>
 #include "RaySim/Math/Vector.hpp"
 #include "RaySim/Graphics/Color.hpp"
+#include "RaySim/Graphics/FontManager.hpp"
 
 namespace RS
 {
@@ -20,6 +21,10 @@ namespace RS
         void SetFrameRate(int fps);
         void FullScreen();
 
+        // Font management
+        void SetDefaultFont(const std::string& fontPath, int fontSize = 32);
+        FontManager& GetFontManager() { return fontManager_; }
+
         void Run(); // Start the simulation loop
 
         RS::Vec2 GetScreenSize() const { return {static_cast<float>(width_), static_cast<float>(height_)}; }
@@ -27,15 +32,17 @@ namespace RS
         int GetHeight() const { return height_; }
 
         // Utility drawing functions to implement with raylib
-
-        void Background(const RS::Color &color);
-        void DrawText(const char *text, int posX, int posY, int fontSize, const RS::Color &color);
+        void Background(const RS::RColor &color);
+        void DrawText(const char *text, int posX, int posY, int fontSize, const RS::RColor &color);
+        void DrawTextEx(const char *text, float posX, float posY, const FontHandle& font, float fontSize, const RS::RColor &color);
 
     private:
         int fps_               {60};
         int width_             {800};
         int height_            {600};
         std::string title_     {"RaySim Title"};
+
+        FontManager fontManager_;
     };
 
 } // namespace RS

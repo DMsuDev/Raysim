@@ -32,25 +32,45 @@ void RS::Canvas::FullScreen()
     ::ToggleFullscreen();
 }
 
-void RS::Canvas::Background(const RS::Color &color)
+void RS::Canvas::SetDefaultFont(const std::string& fontPath, int fontSize)
 {
-    ::ClearBackground({color.r, color.g, color.b, color.a});
+    fontManager_.LoadFont(fontPath, fontSize);
 }
 
-void RS::Canvas::DrawText(const char *text, int posX, int posY, int fontSize, const RS::Color &color)
+void RS::Canvas::Background(const RS::RColor &color)
 {
-    ::DrawText(text, posX, posY, fontSize, {color.r, color.g, color.b, color.a});
+    ::ClearBackground(color.raylib());
+}
+
+void RS::Canvas::DrawText(const char *text, int posX, int posY, int fontSize, const RS::RColor &color)
+{
+    // Use loaded font if available, otherwise fall back to raylib default
+    if (fontManager_.HasFont()) {
+        DrawTextEx(text, static_cast<float>(posX), static_cast<float>(posY), fontManager_.GetFont(), static_cast<float>(fontSize), color);
+    } else {
+        ::DrawText(text, posX, posY, fontSize, color.raylib());
+    }
+}
+
+void RS::Canvas::DrawTextEx(const char *text, float posX, float posY, const FontHandle& font, float fontSize, const RS::RColor &color)
+{
+    if (font.IsValid()) {
+        ::Font* fontPtr = static_cast<::Font*>(font.data);
+        ::DrawTextEx(*fontPtr, text, {posX, posY}, fontSize, 1.0f, color.raylib());
+    } else {
+        // Fallback to default raylib font
+        ::DrawText(text, static_cast<int>(posX), static_cast<int>(posY), static_cast<int>(fontSize), color.raylib());
+    }
 }
 
 void RS::Canvas::Run()
 {
-    // Reduce raylib log verbosity to warnings and errors only
-    SetTraceLogLevel(LOG_WARNING);
 
     InitWindow(width_, height_, title_.c_str());
     SetTargetFPS(fps_);
 
     Setup(); // Call the user-defined setup function
+
     while (!WindowShouldClose())
     {
         // Call the user-defined draw function within the raylib drawing context
@@ -62,5 +82,6 @@ void RS::Canvas::Run()
         // End the drawing for this frame
         EndDrawing();
     }
+
     CloseWindow();
 }
