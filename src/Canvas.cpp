@@ -65,7 +65,7 @@ void RS::Canvas::DrawTextEx(const char *text, float posX, float posY, const Font
 
 void RS::Canvas::Run()
 {
-
+    SetTraceLogLevel(LOG_ERROR); // Only log errors to avoid cluttering the console
     InitWindow(width_, height_, title_.c_str());
     SetTargetFPS(fps_);
 
