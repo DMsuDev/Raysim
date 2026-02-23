@@ -1,4 +1,4 @@
-#include "RaySim/Graphics/Color.hpp"
+#include "Raysim/Graphics/Color.hpp"
 #include "pch.hpp"
 
 #include <raylib.h>

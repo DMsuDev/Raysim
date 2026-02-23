@@ -1,4 +1,4 @@
-#include "RaySim/Core/Canvas.hpp"
+#include "Raysim/Core/Canvas.hpp"
 #include "pch.hpp"
 
 #include <raylib.h>

@@ -1,4 +1,4 @@
-#include "RaySim/RaySim.hpp"
+#include "Raysim/Raysim.hpp"
 
 class MySimulation : public RS::Canvas {
 public:

@@ -1,9 +1,10 @@
 #pragma once
 
 #include <string>
-#include "RaySim/Math/Vector.hpp"
-#include "RaySim/Graphics/Color.hpp"
-#include "RaySim/Graphics/FontManager.hpp"
+
+#include "Raysim/Math/Vector.hpp"
+#include "Raysim/Graphics/Color.hpp"
+#include "Raysim/Graphics/FontManager.hpp"
 
 namespace RS
 {

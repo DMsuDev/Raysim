@@ -1,4 +1,4 @@
-#include "RaySim/Graphics/FontManager.hpp"
+#include "Raysim/Graphics/FontManager.hpp"
 #include "pch.hpp"
 
 #include <raylib.h>

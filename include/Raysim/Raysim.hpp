@@ -2,10 +2,11 @@
 
 // Main headers for the RaySim framework
 
-#include "RaySim/Core/Canvas.hpp"
-#include "RaySim/Graphics/Color.hpp"
-#include "RaySim/Math/Vector.hpp"
-#include "RaySim/Graphics/FontManager.hpp"
+#include "Raysim/Core/Canvas.hpp"
+#include "Raysim/Graphics/Color.hpp"
+#include "Raysim/Math/Vector.hpp"
+#include "Raysim/Graphics/FontManager.hpp"
+#include "Raysim/Utils/Log.hpp"
 
 // Version information
 
