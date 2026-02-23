@@ -1,6 +1,8 @@
 #include "RaySim/Graphics/Color.hpp"
 #include "pch.hpp"
 
+#include <raylib.h>
+
 RS::RColor RS::RColor::operator+(const RS::RColor& o) const {
     return {
         static_cast<unsigned char>(std::min(255, r + o.r)),
