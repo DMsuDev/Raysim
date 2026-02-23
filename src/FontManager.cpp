@@ -13,7 +13,7 @@ void RS::FontManager::LoadFont(const std::string& fontPath, int fontSize)
 
     if (::FileExists(fontPath.c_str()) == 0)
     {
-        ::TraceLog(LOG_WARNING, "RaySim: Font not found at '%s', falling back to default font", fontPath.c_str());
+        LOG_WARN("RaySim: Font not found at '{}', falling back to default font", fontPath);
         *font = ::GetFontDefault();
         usingDefault = true;
     }
@@ -22,7 +22,7 @@ void RS::FontManager::LoadFont(const std::string& fontPath, int fontSize)
         *font = ::LoadFontEx(fontPath.c_str(), fontSize, nullptr, 0);
 
         if (font->glyphCount == 0) {
-            ::TraceLog(LOG_WARNING, "RaySim: Failed to load font at '%s', falling back to default font", fontPath.c_str());
+            LOG_WARN("RaySim: Failed to load font at '{}', falling back to default font", fontPath);
             delete font;
             font = new ::Font();
             *font = ::GetFontDefault();
@@ -30,7 +30,7 @@ void RS::FontManager::LoadFont(const std::string& fontPath, int fontSize)
         }
     }
 
-    ::TraceLog(LOG_INFO, "RaySim: Loaded font '%s' (size: %d)", fontPath.c_str(), fontSize);
+    LOG_INFO("RaySim: Loaded font '{}' (size: {})", fontPath, fontSize);
     ::SetTextureFilter(font->texture, TEXTURE_FILTER_BILINEAR);
 
     font_      = font;
@@ -57,6 +57,6 @@ void RS::FontManager::UnloadFont()
     }
     else if (loaded_)
     {
-        ::TraceLog(LOG_WARNING, "RaySim: Attempted to unload font, but no font was loaded");
+        LOG_WARN("RaySim: Attempted to unload font, but no font was loaded");
     }
 }

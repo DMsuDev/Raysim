@@ -65,11 +65,15 @@ void RS::Canvas::DrawTextEx(const char *text, float posX, float posY, const Font
 
 void RS::Canvas::Run()
 {
+    RS::Logger::Init(title_, "asd.log");
+
     SetTraceLogLevel(LOG_ERROR); // Only log errors to avoid cluttering the console
     InitWindow(width_, height_, title_.c_str());
     SetTargetFPS(fps_);
+    LOG_INFO("Window created: {}x{} @ {} FPS", width_, height_, fps_);
 
     Setup(); // Call the user-defined setup function
+    LOG_INFO("Setup complete");
 
     while (!WindowShouldClose())
     {
@@ -83,5 +87,6 @@ void RS::Canvas::Run()
         EndDrawing();
     }
 
+    LOG_INFO("Shutting down");
     CloseWindow();
 }

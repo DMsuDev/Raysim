@@ -2,12 +2,21 @@ cmake_minimum_required(VERSION 3.20)
 
 # ─── Version settings ─────────────────────────────
 set(RAYLIB_VERSION  5.5)
+set(SPDLOG_VERSION  v1.17.0)
 
 # ─── FetchContent module ──────────────────────────
 include(FetchContent)
 set(FETCHCONTENT_QUIET                ON  CACHE BOOL "Reduce verbosity during configure")
 set(FETCHCONTENT_UPDATES_DISCONNECTED ON  CACHE BOOL "Skip git update on reconfigure (faster)")
 set(FETCHCONTENT_BASE_DIR             "${CMAKE_CURRENT_SOURCE_DIR}" CACHE PATH "Base directory for downloaded content")
+
+# ─── SpdLog ────────────────────────────────────────
+FetchContent_Declare(
+    spdlog
+    GIT_REPOSITORY https://github.com/gabime/spdlog.git
+    GIT_TAG ${SPDLOG_VERSION} GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(spdlog)
 
 # ─── RAYLIB ─────────────────────────────────────────
 FetchContent_Declare(
@@ -27,4 +36,5 @@ FetchContent_MakeAvailable(raylib)
 message(STATUS "")
 message(STATUS "Third-party dependencies summary:")
 message(STATUS "  • raylib   : ${RAYLIB_VERSION}")
+message(STATUS "  • spdlog   : ${SPDLOG_VERSION}")
 message(STATUS "")

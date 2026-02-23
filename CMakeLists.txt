@@ -91,6 +91,7 @@ add_executable(${PROJECT_NAME}
     # Implementation sources
     ${RAYSIM_SOURCES_DIR}/Color.cpp
     ${RAYSIM_SOURCES_DIR}/Canvas.cpp
+    ${RAYSIM_SOURCES_DIR}/Log.cpp
     ${RAYSIM_SOURCES_DIR}/FontManager.cpp
 
     # Application entry point
@@ -107,6 +108,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/i
 # Link libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE
     raylib
+    spdlog::spdlog_header_only
 )
 
 # Set precompile header (optional, can speed up compilation)
