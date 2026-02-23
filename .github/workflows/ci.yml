@@ -1,0 +1,127 @@
+# =============================================================================
+# CI Build - Compile and validate on every push / PR
+# =============================================================================
+name: CI Build
+
+on:
+  push:
+    branches: [master, feature/**]
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  # ─── Windows MSVC ──────────────────────────────────────────────────────
+  build-windows:
+    name: Windows (MSVC ${{ matrix.config }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [Debug, Release]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Cache dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            build/_deps
+            vendor
+          key: deps-win-${{ hashFiles('vendor/CMakeLists.txt') }}
+          restore-keys: deps-win-
+
+      - name: Configure CMake
+        run: cmake -B build -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+
+      - name: Build
+        run: cmake --build build --config ${{ matrix.config }} --parallel $env:NUMBER_OF_PROCESSORS
+
+      - name: Upload build artifact
+        if: matrix.config == 'Release' && success()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ github.event.repository.name }}-windows-${{ github.sha }}
+          path: build/bin/Release/
+          retention-days: 7
+
+  # ─── Linux GCC / Clang (cross-platform validation) ─────────────────────
+  build-linux:
+    name: Linux (${{ matrix.compiler }}, ${{ matrix.config }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+        config: [Debug, Release]
+        include:
+          - compiler: gcc
+            cc: gcc
+            cxx: g++
+          - compiler: clang
+            cc: clang
+            cxx: clang++
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt install -y cmake clang build-essential \
+            libasound2-dev libx11-dev libxrandr-dev \
+            libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev \
+            libxinerama-dev libwayland-dev libxkbcommon-dev
+
+      - name: Cache dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            build/_deps
+            vendor
+          key: deps-linux-${{ matrix.compiler }}-${{ hashFiles('vendor/CMakeLists.txt') }}
+          restore-keys: deps-linux-${{ matrix.compiler }}-
+
+      - name: Configure CMake
+        env:
+          CC: ${{ matrix.cc }}
+          CXX: ${{ matrix.cxx }}
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+
+      - name: Build
+        run: cmake --build build --config ${{ matrix.config }} --parallel $(nproc)
+
+  # ─── Build summary ─────────────────────────────────────────────────────
+  build-status:
+    name: CI Status
+    needs: [build-windows, build-linux]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check results
+        run: |
+          results=("${{ needs.build-windows.result }}" "${{ needs.build-linux.result }}")
+          failed=false
+          for r in "${results[@]}"; do
+            if [[ "$r" == "failure" ]]; then
+              failed=true
+            fi
+          done
+          if $failed; then
+            echo "::error::One or more build configurations failed"
+            exit 1
+          fi
+          echo "All builds passed!"

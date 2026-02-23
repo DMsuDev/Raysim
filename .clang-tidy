@@ -1,0 +1,46 @@
+Checks: >
+  -*, bugprone-*, -bugprone-easily-swappable-parameters, -bugprone-narrowing-conversions, cert-*, -cert-err58-cpp, -cert-msc50-cpp, -cert-msc51-cpp, clang-analyzer-*, cppcoreguidelines-*, -cppcoreguidelines-avoid-magic-numbers, -cppcoreguidelines-pro-type-reinterpret-cast, -cppcoreguidelines-pro-bounds-array-to-pointer-decay, -cppcoreguidelines-owning-memory, -cppcoreguidelines-avoid-non-const-global-variables, -cppcoreguidelines-pro-type-vararg, -cppcoreguidelines-pro-bounds-pointer-arithmetic, -cppcoreguidelines-non-private-member-variables-in-classes, modernize-*, -modernize-use-trailing-return-type, -modernize-avoid-c-arrays, performance-*, readability-*, -readability-magic-numbers, -readability-identifier-length, -readability-braces-around-statements, -readability-named-parameter, -readability-uppercase-literal-suffix, #magic___^_^___line
+WarningsAsErrors: ""
+HeaderFilterRegex: (include/Raysim)/.*\.(hpp|h)$
+CheckOptions:
+  # ──────────────────────────────────────────────
+  # Naming (your style + small additions)
+  # ──────────────────────────────────────────────
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.StructCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+  - key: readability-identifier-naming.FunctionCase
+    value: CamelCase
+  - key: readability-identifier-naming.MethodCase
+    value: CamelCase
+  - key: readability-identifier-naming.NamespaceCase
+    value: CamelCase
+  - key: readability-identifier-naming.PrivateMemberPrefix
+    value: m_
+  - key: readability-identifier-naming.PrivateMemberCase
+    value: CamelCase
+  - key: readability-identifier-naming.StaticMemberPrefix
+    value: s_
+  - key: readability-identifier-naming.StaticMemberCase
+    value: CamelCase
+  - key: readability-identifier-naming.ConstantCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.EnumConstantCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.MacroDefinitionCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.ParameterCase
+    value: camelBack
+  - key: readability-identifier-naming.LocalVariableCase
+    value: camelBack
+    # Performance tuning
+  - key: performance-unnecessary-value-param.AllowedTypes
+    value: std::function;std::string;std::shared_ptr;std::unique_ptr
+    # Modernize tuning
+  - key: modernize-use-auto.MinTypeNameLength
+    value: "5"
+  - key: modernize-loop-convert.MinConfidence
+    value: reasonable
