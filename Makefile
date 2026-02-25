@@ -24,7 +24,6 @@ PROJECT_NAME  := RaySim
 PROJECT_VER   := 0.2.1
 BUILD_DIR     := build
 BUILD_TYPE    ?= Debug
-LIBRARY_TYPE  := Static Library
 
 # ─── Sources ─────────────────────────────────────────────────────────────
 # Add directories here; cppcheck and clang-tidy pick them up automatically.
