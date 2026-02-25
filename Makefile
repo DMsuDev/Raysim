@@ -214,7 +214,7 @@ run-only:
 clean:
 	$(call _section,Clean)
 	@printf "  %-14s : %s\n" "Removing" "build artifacts"
-	$(if $(wildcard $(CONFIGURE_STAMP)),-@cmake --build $(BUILD_DIR) --config $(BUILD_TYPE) --target clean > /dev/null)
+	$(if $(wildcard $(CONFIGURE_STAMP)),-@cmake --build $(BUILD_DIR) --config $(BUILD_TYPE) > /dev/null)
 	@cmake -E rm -f cppcheck.log
 	$(call _ok,Clean done)
 	$(call _done)
