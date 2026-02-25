@@ -131,13 +131,6 @@ if(MSVC)
     target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
 endif()
 
-# Hide console window on Windows Release builds (optional)
-if(MSVC AND HIDE_CONSOLE)
-    target_link_options(${PROJECT_NAME} PRIVATE
-        $<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:MSVC>>:/SUBSYSTEM:WINDOWS;/ENTRY:mainCRTStartup>
-    )
-endif()
-
 # Enable debug mode: assertions and verbose logging
 if(ENABLE_DEBUG)
     target_compile_definitions(${PROJECT_NAME} PRIVATE AG_DEBUG)
@@ -145,15 +138,14 @@ if(ENABLE_DEBUG)
 endif()
 
 # ============================================================================
-# COPY RESOURCES TO OUTPUT DIRECTORY
+# EXAMPLES
 # ============================================================================
 
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/resources
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>/resources
-    COMMENT "Copying resources to output directory"
-)
+option(RS_BUILD_EXAMPLES "Build Raysim examples" ON)
+
+if(RS_BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
 
 # ============================================================================
 # BUILD SUMMARY
