@@ -6,7 +6,7 @@ name: Dependency Review
 
 on:
   pull_request:
-    branches: [master]
+    branches: [main]
 
 permissions:
   contents: read
@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6 # Updated to latest major (v5 as of 2026)
+        uses: actions/checkout@v6
 
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
@@ -30,7 +30,7 @@ jobs:
           # Block these strong copyleft licenses (deprecated in future versions; consider migrating to allow-lists)
           deny-licenses: AGPL-3.0, GPL-2.0, GPL-3.0
 
-          # Explicitly allow com<mon permissive/open licenses used by typical deps (GLFW, imgui, spdlog, glm, etc.)
+          # Explicitly allow common permissive/open licenses used by typical deps (GLFW, imgui, spdlog, glm, etc.)
           allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, Zlib, BSL-1.0, 0BSD, Unlicense, MPL-2.0
 
           # Always add a summary comment in the PR (very useful for visibility)

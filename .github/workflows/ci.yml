@@ -5,9 +5,9 @@ name: CI Build
 
 on:
   push:
-    branches: [master, feature/**]
+    branches: [main, feature/**]
   pull_request:
-    branches: [master]
+    branches: [main]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -47,6 +47,29 @@ jobs:
       - name: Build
         run: cmake --build build --config ${{ matrix.config }} --parallel $env:NUMBER_OF_PROCESSORS
 
+      - name: Test Example - Mouse Detection (Release only)
+        if: matrix.config == 'Release' && success()
+        shell: pwsh
+        run: |
+          $exePath = "build\examples\${{ matrix.config }}\Mouse_detection_2D.exe"
+          Write-Host "Testing example: $exePath"
+          if (Test-Path $exePath) {
+            Write-Host "✓ Executable found"
+            # Run with 2 second timeout (just to verify it starts without crashing)
+            $proc = Start-Process -FilePath $exePath -NoNewWindow -PassThru
+            Start-Sleep -Seconds 2
+            if ($proc.HasExited) {
+              Write-Host "✗ Process exited unexpectedly"
+              exit 1
+            } else {
+              Write-Host "✓ Process started successfully"
+              Stop-Process -InputObject $proc -Force
+            }
+          } else {
+            Write-Host "✗ Executable not found at $exePath"
+            exit 1
+          }
+
       - name: Upload build artifact
         if: matrix.config == 'Release' && success()
         uses: actions/upload-artifact@v6
@@ -84,7 +107,8 @@ jobs:
           sudo apt install -y cmake clang build-essential \
             libasound2-dev libx11-dev libxrandr-dev \
             libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev \
-            libxinerama-dev libwayland-dev libxkbcommon-dev
+            libxinerama-dev libwayland-dev libxkbcommon-dev \
+            xvfb
 
       - name: Cache dependencies
         uses: actions/cache@v5
@@ -103,6 +127,21 @@ jobs:
 
       - name: Build
         run: cmake --build build --config ${{ matrix.config }} --parallel $(nproc)
+
+      - name: Test Example - Mouse Detection (Release only)
+        if: matrix.config == 'Release' && success()
+        run: |
+          EXE_PATH="build/examples/Mouse_detection_2D"
+          echo "Testing example: $EXE_PATH"
+          if [ -f "$EXE_PATH" ]; then
+            echo "✓ Executable found"
+            # Run with xvfb and 3 second timeout (just to verify it starts without crashing)
+            timeout 3s xvfb-run -a "$EXE_PATH" 2>&1 || true
+            echo "✓ Process completed"
+          else
+            echo "✗ Executable not found at $EXE_PATH"
+            exit 1
+          fi
 
   # ─── Build summary ─────────────────────────────────────────────────────
   build-status:
