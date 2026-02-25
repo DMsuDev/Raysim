@@ -7,9 +7,9 @@ function(create_example TARGET SOURCE)
     # Link the target against the RaySim library
     target_link_libraries(${TARGET} PRIVATE Raysim)
 
-    # Set the output directory for the executable to examples/build/bin
+    # Set the output directory for the executable to build/bin/$<CONFIG>/
     set_target_properties(${TARGET} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<CONFIG>"
     )
     # Collect example targets so we can copy resources once for all
     list(APPEND EXAMPLES_LIST ${TARGET})
@@ -27,6 +27,6 @@ add_custom_target(copy_examples_resources ALL
 add_custom_command(TARGET copy_examples_resources POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/resources
-        ${CMAKE_CURRENT_SOURCE_DIR}/build/$<CONFIG>/resources
+        ${CMAKE_BINARY_DIR}/bin/$<CONFIG>/resources
     COMMENT "Copying resources for all examples"
 )

@@ -51,7 +51,7 @@ jobs:
         if: matrix.config == 'Release' && success()
         shell: pwsh
         run: |
-          $exePath = "build\examples\${{ matrix.config }}\Mouse_detection_2D.exe"
+          $exePath = "build\bin\${{ matrix.config }}\Mouse_detection_2D.exe"
           Write-Host "Testing example: $exePath"
           if (Test-Path $exePath) {
             Write-Host "✓ Executable found"
@@ -131,7 +131,7 @@ jobs:
       - name: Test Example - Mouse Detection (Release only)
         if: matrix.config == 'Release' && success()
         run: |
-          EXE_PATH="build/examples/Mouse_detection_2D"
+          EXE_PATH="build/bin/Release/Mouse_detection_2D"
           echo "Testing example: $EXE_PATH"
           if [ -f "$EXE_PATH" ]; then
             echo "✓ Executable found"

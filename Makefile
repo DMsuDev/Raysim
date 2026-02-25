@@ -139,10 +139,10 @@ HAS_ACT        := $(call _find_tool,act)
 IS_MULTICONFIG := $(or $(findstring Visual Studio,"$(CMAKE_GEN)"),$(findstring Xcode,"$(CMAKE_GEN)"))
 
 ifeq ($(IS_MULTICONFIG),)
-    EXAMPLE_PATH ?= examples/build
+    EXAMPLE_PATH ?= $(BUILD_DIR)/bin
     LIB_PATH     ?= $(BUILD_DIR)/lib
 else
-    EXAMPLE_PATH ?= examples/build
+    EXAMPLE_PATH ?= $(BUILD_DIR)/bin
     LIB_PATH     ?= $(BUILD_DIR)/lib/$(BUILD_TYPE)
 endif
 
@@ -227,14 +227,13 @@ clean:
 	@printf "  %-14s : %s\n" "Removing" "build artifacts"
 	$(if $(wildcard $(CONFIGURE_STAMP)),-@cmake --build $(BUILD_DIR) --config $(BUILD_TYPE) > /dev/null)
 	@cmake -E rm -f cppcheck.log
-	@cmake -E rm -rf examples/build
 	$(call _ok,Clean done)
 	$(call _done)
 
 purge:
 	$(call _section,Full Clean)
-	@printf "  %-14s : %s\n" "Removing" "$(BUILD_DIR)/ $(TIDY_DIR)/ examples/build/"
-	@cmake -E rm -rf $(BUILD_DIR) $(TIDY_DIR) examples/build
+	@printf "  %-14s : %s\n" "Removing" "$(BUILD_DIR)/ $(TIDY_DIR)/"
+	@cmake -E rm -rf $(BUILD_DIR) $(TIDY_DIR)
 	$(call _ok,Purge done)
 	$(call _done)
 
