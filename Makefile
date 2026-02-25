@@ -190,7 +190,8 @@ build: $(CONFIGURE_STAMP)
 rebuild: clean build
 
 release:
-	@$(MAKE)ok,Release build complete (optimized))
+	@$(MAKE) --no-print-directory build BUILD_TYPE=Release
+	$(call _ok,Release build complete (optimized))
 
 relwithdebinfo:
 	@$(MAKE) --no-print-directory build BUILD_TYPE=RelWithDebInfo
@@ -321,20 +322,20 @@ act-quality:
 	@act push -W .github/workflows/code-quality.yml --container-architecture linux/amd64
 	$(call _done)
 
-# ═══════════════════s ($(LIBRARY_TYPE))\n" "Type" "C++ Library"
+# ═════════════════════════════════════════════════════════════════════════
+#  INFO
+# ═════════════════════════════════════════════════════════════════════════
+
+info:
+	$(call _section,Configuration)
+	@printf "  %-14s : %s\n" "Type" "C++ Library"
 	@printf "  %-14s : %d file(s)\n" "Sources" $(words $(CPP_FILES))
 	@printf "  %-14s : %s\n" "Build Type" "$(BUILD_TYPE)"
 	@printf "  %-14s : %s\n" "Generator" "$(CMAKE_GEN)"
 	@printf "  %-14s : %s\n" "Platform" "$(DETECTED_OS)"
 	@printf "  %-14s : %s\n" "Library Path" "$(LIB_PATH)/"
-	@printf "  %-14s : %s\n" "Examples Path" "$(EXAMPLE_PATH)/
-	@printf "\n$(LINE)───────$(RST) $(TITLE)Project Info$(RST)\n"
-	@printf "  %-14s : %s\n" "Project" "$(PROJECT_NAME) v$(PROJECT_VER)"
-	@printf "  %-14s : %d file(s)\n" "Sources" $(words $(CPP_FILES))
-	@printf "  %-14s : %s\n" "Build Type" "$(BUILD_TYPE)"
-	@printf "  %-14s : %s\n" "Generator" "$(CMAKE_GEN)"
-	@printf "  %-14s : %s\n" "Platform" "$(DETECTED_OS)"
-	@printf "  %-14s : %s\n" "Run Path" "$(RUN_PATH)"
+	@printf "  %-14s : %s\n" "Examples Path" "$(EXAMPLE_PATH)/"
+	@printf "\n$(LINE)───────$(RST) $(TITLE)Tools$(RST)\n"
 	@printf "  %-14s : %s\n" "Tidy Dir" "$(TIDY_DIR)/"
 	@printf "  %-14s : $(if $(HAS_CLANG_TIDY),$(OK)✓ found$(RST),$(ERR)✗ missing$(RST))\n" "clang-tidy"
 	@printf "  %-14s : $(if $(HAS_CPPCHECK),$(OK)✓ found$(RST),$(ERR)✗ missing$(RST))\n" "cppcheck"
@@ -342,7 +343,7 @@ act-quality:
 	$(call _done)
 
 help:
-	@printf "\n$(LINE)───────$(RST) $(TITLE)$(PROJECT_NAME)library (Debug)\n"
+	@printf "\n$(LINE)───────$(RST) $(TITLE)$(PROJECT_NAME) library$(RST)\n"
 	@printf "    $(GRN)make configure$(RST)          Force CMake reconfiguration\n"
 	@printf "    $(GRN)make release$(RST)            Release build\n"
 	@printf "    $(GRN)make relwithdebinfo$(RST)     Release + debug symbols\n"
@@ -379,8 +380,6 @@ help:
 	@printf "  $(BLD)Examples:$(RST)\n"
 	@printf "    make BUILD_TYPE=Release             Release build\n"
 	@printf "    make example-bouncing               Test example\n"
-	@printf "    make tidy                           Static analysis\n"
-	@printf "    make purge build                    Clean rebuild
 	@printf "    make tidy                           Static analysis\n"
 	@printf "    make purge build                    Fresh build from scratch\n"
 	@printf "    make VERBOSE=0 build                Silent build\n"
