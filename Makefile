@@ -21,9 +21,10 @@
 # ─── Project ─────────────────────────────────────────────────────────────
 
 PROJECT_NAME  := RaySim
-PROJECT_VER   := 0.1.0
+PROJECT_VER   := 0.2.1
 BUILD_DIR     := build
 BUILD_TYPE    ?= Debug
+LIBRARY_TYPE  := Static Library
 
 # ─── Sources ─────────────────────────────────────────────────────────────
 # Add directories here; cppcheck and clang-tidy pick them up automatically.
@@ -138,9 +139,11 @@ HAS_ACT        := $(call _find_tool,act)
 IS_MULTICONFIG := $(or $(findstring Visual Studio,"$(CMAKE_GEN)"),$(findstring Xcode,"$(CMAKE_GEN)"))
 
 ifeq ($(IS_MULTICONFIG),)
-    RUN_PATH ?= $(BUILD_DIR)/bin/$(PROJECT_NAME)$(EXE_EXT)
+    EXAMPLE_PATH ?= examples/build
+    LIB_PATH     ?= $(BUILD_DIR)/lib
 else
-    RUN_PATH ?= $(BUILD_DIR)/bin/$(BUILD_TYPE)/$(PROJECT_NAME)$(EXE_EXT)
+    EXAMPLE_PATH ?= examples/build
+    LIB_PATH     ?= $(BUILD_DIR)/lib/$(BUILD_TYPE)
 endif
 
 # ─── Tidy (dedicated Ninja build for compile_commands.json) ──────────────
@@ -151,7 +154,8 @@ TIDY_STAMP := $(TIDY_DIR)/.configured
 # ─── Phony ────────────────────────────────────────────────────────────────
 
 .PHONY: all configure build rebuild release relwithdebinfo \
-        run run-only clean purge \
+        example-bouncing example-lissajous example-mouse \
+        example-run clean purge \
         tidy cppcheck \
         pre-commit pre-commit-install pre-commit-update \
         tag act-ci act-quality info help
@@ -186,26 +190,32 @@ build: $(CONFIGURE_STAMP)
 rebuild: clean build
 
 release:
-	@$(MAKE) --no-print-directory build BUILD_TYPE=Release
-	$(call _warn,Release builds are optimized and may be harder to debug.)
+	@$(MAKE)ok,Release build complete (optimized))
 
 relwithdebinfo:
 	@$(MAKE) --no-print-directory build BUILD_TYPE=RelWithDebInfo
-	$(call _warn,Optimized + debug symbols — suitable for profiling.)
+	$(call _ok,RelWithDebInfo build complete (optimized + symbols))
 
-run: build
-	$(call _section,Run)
-	@printf "  %-14s : %s\n" "Target" "$(PROJECT_NAME)$(EXE_EXT)"
-	@printf "  $(INFO)→ Running...$(RST)\n"
-	@$(call FIXPATH,$(RUN_PATH))
+# ═════════════════════════════════════════════════════════════════════════
+#  EXAMPLES
+# ═════════════════════════════════════════════════════════════════════════
+
+example-bouncing: build
+	$(call _section,Example: Bouncing Balls)
+	@$(call FIXPATH,$(EXAMPLE_PATH)/$(BUILD_TYPE)/Bouncing_Balls$(EXE_EXT))
 	$(call _done)
 
-run-only:
-	$(call _section,Run)
-	@printf "  %-14s : %s\n" "Target" "$(PROJECT_NAME)$(EXE_EXT)"
-	@printf "  $(INFO)→ Running...$(RST)\n"
-	@$(call FIXPATH,$(RUN_PATH))
+example-lissajous: build
+	$(call _section,Example: Lissajous Curves)
+	@$(call FIXPATH,$(EXAMPLE_PATH)/$(BUILD_TYPE)/Lissajous_Curves$(EXE_EXT))
 	$(call _done)
+
+example-mouse: build
+	$(call _section,Example: Mouse Detection 2D)
+	@$(call FIXPATH,$(EXAMPLE_PATH)/$(BUILD_TYPE)/Mouse_detection_2D$(EXE_EXT))
+	$(call _done)
+
+example-run: example-bouncing
 
 # ═════════════════════════════════════════════════════════════════════════
 #  CLEAN
@@ -216,13 +226,14 @@ clean:
 	@printf "  %-14s : %s\n" "Removing" "build artifacts"
 	$(if $(wildcard $(CONFIGURE_STAMP)),-@cmake --build $(BUILD_DIR) --config $(BUILD_TYPE) > /dev/null)
 	@cmake -E rm -f cppcheck.log
+	@cmake -E rm -rf examples/build
 	$(call _ok,Clean done)
 	$(call _done)
 
 purge:
 	$(call _section,Full Clean)
-	@printf "  %-14s : %s\n" "Removing" "$(BUILD_DIR)/ $(TIDY_DIR)/"
-	@cmake -E rm -rf $(BUILD_DIR) $(TIDY_DIR)
+	@printf "  %-14s : %s\n" "Removing" "$(BUILD_DIR)/ $(TIDY_DIR)/ examples/build/"
+	@cmake -E rm -rf $(BUILD_DIR) $(TIDY_DIR) examples/build
 	$(call _ok,Purge done)
 	$(call _done)
 
@@ -310,11 +321,13 @@ act-quality:
 	@act push -W .github/workflows/code-quality.yml --container-architecture linux/amd64
 	$(call _done)
 
-# ═════════════════════════════════════════════════════════════════════════
-#  INFO & HELP
-# ═════════════════════════════════════════════════════════════════════════
-
-info:
+# ═══════════════════s ($(LIBRARY_TYPE))\n" "Type" "C++ Library"
+	@printf "  %-14s : %d file(s)\n" "Sources" $(words $(CPP_FILES))
+	@printf "  %-14s : %s\n" "Build Type" "$(BUILD_TYPE)"
+	@printf "  %-14s : %s\n" "Generator" "$(CMAKE_GEN)"
+	@printf "  %-14s : %s\n" "Platform" "$(DETECTED_OS)"
+	@printf "  %-14s : %s\n" "Library Path" "$(LIB_PATH)/"
+	@printf "  %-14s : %s\n" "Examples Path" "$(EXAMPLE_PATH)/
 	@printf "\n$(LINE)───────$(RST) $(TITLE)Project Info$(RST)\n"
 	@printf "  %-14s : %s\n" "Project" "$(PROJECT_NAME) v$(PROJECT_VER)"
 	@printf "  %-14s : %d file(s)\n" "Sources" $(words $(CPP_FILES))
@@ -329,15 +342,17 @@ info:
 	$(call _done)
 
 help:
-	@printf "\n$(LINE)───────$(RST) $(TITLE)$(PROJECT_NAME)$(RST) $(DIM)v$(PROJECT_VER) — Targets$(RST)\n\n"
-	@printf "  $(BLD)Build:$(RST)\n"
-	@printf "    $(GRN)make$(RST)                    Build (Debug)\n"
+	@printf "\n$(LINE)───────$(RST) $(TITLE)$(PROJECT_NAME)library (Debug)\n"
 	@printf "    $(GRN)make configure$(RST)          Force CMake reconfiguration\n"
 	@printf "    $(GRN)make release$(RST)            Release build\n"
 	@printf "    $(GRN)make relwithdebinfo$(RST)     Release + debug symbols\n"
 	@printf "    $(GRN)make rebuild$(RST)            Clean + build\n"
-	@printf "    $(GRN)make run$(RST)                Build and run\n"
-	@printf "    $(GRN)make run-only$(RST)           Run without rebuilding\n"
+	@printf "\n"
+	@printf "  $(BLD)Examples:$(RST)\n"
+	@printf "    $(GRN)make example-run$(RST)        Run Bouncing Balls example\n"
+	@printf "    $(GRN)make example-bouncing$(RST)   Run Bouncing Balls\n"
+	@printf "    $(GRN)make example-lissajous$(RST)  Run Lissajous Curves\n"
+	@printf "    $(GRN)make example-mouse$(RST)      Run Mouse Detection 2D\n"
 	@printf "\n"
 	@printf "  $(BLD)Clean:$(RST)\n"
 	@printf "    $(GRN)make clean$(RST)              Remove build artifacts\n"
@@ -353,17 +368,19 @@ help:
 	@printf "    $(GRN)make pre-commit-update$(RST)  Update hook versions\n"
 	@printf "\n"
 	@printf "  $(BLD)CI / Release:$(RST)\n"
-	@printf "    $(GRN)make tag VERSION=v0.1.0$(RST) Create & push release tag\n"
+	@printf "    $(GRN)make tag VERSION=v0.2.1$(RST) Create & push release tag\n"
 	@printf "    $(GRN)make act-ci$(RST)             Run CI workflow locally\n"
 	@printf "    $(GRN)make act-quality$(RST)        Run quality workflow locally\n"
 	@printf "\n"
-	@printf "  $(BLD)Info:$(RST)\n"
+	@printf "  $(BLD)Utility:$(RST)\n"
 	@printf "    $(GRN)make info$(RST)               Project configuration & tools\n"
 	@printf "    $(GRN)make help$(RST)               This help\n"
 	@printf "\n"
 	@printf "  $(BLD)Examples:$(RST)\n"
 	@printf "    make BUILD_TYPE=Release             Release build\n"
-	@printf "    make run                            Build (Debug) and run\n"
+	@printf "    make example-bouncing               Test example\n"
+	@printf "    make tidy                           Static analysis\n"
+	@printf "    make purge build                    Clean rebuild
 	@printf "    make tidy                           Static analysis\n"
 	@printf "    make purge build                    Fresh build from scratch\n"
 	@printf "    make VERBOSE=0 build                Silent build\n"
