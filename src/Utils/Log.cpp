@@ -1,10 +1,8 @@
-#include "pch.hpp"
+#include "../pch.hpp"
 
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/async.h>
-
-#include <cassert>
 
 namespace RS {
 
@@ -40,11 +38,12 @@ void Logger::Init(const std::string& app_name,
             ));
 
         // Configure console sink pattern: [HH:MM:SS] LOGGER: Message (with colors)
-        logSinks[0]->set_pattern("%^[%T] %n: %v%$");
-        // console_sink->set_pattern("%^[%T] [%l] [%n] %v%$");
+        logSinks[0]->set_pattern("%^[%T] [%n] %v%$");
 
         // Configure file sink pattern: [HH:MM:SS] [LEVEL] LOGGER: Message
         logSinks[1]->set_pattern("[%T] [%l] %n: %v");
+
+        // Example of a more detailed pattern with thread ID and source location (uncomment if needed)
         // file_sink->set_pattern("[%Y-%m-%d %T] [%l] [%n] [thread %t] %v");
 
         if (async)

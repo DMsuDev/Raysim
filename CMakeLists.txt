@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(RaySim VERSION 0.1.0 LANGUAGES CXX C)
+project(Raysim VERSION 0.2.1 LANGUAGES CXX C)
 
 # ============================================================================
 # OUTPUT DIRECTORIES AND PATHS
@@ -81,21 +81,27 @@ endif()
 add_subdirectory(vendor)
 
 # ============================================================================
-# PROJECT SOURCE FILES
+# PROJECT SOURCE FILES - CREATE LIBRARY
 # ============================================================================
 
 set(RAYSIM_SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-# Main executable with all framework and platform sources
-add_executable(${PROJECT_NAME}
+# Create RaySim as a static library
+add_library(${PROJECT_NAME} STATIC
     # Implementation sources
-    ${RAYSIM_SOURCES_DIR}/Color.cpp
-    ${RAYSIM_SOURCES_DIR}/Canvas.cpp
-    ${RAYSIM_SOURCES_DIR}/Log.cpp
-    ${RAYSIM_SOURCES_DIR}/FontManager.cpp
+    ${RAYSIM_SOURCES_DIR}/Graphics/Color.cpp
+    ${RAYSIM_SOURCES_DIR}/Graphics/Shapes.cpp
+    ${RAYSIM_SOURCES_DIR}/Graphics/Texts.cpp
 
-    # Application entry point
-    examples/main.cpp
+    ${RAYSIM_SOURCES_DIR}/Manager/FontManager.cpp
+    ${RAYSIM_SOURCES_DIR}/Manager/InputManager.cpp
+    ${RAYSIM_SOURCES_DIR}/Manager/TimeManager.cpp
+
+    ${RAYSIM_SOURCES_DIR}/Core/Canvas.cpp
+
+    ${RAYSIM_SOURCES_DIR}/Utils/Log.cpp
+
+    ${RAYSIM_SOURCES_DIR}/Math/Random.cpp
 )
 
 # ============================================================================
@@ -103,10 +109,10 @@ add_executable(${PROJECT_NAME}
 # ============================================================================
 
 # Include directories for header search
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Link libraries
-target_link_libraries(${PROJECT_NAME} PRIVATE
+target_link_libraries(${PROJECT_NAME} PUBLIC
     raylib
     spdlog::spdlog_header_only
 )
@@ -117,7 +123,7 @@ target_precompile_headers(${PROJECT_NAME} PRIVATE
 )
 
 # C++ features and warning flags
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 target_compile_options(${PROJECT_NAME} PRIVATE ${WARNING_FLAGS})
 
 # Suppress MSVC security warnings (CRT_SECURE_NO_WARNINGS)
