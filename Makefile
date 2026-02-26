@@ -221,9 +221,10 @@ example-mouse: build
 
 clean:
 	$(call _section,Clean)
-	@printf "  %-14s : %s\n" "Removing" "build artifacts"
+	@printf "  %-14s : %s\n" "Removing" "build artifacts and $(BUILD_DIR)/bin"
 	$(if $(wildcard $(CONFIGURE_STAMP)),-@cmake --build $(BUILD_DIR) --config $(BUILD_TYPE) > /dev/null)
 	@cmake -E rm -f cppcheck.log
+	@cmake -E rm -rf $(BUILD_DIR)/bin
 	$(call _ok,Clean done)
 	$(call _done)
 
