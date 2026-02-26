@@ -26,10 +26,29 @@ namespace RS {
 class Canvas
 {
 public:
-    /// @brief Construct Canvas with default settings (800×600, 60 FPS)
-    Canvas() : fontManager_(FontManager()), inputManager_(InputManager()), timeManager_(TimeManager()) {}
+    /**
+     * @brief Construct a new Canvas object
+     *
+     * Creates a Canvas with default settings: 800×600 window and 60 FPS target.
+     */
+    Canvas() = default;
 
-    virtual ~Canvas() = default;
+    /**
+     * @brief Destroy the Canvas object
+     *
+     * Virtual destructor to allow proper cleanup in derived classes.
+     */
+    virtual ~Canvas() noexcept = default;
+
+    // Delete copy constructor and assignment operator to prevent copying
+
+    Canvas(const Canvas&) = delete;
+    Canvas& operator=(const Canvas&) = delete;
+
+    // Allow move semantics for flexibility
+
+    Canvas(Canvas&&) = default;
+    Canvas& operator=(Canvas&&) = default;
 
     /**
      * @brief User-defined initialization (called once at application start)
