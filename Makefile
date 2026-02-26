@@ -21,7 +21,7 @@
 # ─── Project ─────────────────────────────────────────────────────────────
 
 PROJECT_NAME  := RaySim
-PROJECT_VER   := 0.2.1
+PROJECT_VER   := 0.2.3
 BUILD_DIR     := build
 BUILD_TYPE    ?= Debug
 
