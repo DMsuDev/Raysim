@@ -29,18 +29,27 @@ class Logger
 {
 public:
     // Initialize logging system (call once at startup)
-    // Sets up core logger with specified log file and log level
+    // Sets up core logger with specified log file and separate levels for console and file
     static void Init(
         const std::string& app_name,
         const std::string& log_file,
-        bool async = true);
+        bool async = true,
+        spdlog::level::level_enum console_level = spdlog::level::info,
+        spdlog::level::level_enum file_level = spdlog::level::trace);
 
     // Get the core logger instance for logging messages
-
     static Shared<spdlog::logger> Get();
     static Shared<spdlog::logger> Get(const std::string &name);
 
+    // Set global logger level (applies as filter for all sinks)
     static void SetLevel(spdlog::level::level_enum level);
+
+    // Set individual sink levels (allows fine-grained control)
+    static void SetConsoleLevel(spdlog::level::level_enum level);
+    static void SetFileLevel(spdlog::level::level_enum level);
+
+    // Force flush all sinks immediately (useful for async logging)
+    static void Flush();
 
 private:
     static Shared<spdlog::logger> s_CoreLogger;
