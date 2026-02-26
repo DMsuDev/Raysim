@@ -26,7 +26,7 @@ public:
     void Setup() override {
         SetSize(1000, 600);
         SetTitle("RaySim - Mouse Detection Demo");
-        SetDefaultFont("resources/fonts/opensans/OpenSans-Regular.ttf", 24);
+        SetDefaultFont("resources/fonts/opensans/OpenSans-Regular.ttf");
         SetTargetFPS(60);
     }
 
@@ -65,14 +65,14 @@ public:
         // Mouse position text
         std::string posText = "Mouse: (" + std::to_string(static_cast<int>(mousePos.x)) +
                              ", " + std::to_string(static_cast<int>(mousePos.y)) + ")";
-        Text::DrawText(posText, 50, 50, 20, Color::White(), OriginMode::TopLeft);
+        Text::DrawText(posText, 50, 50, 24, Color::White(), OriginMode::TopLeft);
 
         // Instructions
-        Text::DrawText("Move your mouse! Left Click for colors", 50, 550, 18, Color::LightGray(), OriginMode::BottomLeft);
+        Text::DrawText("Move your mouse! Left Click for colors", 50, 550, 21, Color::LightGray(), OriginMode::BottomLeft);
 
         // Draw FPS
         std::string fpsText = "FPS: " + std::to_string(GetTimeManager().GetCurrentFPS());
-        Text::DrawText(fpsText, 950, 50, 20, Color::LightGray(), OriginMode::TopRight);
+        Text::DrawText(fpsText, 950, 50, 24, Color::LightGray(), OriginMode::TopRight);
 
         // Color blocks on mouse buttons
         if (input.IsMouseButtonDown(MouseButton::Left)) {
