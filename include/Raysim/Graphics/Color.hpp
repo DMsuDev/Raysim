@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Raysim/Math/Vector3.hpp"
+#include <string>
+
 namespace RS {
 
 /**
@@ -12,6 +15,10 @@ namespace RS {
 struct Color {
     unsigned char r{255}, g{255}, b{255}, a{255};  ///< Red, Green, Blue, Alpha components
 
+    // =======================================================
+    //                     CONSTRUCTORS
+    // =======================================================
+
     constexpr Color() = default;
 
     /// @brief Construct color from RGBA components
@@ -22,6 +29,10 @@ struct Color {
     explicit constexpr Color(unsigned char gray, unsigned char a = 255)
         : r(gray), g(gray), b(gray), a(a) {}
 
+    // =======================================================
+    //                    COLOR OPERATIONS
+    // =======================================================
+
     /**
      * @brief Linear interpolate between two colors
      * @param a Start color
@@ -31,7 +42,59 @@ struct Color {
      */
     static Color Lerp(const Color& a, const Color& b, float t);
 
-    // ==== OPERATORS =====
+    // =======================================================
+    //                    FACTORY METHODS
+    // =======================================================
+
+    /**
+     * @brief Create a Color from a hexadecimal string (e.g. "#RRGGBB" or "#RRGGBBAA")
+     * @param hex Hexadecimal color string
+     * @return Parsed Color object
+     */
+    static Color FromHex(const std::string& hex);
+
+    /**
+     * @brief Create a Color from HSV values
+     * @param h Hue (0-360 degrees)
+     * @param s Saturation (0-1)
+     * @param v Value (0-1)
+     * @param alpha Optional alpha component (0-255, default 255)
+     * @return Color object representing the HSV values
+     */
+    static Color FromHSV(float h, float s, float v, unsigned char alpha = 255);
+
+    /**
+     * @brief Create a Color from HSV values using a Vector3 (hue, saturation, value)
+     * @param hsv Vector3 where x = hue (0-360), y = saturation
+     * z = value (0-1)
+     * @param alpha Optional alpha component (0-255, default 255)
+     * @return Color object representing the HSV values
+     */
+    static Color FromHSV(const Vector3& hsv, unsigned char alpha = 255)
+    {
+        return FromHSV(hsv.x, hsv.y, hsv.z, alpha);
+    }
+
+    // =======================================================
+    //                 CONVERSION UTILITIES
+    // =======================================================
+
+    /**
+     * @brief Convert this Color to a hexadecimal string (e.g. "#RRGGBBAA")
+     * @param includeAlpha Whether to include the alpha component in the hex string (default false)
+     * @return Hexadecimal string representation of the color
+     */
+    std::string ToHex(bool includeAlpha = false) const;
+
+    /**
+    * @brief Convert this Color to HSV representation
+    * @return Vector3 where x = hue (0-360), y = saturation (0-1), z = value (0-1)
+    */
+    Vector3 ToHSV() const;
+
+    // =======================================================
+    //                      OPERATORS
+    // =======================================================
 
     /// @brief Add color components (bright blend)
     Color operator+(const Color& rhs) const;
@@ -45,37 +108,43 @@ struct Color {
     }
     /// @brief Inequality comparison
     bool operator!=(const Color& rhs) const { return !(*this == rhs); }
-
-    // ==== PREDEFINED COLORS =====
-
-    static constexpr Color Red()          { return {255,   0,   0}; }
-    static constexpr Color Green()        { return {  0, 255,   0}; }
-    static constexpr Color Yellow()       { return {255, 255,   0}; }
-    static constexpr Color Blue()         { return {  0,   0, 255}; }
-
-    static constexpr Color White()        { return {255, 255, 255}; }
-    static constexpr Color Black()        { return {  0,   0,   0}; }
-    static constexpr Color Gray()         { return {128, 128, 128}; }
-
-    static constexpr Color Cyan()         { return {  0, 255, 255}; }
-    static constexpr Color Magenta()      { return {255,   0, 255}; }
-    static constexpr Color Pink()         { return {255, 192, 203}; }
-    static constexpr Color Orange()       { return {255, 165,   0}; }
-    static constexpr Color Purple()       { return {128,   0, 128}; }
-
-    // ==== RAYSIM (AND RAYLIB WRAPPED) COLORS =====
-    static constexpr Color RayRed()       { return {239,  68,  68}; }
-    static constexpr Color RayGreen()     { return { 89, 255, 128}; }
-    static constexpr Color RayBlue()      { return {  0, 161, 224}; }
-    static constexpr Color RayYellow()    { return {255, 229,   0}; }
-
-    static constexpr Color RayBlack()     { return { 23,  26,  31}; }
-    static constexpr Color RayWhite()     { return {221, 221, 221}; }
-
-    static constexpr Color RayCyan()      { return { 89, 255, 241}; }
-    static constexpr Color RayGray()     { return { 64,  64,  64}; }
-    static constexpr Color LightGray()    { return {200, 200, 200}; }
-    static constexpr Color DarkBlue()     { return { 40,  44,  52}; }
 };
+
+// =========================================================
+// PREDEFINED COLORS (ENGINE STYLE)
+// =========================================================
+
+namespace Colors
+{
+    inline constexpr Color White      {255, 255, 255};
+    inline constexpr Color Black      {0, 0, 0};
+    inline constexpr Color Gray       {128, 128, 128};
+    inline constexpr Color LightGray  {200, 200, 200};
+
+    inline constexpr Color Red        {255, 0, 0};
+    inline constexpr Color Green      {0, 255, 0};
+    inline constexpr Color Blue       {0, 0, 255};
+
+    inline constexpr Color Yellow     {255, 255, 0};
+    inline constexpr Color Cyan       {0, 255, 255};
+    inline constexpr Color Magenta    {255, 0, 255};
+
+    inline constexpr Color Orange     {255, 165, 0};
+    inline constexpr Color Pink       {255, 192, 203};
+    inline constexpr Color Purple     {128, 0, 128};
+
+    // Raylib-style colors
+    inline constexpr Color RayRed     {239, 68, 68};
+    inline constexpr Color RayGreen   {89, 255, 128};
+    inline constexpr Color RayBlue    {0, 161, 224};
+    inline constexpr Color RayYellow  {255, 229, 0};
+
+    inline constexpr Color RayBlack   {23, 26, 31};
+    inline constexpr Color RayWhite   {221, 221, 221};
+    inline constexpr Color RayGray    {64, 64, 64};
+    inline constexpr Color RayCyan    {89, 255, 241};
+
+    inline constexpr Color DarkBlue   {40, 44, 52};
+}
 
 } // namespace RS
