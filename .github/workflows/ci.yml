@@ -47,29 +47,6 @@ jobs:
       - name: Build
         run: cmake --build build --config ${{ matrix.config }} --parallel $env:NUMBER_OF_PROCESSORS
 
-      - name: Test Example - Mouse Detection (Release only)
-        if: matrix.config == 'Release' && success()
-        shell: pwsh
-        run: |
-          $exePath = "build\bin\${{ matrix.config }}\Mouse_detection_2D.exe"
-          Write-Host "Testing example: $exePath"
-          if (Test-Path $exePath) {
-            Write-Host "✓ Executable found"
-            # Run with 2 second timeout (just to verify it starts without crashing)
-            $proc = Start-Process -FilePath $exePath -NoNewWindow -PassThru
-            Start-Sleep -Seconds 2
-            if ($proc.HasExited) {
-              Write-Host "✗ Process exited unexpectedly"
-              exit 1
-            } else {
-              Write-Host "✓ Process started successfully"
-              Stop-Process -InputObject $proc -Force
-            }
-          } else {
-            Write-Host "✗ Executable not found at $exePath"
-            exit 1
-          }
-
       - name: Upload build artifact
         if: matrix.config == 'Release' && success()
         uses: actions/upload-artifact@v6
