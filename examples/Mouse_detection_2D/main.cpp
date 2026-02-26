@@ -31,7 +31,7 @@ public:
     }
 
     void Draw() override {
-        Background(Color::DarkBlue());
+        Background(Colors::DarkBlue);
 
         // Draw grid background
         Color gridColor{60, 60, 60};
@@ -60,32 +60,32 @@ public:
         Shapes::DrawRect(1000.0f - mousePos.x, fixedY, invertedSize, invertedSize, rectColorR, OriginMode::Center);
 
         // Center circles following mouse
-        Shapes::DrawCircle(mousePos.x, mousePos.y, 8, Color::RayWhite(), OriginMode::Center);
+        Shapes::DrawCircle(mousePos.x, mousePos.y, 8, Colors::RayWhite, OriginMode::Center);
 
         // Mouse position text
         std::string posText = "Mouse: (" + std::to_string(static_cast<int>(mousePos.x)) +
                              ", " + std::to_string(static_cast<int>(mousePos.y)) + ")";
-        Text::DrawText(posText, 50, 50, 24, Color::White(), OriginMode::TopLeft);
+        Text::DrawText(posText, 50, 50, 24, Colors::White, OriginMode::TopLeft);
 
         // Instructions
-        Text::DrawText("Move your mouse! Left Click for colors", 50, 550, 21, Color::LightGray(), OriginMode::BottomLeft);
+        Text::DrawText("Move your mouse! RMB, LMB or MMB to interact", 50, 550, 21, Colors::LightGray, OriginMode::BottomLeft);
 
         // Draw FPS
         std::string fpsText = "FPS: " + std::to_string(GetTimeManager().GetCurrentFPS());
-        Text::DrawText(fpsText, 950, 50, 24, Color::LightGray(), OriginMode::TopRight);
+        Text::DrawText(fpsText, 950, 50, 24, Colors::LightGray, OriginMode::TopRight);
 
         // Color blocks on mouse buttons
         if (input.IsMouseButtonDown(MouseButton::Left)) {
-            Shapes::DrawRect(200, 100, 80, 80, Color::RayRed(), OriginMode::Center);
-            Text::DrawText("LEFT", 200, 100, 20, Color::RayBlack(), OriginMode::Center);
+            Shapes::DrawRect(200, 100, 80, 80, Colors::RayRed, OriginMode::Center);
+            Text::DrawText("LEFT", 200, 100, 20, Colors::RayBlack, OriginMode::Center);
         }
         if (input.IsMouseButtonDown(MouseButton::Right)) {
-            Shapes::DrawRect(800, 100, 80, 80, Color::RayGreen(), OriginMode::Center);
-            Text::DrawText("RIGHT", 800, 100, 20, Color::RayBlack(), OriginMode::Center);
+            Shapes::DrawRect(800, 100, 80, 80, Colors::RayGreen, OriginMode::Center);
+            Text::DrawText("RIGHT", 800, 100, 20, Colors::RayBlack, OriginMode::Center);
         }
         if (input.IsMouseButtonDown(MouseButton::Middle)) {
-            Shapes::DrawRect(500, 100, 80, 80, Color::RayBlue(), OriginMode::Center);
-            Text::DrawText("MIDDLE", 500, 100, 20, Color::RayBlack(), OriginMode::Center);
+            Shapes::DrawRect(500, 100, 80, 80, Colors::RayBlue, OriginMode::Center);
+            Text::DrawText("MIDDLE", 500, 100, 20, Colors::RayBlack, OriginMode::Center);
         }
     }
 };

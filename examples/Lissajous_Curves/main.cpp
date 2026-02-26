@@ -194,7 +194,7 @@ private:
 
     /// Draw axes and reference rectangle
     void DrawAxes() {
-        Color axisColor = Color::LightGray();
+        Color axisColor = Colors::LightGray;
         Shapes::DrawRectOutline(rectX, rectY, rectW, rectH, axisColor);
         Shapes::DrawLine(centerX, rectY, centerX, rectY + rectH, axisColor);
         Shapes::DrawLine(rectX, centerY, rectX + rectW, centerY, axisColor);
@@ -208,7 +208,7 @@ private:
         int idx = static_cast<int>(std::floor(idxF));
         int next = std::min(idx + 1, (int)curvePoints.size() - 1);
         Vector2 pos = Math::Lerp(curvePoints[idx], curvePoints[next], idxF - idx);
-        Shapes::DrawCircle(pos.x, pos.y, 10, Color::RayYellow(), OriginMode::Center);
+        Shapes::DrawCircle(pos.x, pos.y, 10, Colors::RayYellow, OriginMode::Center);
     }
 
     /// Draw the user interface with parameter information
@@ -261,7 +261,7 @@ private:
         // Controls at the bottom
         y = 750;
         Text::DrawText("Arrows=Freq  P/O=Dir  +/-=Speed  1-6=Preset  R=Reset",
-                   20, y, 18, Color::LightGray(), OriginMode::BottomLeft);
+                   20, y, 18, Colors::LightGray, OriginMode::BottomLeft);
 
         // Description of the current preset
         y += 25;
@@ -307,7 +307,7 @@ public:
     }
 
     void Draw() override {
-        Background(Color::RayBlack());
+        Background(Colors::RayBlack);
 
         InputManager& input = GetInputManager();
         TimeManager& time = GetTimeManager();
