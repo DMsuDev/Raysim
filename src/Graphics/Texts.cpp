@@ -31,34 +31,44 @@ static ::Vector2 OriginToVector(OriginMode origin) {
     return {x, y};
 }
 
-// ============================================================================
-// TEXT DRAWING - BASIC (NO ORIGIN MODE)
-// ============================================================================
-
-void Text::DrawText(const std::string& text, float x, float y, int fontSize, const Color& color) {
-    RS_ASSERT(fontSize > 0, "Font size must be positive: {}", fontSize);
-    if (RS::FontManager::HasFont()) {
-        ::Font* fontPtr = static_cast<::Font*>(RS::FontManager::GetFont().data);
-        RS_ASSERT_NOT_NULL(fontPtr);
-        ::DrawTextEx(*fontPtr, text.c_str(), {x, y}, static_cast<float>(fontSize), 0, ToRL(color));
-    } else {
-        // Fallback to default raylib font
-        ::DrawText(text.c_str(), static_cast<int>(x), static_cast<int>(y), static_cast<int>(fontSize), ToRL(color));
-    }
-}
-
-void Text::DrawTextEx(const std::string& text, float x, float y, float fontSize, float spacing, const Color& color) {
-    RS_ASSERT(fontSize > 0, "Font size must be positive: {}", fontSize);
-    RS_ASSERT(spacing >= 0, "Spacing must be non-negative: {}", spacing);
-    // Use loaded font if available, otherwise fall back to raylib default
+static void DrawTextInternal(const std::string& text, float x, float y, float fontSize, float spacing, const Color& color) {
     if (RS::FontManager::HasFont()) {
         ::Font* fontPtr = static_cast<::Font*>(RS::FontManager::GetFont().data);
         RS_ASSERT_NOT_NULL(fontPtr);
         ::DrawTextEx(*fontPtr, text.c_str(), {x, y}, fontSize, spacing, ToRL(color));
     } else {
-        // Fallback to default raylib font
         ::DrawText(text.c_str(), static_cast<int>(x), static_cast<int>(y), static_cast<int>(fontSize), ToRL(color));
     }
+}
+
+static ::Vector2 MeasureTextDimensions(const std::string& text, float fontSize, float spacing) {
+    if (RS::FontManager::HasFont()) {
+        ::Font* fontPtr = static_cast<::Font*>(RS::FontManager::GetFont().data);
+        RS_ASSERT_NOT_NULL(fontPtr);
+        return ::MeasureTextEx(*fontPtr, text.c_str(), fontSize, spacing);
+    } else {
+        float width = static_cast<float>(::MeasureText(text.c_str(), static_cast<int>(fontSize)));
+        return {width, fontSize};
+    }
+}
+
+// ============================================================================
+// TEXT DRAWING - BASIC (NO ORIGIN MODE)
+// ============================================================================
+
+void Text::DrawText(const std::string& text, float x, float y, int fontSize, const Color& color) {
+    RS_ASSERT(!text.empty(), "Text cannot be empty");
+    RS_ASSERT(fontSize > 0, "Font size must be positive: {}", fontSize);
+
+    DrawTextInternal(text, x, y, static_cast<float>(fontSize), 0.0f, color);
+}
+
+void Text::DrawTextEx(const std::string& text, float x, float y, float fontSize, float spacing, const Color& color) {
+    RS_ASSERT(!text.empty(), "Text cannot be empty");
+    RS_ASSERT(fontSize > 0, "Font size must be positive: {}", fontSize);
+    RS_ASSERT(spacing >= 0, "Spacing must be non-negative: {}", spacing);
+
+    DrawTextInternal(text, x, y, fontSize, spacing, color);
 }
 
 // ============================================================================
@@ -66,63 +76,28 @@ void Text::DrawTextEx(const std::string& text, float x, float y, float fontSize,
 // ============================================================================
 
 void Text::DrawText(const std::string& text, float x, float y, int fontSize, const Color& color, OriginMode origin) {
-    // Measure text dimensions accurately using raylib when possible
-    float textWidth = 0.0f;
-    float textHeight = 0.0f;
+    RS_ASSERT(!text.empty(), "Text cannot be empty");
+    RS_ASSERT(fontSize > 0, "Font size must be positive: {}", fontSize);
 
-    if (RS::FontManager::HasFont()) {
-        ::Font* fontPtr = static_cast<::Font*>(RS::FontManager::GetFont().data);
-        RS_ASSERT_NOT_NULL(fontPtr);
-        ::Vector2 m = ::MeasureTextEx(*fontPtr, text.c_str(), static_cast<float>(fontSize), 0.0f);
-        textWidth = m.x;
-        textHeight = m.y;
-    } else {
-        // Fallback to raylib default font measurement
-        textWidth = static_cast<float>(::MeasureText(text.c_str(), static_cast<int>(fontSize)));
-        textHeight = static_cast<float>(fontSize);
-    }
-
+    ::Vector2 dims = MeasureTextDimensions(text, static_cast<float>(fontSize), 0.0f);
     ::Vector2 originVec = OriginToVector(origin);
-    float adjustedX = x - (originVec.x * textWidth);
-    float adjustedY = y - (originVec.y * textHeight);
+    float adjustedX = x - (originVec.x * dims.x);
+    float adjustedY = y - (originVec.y * dims.y);
 
-    if (RS::FontManager::HasFont()) {
-        ::Font* fontPtr = static_cast<::Font*>(RS::FontManager::GetFont().data);
-        RS_ASSERT_NOT_NULL(fontPtr);
-        ::DrawTextEx(*fontPtr, text.c_str(), {adjustedX, adjustedY}, static_cast<float>(fontSize), 0, ToRL(color));
-    } else {
-        ::DrawText(text.c_str(), static_cast<int>(adjustedX), static_cast<int>(adjustedY), static_cast<int>(fontSize), ToRL(color));
-    }
+    DrawTextInternal(text, adjustedX, adjustedY, static_cast<float>(fontSize), 0.0f, color);
 }
 
 void Text::DrawTextEx(const std::string& text, float x, float y, float fontSize, float spacing, const Color& color, OriginMode origin) {
-    // Measure text dimensions accurately using raylib when possible
-    float textWidth = 0.0f;
-    float textHeight = 0.0f;
+    RS_ASSERT(!text.empty(), "Text cannot be empty");
+    RS_ASSERT(fontSize > 0, "Font size must be positive: {}", fontSize);
+    RS_ASSERT(spacing >= 0, "Spacing must be non-negative: {}", spacing);
 
-    if (RS::FontManager::HasFont()) {
-        ::Font* fontPtr = static_cast<::Font*>(RS::FontManager::GetFont().data);
-        RS_ASSERT_NOT_NULL(fontPtr);
-        ::Vector2 m = ::MeasureTextEx(*fontPtr, text.c_str(), fontSize, spacing);
-        textWidth = m.x;
-        textHeight = m.y;
-    } else {
-        // Fallback to raylib default font measurement
-        textWidth = static_cast<float>(::MeasureText(text.c_str(), static_cast<int>(fontSize)));
-        textHeight = fontSize;
-    }
-
+    ::Vector2 dims = MeasureTextDimensions(text, fontSize, spacing);
     ::Vector2 originVec = OriginToVector(origin);
-    float adjustedX = x - (originVec.x * textWidth);
-    float adjustedY = y - (originVec.y * textHeight);
+    float adjustedX = x - (originVec.x * dims.x);
+    float adjustedY = y - (originVec.y * dims.y);
 
-    if (RS::FontManager::HasFont()) {
-        ::Font* fontPtr = static_cast<::Font*>(RS::FontManager::GetFont().data);
-        RS_ASSERT_NOT_NULL(fontPtr);
-        ::DrawTextEx(*fontPtr, text.c_str(), {adjustedX, adjustedY}, fontSize, spacing, ToRL(color));
-    } else {
-        ::DrawText(text.c_str(), static_cast<int>(adjustedX), static_cast<int>(adjustedY), static_cast<int>(fontSize), ToRL(color));
-    }
+    DrawTextInternal(text, adjustedX, adjustedY, fontSize, spacing, color);
 }
 
 // ============================================================================
@@ -130,34 +105,19 @@ void Text::DrawTextEx(const std::string& text, float x, float y, float fontSize,
 // ============================================================================
 
 void Text::DrawTextInRect(const std::string& text, float x, float y, float w, float h, float fontSize, const Color& color, OriginMode origin, float spacing) {
-    // Measure text dimensions
-    float textWidth = 0.0f;
-    float textHeight = 0.0f;
+    RS_ASSERT(!text.empty(), "Text cannot be empty");
+    RS_ASSERT(fontSize > 0, "Font size must be positive: {}", fontSize);
+    RS_ASSERT(spacing >= 0, "Spacing must be non-negative: {}", spacing);
+    RS_ASSERT(w > 0, "Rectangle width must be positive: {}", w);
+    RS_ASSERT(h > 0, "Rectangle height must be positive: {}", h);
 
-    if (RS::FontManager::HasFont()) {
-        ::Font* fontPtr = static_cast<::Font*>(RS::FontManager::GetFont().data);
-        RS_ASSERT_NOT_NULL(fontPtr);
-        ::Vector2 m = ::MeasureTextEx(*fontPtr, text.c_str(), fontSize, spacing);
-        textWidth = m.x;
-        textHeight = m.y;
-    } else {
-        textWidth = static_cast<float>(::MeasureText(text.c_str(), static_cast<int>(fontSize)));
-        textHeight = fontSize;
-    }
-
+    ::Vector2 dims = MeasureTextDimensions(text, fontSize, spacing);
     ::Vector2 originVec = OriginToVector(origin);
 
-    // Compute top-left position where to draw text so it's aligned inside rect
-    float drawX = x + (w - textWidth) * originVec.x;
-    float drawY = y + (h - textHeight) * originVec.y;
+    float drawX = x + (w - dims.x) * originVec.x;
+    float drawY = y + (h - dims.y) * originVec.y;
 
-    if (RS::FontManager::HasFont()) {
-        ::Font* fontPtr = static_cast<::Font*>(RS::FontManager::GetFont().data);
-        RS_ASSERT_NOT_NULL(fontPtr);
-        ::DrawTextEx(*fontPtr, text.c_str(), {drawX, drawY}, fontSize, spacing, ToRL(color));
-    } else {
-        ::DrawText(text.c_str(), static_cast<int>(drawX), static_cast<int>(drawY), static_cast<int>(fontSize), ToRL(color));
-    }
+    DrawTextInternal(text, drawX, drawY, fontSize, spacing, color);
 }
 
 } // namespace RS
