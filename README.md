@@ -3,7 +3,7 @@
 ![C++](https://img.shields.io/badge/C%2B%2B-17-blue?style=flat&logo=cplusplus)
 ![CMake](https://img.shields.io/badge/CMake-3.19+-green?style=flat&logo=cmake)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat)
-![Version](https://img.shields.io/badge/Version-0.2.3-brightgreen?style=flat)
+![Version](https://img.shields.io/badge/Version-0.2.4-brightgreen?style=flat)
 
 A basic C++ framework for 2D graphics and interactive applications powered by [raylib](https://www.raylib.com/).
 
