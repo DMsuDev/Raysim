@@ -36,9 +36,11 @@ void RS::FontManager::LoadFont(const std::string& fontPath, int fontSize)
     ::Font* font = nullptr;
     bool usingDefault = false;
 
-    if (::FileExists(fontPath.c_str()) == 0)
+    std::string resolvedPath = ::GetApplicationDirectory() + fontPath;
+
+    if (::FileExists(resolvedPath.c_str()) == 0)
     {
-        LOG_WARN("File '{}' not found, loading default font", fontPath);
+        LOG_WARN("File '{}' not found, loading default font", resolvedPath);
         font = new ::Font();
         *font = ::GetFontDefault();
         usingDefault = true;
@@ -46,7 +48,7 @@ void RS::FontManager::LoadFont(const std::string& fontPath, int fontSize)
     else
     {
         ::Font* loadedFont = new ::Font();
-        *loadedFont = ::LoadFontEx(fontPath.c_str(), fontSize, nullptr, 0);
+        *loadedFont = ::LoadFontEx(resolvedPath.c_str(), fontSize, nullptr, 0);
 
         if (loadedFont->glyphCount == 0)
         {
