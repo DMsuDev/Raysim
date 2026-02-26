@@ -6,11 +6,23 @@
 
 // Static member definitions
 namespace RS {
-    std::string FontManager::path_      = "";
-    void*       FontManager::font_      = nullptr;
-    int         FontManager::fontSize_  = 0;
-    bool        FontManager::loaded_    = false;
-    bool        FontManager::isDefault_ = false;
+    std::string FontManager::path_       = "";
+    FontHandle  FontManager::fontHandle_ = FontHandle();
+    int         FontManager::fontSize_   = 0;
+    bool        FontManager::isDefault_  = false;
+}
+
+void RS::FontManager::LoadDefaultFont()
+{
+    if (isDefault_ && fontHandle_.IsValid())
+        return; // ya cargada
+
+    // cargar fuente interna de raylib: crear copia en heap para almacenar de forma segura
+    ::Font* font = new ::Font();
+    *font = ::GetFontDefault();
+    fontHandle_ = FontHandle(static_cast<void*>(font));
+    fontSize_ = 20; // tamaño por defecto
+    isDefault_ = true;
 }
 
 void RS::FontManager::LoadFont(const std::string& fontPath, int fontSize)
@@ -18,73 +30,81 @@ void RS::FontManager::LoadFont(const std::string& fontPath, int fontSize)
     RS_ASSERT(!fontPath.empty(), "Font path cannot be empty");
     RS_ASSERT(fontSize > 0, "Font size must be positive, got: {}", fontSize);
 
-    LOG_INFO("FontManager: Loading font from '{}' with size {}", fontPath, fontSize);
+    LOG_INFO("Loading font from '{}'", fontPath);
     UnloadFont();
 
-    ::Font* font = new ::Font();
-    RS_ASSERT_NOT_NULL(font);
+    ::Font* font = nullptr;
     bool usingDefault = false;
 
     if (::FileExists(fontPath.c_str()) == 0)
     {
-        LOG_WARN("FontManager: Font file not found at '{}', falling back to default font", fontPath);
+        LOG_WARN("File '{}' not found, loading default font", fontPath);
+        font = new ::Font();
         *font = ::GetFontDefault();
         usingDefault = true;
     }
     else
     {
-        LOG_DEBUG("FontManager: File exists, attempting to load...");
-        *font = ::LoadFontEx(fontPath.c_str(), fontSize, nullptr, 0);
+        ::Font* loadedFont = new ::Font();
+        *loadedFont = ::LoadFontEx(fontPath.c_str(), fontSize, nullptr, 0);
 
-        if (font->glyphCount == 0) {
-            LOG_WARN("FontManager: Failed to load font at '{}' (glyph count: 0), falling back to default font", fontPath);
-            delete font;
+        if (loadedFont->glyphCount == 0)
+        {
+            LOG_WARN("Failed to load font, loading default font");
+            delete loadedFont;
             font = new ::Font();
             *font = ::GetFontDefault();
             usingDefault = true;
         }
+        else
+        {
+            font = loadedFont;
+        }
     }
 
-    if (usingDefault) {
-        LOG_INFO("FontManager: Using default raylib font (size: {})", fontSize);
+    // Only validate texture for custom fonts (default font texture may not be initialized)
+    if (!usingDefault) {
+        RS_ASSERT(font->texture.id > 0, "Font texture not properly loaded");
+        ::SetTextureFilter(font->texture, TEXTURE_FILTER_BILINEAR);
+    }
+
+    // Only set fontHandle for custom fonts, use DrawText fallback for default font
+    if (!usingDefault) {
+        fontHandle_  = FontHandle(static_cast<void*>(font));
+        LOG_INFO("Font loaded successfully");
     } else {
-        LOG_INFO("FontManager: Successfully loaded font '{}' (size: {}, glyphs: {})", fontPath, fontSize, font->glyphCount);
+        LOG_INFO("Using default font, no custom font handle stored");
+        delete font; // Clean up default font as it won't be used
     }
-    RS_ASSERT(font->texture.id > 0, "Font texture not properly loaded");
-    ::SetTextureFilter(font->texture, TEXTURE_FILTER_BILINEAR);
 
-    font_      = font;
-    fontSize_  = fontSize;
-    path_      = fontPath;
-    loaded_    = true;
-    isDefault_ = usingDefault;
-
-    RS_ASSERT(loaded_, "Font should be marked as loaded after LoadFont");
+    fontSize_    = fontSize;
+    path_        = fontPath;
+    isDefault_   = usingDefault;
 }
 
 void RS::FontManager::UnloadFont()
 {
-    if (loaded_ && font_ != nullptr)
+    if (!HasFont())
     {
-        LOG_DEBUG("FontManager: Unloading font from '{}'", path_);
-        ::Font* font = RS::Cast<::Font*>(font_);
-        RS_ASSERT_NOT_NULL(font);
-        // Do not call ::UnloadFont on raylib's built-in default font — it's static
-        if (!isDefault_)
-        {
-            ::UnloadFont(*font);
-            LOG_DEBUG("FontManager: Font resources freed");
-        }
-        else {
-            LOG_DEBUG("FontManager: Skipping unload of default font");
-        }
-        delete font;
-        font_      = nullptr;
-        loaded_    = false;
-        isDefault_ = false;
+        LOG_DEBUG("Attempted to unload font, skipping because no font is loaded");
+        return;
     }
-    else if (loaded_)
+
+    ::Font* font = static_cast<::Font*>(fontHandle_.data);
+    RS_ASSERT_NOT_NULL(font);
+
+    if (!isDefault_)
     {
-        LOG_WARN("FontManager: Attempted to unload font, but font pointer is null");
+        ::UnloadFont(*font);
+        LOG_DEBUG("Font resources freed");
     }
+    else
+    {
+        LOG_DEBUG("Skipping call to ::UnloadFont for default font");
+    }
+
+    // Free heap memory regardless of default/copy origin
+    delete font;
+    fontHandle_ = FontHandle();
+    isDefault_  = false;
 }
