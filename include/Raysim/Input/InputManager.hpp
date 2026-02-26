@@ -161,22 +161,14 @@ public:
      */
     float GetGamepadAxisValue(int gamepad, int axis) const;
 
-    // ============================================================================
-    // UTILITY
-    // ============================================================================
-
     /**
      * @brief Update input state (should be called each frame)
      */
-    void Update();
+    void Update() {
+        // Raylib input functions automatically update state each frame, so no internal state is needed here.
+        // This function can be used for any additional processing if necessary in the future.
+    }
 
-    /**
-     * @brief Reset input state
-     */
-    void Reset();
-
-private:
-    Vector2 lastMousePos_ = {0, 0};
 };
 
 } // namespace RS

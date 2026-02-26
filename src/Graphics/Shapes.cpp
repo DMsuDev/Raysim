@@ -31,8 +31,8 @@ static ::Vector2 OriginToVector(OriginMode origin) {
 }
 
 void Shapes::DrawRect(float x, float y, float w, float h, const Color& color) {
-    ::DrawRectangle(RS::Cast<int>(x), RS::Cast<int>(y),
-                    RS::Cast<int>(w), RS::Cast<int>(h), ToRL(color));
+    ::DrawRectangle(static_cast<int>(x), static_cast<int>(y),
+                    static_cast<int>(w), static_cast<int>(h), ToRL(color));
 }
 
 void Shapes::DrawRectOutline(float x, float y, float w, float h, const Color& color, float thickness) {
@@ -52,11 +52,11 @@ void Shapes::DrawRectRounded(float x, float y, float w, float h, float roundness
 // ============================================================================
 
 void Shapes::DrawCircle(float x, float y, float radius, const Color& color) {
-    ::DrawCircle(RS::Cast<int>(x), RS::Cast<int>(y), radius, ToRL(color));
+    ::DrawCircle(static_cast<int>(x), static_cast<int>(y), radius, ToRL(color));
 }
 
 void Shapes::DrawCircleOutline(float x, float y, float radius, const Color& color) {
-    ::DrawCircleLines(RS::Cast<int>(x), RS::Cast<int>(y), radius, ToRL(color));
+    ::DrawCircleLines(static_cast<int>(x), static_cast<int>(y), radius, ToRL(color));
 }
 
 // ============================================================================
@@ -66,8 +66,8 @@ void Shapes::DrawCircleOutline(float x, float y, float radius, const Color& colo
 void Shapes::DrawLine(float x1, float y1, float x2, float y2, const Color& color, float thickness) {
     RS_ASSERT(thickness > 0, "Line thickness must be positive: {}", thickness);
     if (thickness <= 1.0f) {
-        ::DrawLine(RS::Cast<int>(x1), RS::Cast<int>(y1),
-                   RS::Cast<int>(x2), RS::Cast<int>(y2), ToRL(color));
+        ::DrawLine(static_cast<int>(x1), static_cast<int>(y1),
+                   static_cast<int>(x2), static_cast<int>(y2), ToRL(color));
     } else {
         ::DrawLineEx({x1, y1}, {x2, y2}, thickness, ToRL(color));
     }
@@ -101,12 +101,12 @@ void Shapes::DrawPolygon(float x, float y, int sides, float radius, float rotati
 // ============================================================================
 
 void Shapes::DrawPoint(float x, float y, const Color& color) {
-    ::DrawPixel(RS::Cast<int>(x), RS::Cast<int>(y), ToRL(color));
+    ::DrawPixel(static_cast<int>(x), static_cast<int>(y), ToRL(color));
 }
 
 void Shapes::DrawPoint(float x, float y, float size, const Color& color) {
     RS_ASSERT(size > 0, "Point size must be positive: {}", size);
-    ::DrawCircle(RS::Cast<int>(x), RS::Cast<int>(y), size, ToRL(color));
+    ::DrawCircle(static_cast<int>(x), static_cast<int>(y), size, ToRL(color));
 }
 
 // ============================================================================
@@ -146,7 +146,7 @@ void Shapes::DrawCircle(float x, float y, float radius, const Color& color, Orig
     // For circles, origin is calculated based on bounding box (radius * 2)
     float adjustedX = x - (originVec.x * radius * 2.0f) + radius;
     float adjustedY = y - (originVec.y * radius * 2.0f) + radius;
-    ::DrawCircle(RS::Cast<int>(adjustedX), RS::Cast<int>(adjustedY), radius, ToRL(color));
+    ::DrawCircle(static_cast<int>(adjustedX), static_cast<int>(adjustedY), radius, ToRL(color));
 }
 
 void Shapes::DrawCircleOutline(float x, float y, float radius, const Color& color, OriginMode origin) {
@@ -154,7 +154,7 @@ void Shapes::DrawCircleOutline(float x, float y, float radius, const Color& colo
     // For circles, origin is calculated based on bounding box (radius * 2)
     float adjustedX = x - (originVec.x * radius * 2.0f) + radius;
     float adjustedY = y - (originVec.y * radius * 2.0f) + radius;
-    ::DrawCircleLines(RS::Cast<int>(adjustedX), RS::Cast<int>(adjustedY), radius, ToRL(color));
+    ::DrawCircleLines(static_cast<int>(adjustedX), static_cast<int>(adjustedY), radius, ToRL(color));
 }
 
 } // namespace RS

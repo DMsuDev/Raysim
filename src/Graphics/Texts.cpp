@@ -38,12 +38,12 @@ static ::Vector2 OriginToVector(OriginMode origin) {
 void Text::DrawText(const std::string& text, float x, float y, int fontSize, const Color& color) {
     RS_ASSERT(fontSize > 0, "Font size must be positive: {}", fontSize);
     if (RS::FontManager::HasFont()) {
-        ::Font* fontPtr = RS::Cast<::Font*>(RS::FontManager::GetFont().data);
+        ::Font* fontPtr = static_cast<::Font*>(RS::FontManager::GetFont().data);
         RS_ASSERT_NOT_NULL(fontPtr);
-        ::DrawTextEx(*fontPtr, text.c_str(), {x, y}, RS::Cast<float>(fontSize), 0, ToRL(color));
+        ::DrawTextEx(*fontPtr, text.c_str(), {x, y}, static_cast<float>(fontSize), 0, ToRL(color));
     } else {
         // Fallback to default raylib font
-        ::DrawText(text.c_str(), RS::Cast<int>(x), RS::Cast<int>(y), RS::Cast<int>(fontSize), ToRL(color));
+        ::DrawText(text.c_str(), static_cast<int>(x), static_cast<int>(y), static_cast<int>(fontSize), ToRL(color));
     }
 }
 
@@ -52,12 +52,12 @@ void Text::DrawTextEx(const std::string& text, float x, float y, float fontSize,
     RS_ASSERT(spacing >= 0, "Spacing must be non-negative: {}", spacing);
     // Use loaded font if available, otherwise fall back to raylib default
     if (RS::FontManager::HasFont()) {
-        ::Font* fontPtr = RS::Cast<::Font*>(RS::FontManager::GetFont().data);
+        ::Font* fontPtr = static_cast<::Font*>(RS::FontManager::GetFont().data);
         RS_ASSERT_NOT_NULL(fontPtr);
         ::DrawTextEx(*fontPtr, text.c_str(), {x, y}, fontSize, spacing, ToRL(color));
     } else {
         // Fallback to default raylib font
-        ::DrawText(text.c_str(), RS::Cast<int>(x), RS::Cast<int>(y), RS::Cast<int>(fontSize), ToRL(color));
+        ::DrawText(text.c_str(), static_cast<int>(x), static_cast<int>(y), static_cast<int>(fontSize), ToRL(color));
     }
 }
 
@@ -71,15 +71,15 @@ void Text::DrawText(const std::string& text, float x, float y, int fontSize, con
     float textHeight = 0.0f;
 
     if (RS::FontManager::HasFont()) {
-        ::Font* fontPtr = RS::Cast<::Font*>(RS::FontManager::GetFont().data);
+        ::Font* fontPtr = static_cast<::Font*>(RS::FontManager::GetFont().data);
         RS_ASSERT_NOT_NULL(fontPtr);
-        ::Vector2 m = ::MeasureTextEx(*fontPtr, text.c_str(), RS::Cast<float>(fontSize), 0.0f);
+        ::Vector2 m = ::MeasureTextEx(*fontPtr, text.c_str(), static_cast<float>(fontSize), 0.0f);
         textWidth = m.x;
         textHeight = m.y;
     } else {
         // Fallback to raylib default font measurement
-        textWidth = static_cast<float>(::MeasureText(text.c_str(), RS::Cast<int>(fontSize)));
-        textHeight = RS::Cast<float>(fontSize);
+        textWidth = static_cast<float>(::MeasureText(text.c_str(), static_cast<int>(fontSize)));
+        textHeight = static_cast<float>(fontSize);
     }
 
     ::Vector2 originVec = OriginToVector(origin);
@@ -87,11 +87,11 @@ void Text::DrawText(const std::string& text, float x, float y, int fontSize, con
     float adjustedY = y - (originVec.y * textHeight);
 
     if (RS::FontManager::HasFont()) {
-        ::Font* fontPtr = RS::Cast<::Font*>(RS::FontManager::GetFont().data);
+        ::Font* fontPtr = static_cast<::Font*>(RS::FontManager::GetFont().data);
         RS_ASSERT_NOT_NULL(fontPtr);
-        ::DrawTextEx(*fontPtr, text.c_str(), {adjustedX, adjustedY}, RS::Cast<float>(fontSize), 0, ToRL(color));
+        ::DrawTextEx(*fontPtr, text.c_str(), {adjustedX, adjustedY}, static_cast<float>(fontSize), 0, ToRL(color));
     } else {
-        ::DrawText(text.c_str(), RS::Cast<int>(adjustedX), RS::Cast<int>(adjustedY), RS::Cast<int>(fontSize), ToRL(color));
+        ::DrawText(text.c_str(), static_cast<int>(adjustedX), static_cast<int>(adjustedY), static_cast<int>(fontSize), ToRL(color));
     }
 }
 
@@ -101,14 +101,14 @@ void Text::DrawTextEx(const std::string& text, float x, float y, float fontSize,
     float textHeight = 0.0f;
 
     if (RS::FontManager::HasFont()) {
-        ::Font* fontPtr = RS::Cast<::Font*>(RS::FontManager::GetFont().data);
+        ::Font* fontPtr = static_cast<::Font*>(RS::FontManager::GetFont().data);
         RS_ASSERT_NOT_NULL(fontPtr);
         ::Vector2 m = ::MeasureTextEx(*fontPtr, text.c_str(), fontSize, spacing);
         textWidth = m.x;
         textHeight = m.y;
     } else {
         // Fallback to raylib default font measurement
-        textWidth = static_cast<float>(::MeasureText(text.c_str(), RS::Cast<int>(fontSize)));
+        textWidth = static_cast<float>(::MeasureText(text.c_str(), static_cast<int>(fontSize)));
         textHeight = fontSize;
     }
 
@@ -117,11 +117,11 @@ void Text::DrawTextEx(const std::string& text, float x, float y, float fontSize,
     float adjustedY = y - (originVec.y * textHeight);
 
     if (RS::FontManager::HasFont()) {
-        ::Font* fontPtr = RS::Cast<::Font*>(RS::FontManager::GetFont().data);
+        ::Font* fontPtr = static_cast<::Font*>(RS::FontManager::GetFont().data);
         RS_ASSERT_NOT_NULL(fontPtr);
         ::DrawTextEx(*fontPtr, text.c_str(), {adjustedX, adjustedY}, fontSize, spacing, ToRL(color));
     } else {
-        ::DrawText(text.c_str(), RS::Cast<int>(adjustedX), RS::Cast<int>(adjustedY), RS::Cast<int>(fontSize), ToRL(color));
+        ::DrawText(text.c_str(), static_cast<int>(adjustedX), static_cast<int>(adjustedY), static_cast<int>(fontSize), ToRL(color));
     }
 }
 
@@ -135,13 +135,13 @@ void Text::DrawTextInRect(const std::string& text, float x, float y, float w, fl
     float textHeight = 0.0f;
 
     if (RS::FontManager::HasFont()) {
-        ::Font* fontPtr = RS::Cast<::Font*>(RS::FontManager::GetFont().data);
+        ::Font* fontPtr = static_cast<::Font*>(RS::FontManager::GetFont().data);
         RS_ASSERT_NOT_NULL(fontPtr);
         ::Vector2 m = ::MeasureTextEx(*fontPtr, text.c_str(), fontSize, spacing);
         textWidth = m.x;
         textHeight = m.y;
     } else {
-        textWidth = static_cast<float>(::MeasureText(text.c_str(), RS::Cast<int>(fontSize)));
+        textWidth = static_cast<float>(::MeasureText(text.c_str(), static_cast<int>(fontSize)));
         textHeight = fontSize;
     }
 
@@ -152,11 +152,11 @@ void Text::DrawTextInRect(const std::string& text, float x, float y, float w, fl
     float drawY = y + (h - textHeight) * originVec.y;
 
     if (RS::FontManager::HasFont()) {
-        ::Font* fontPtr = RS::Cast<::Font*>(RS::FontManager::GetFont().data);
+        ::Font* fontPtr = static_cast<::Font*>(RS::FontManager::GetFont().data);
         RS_ASSERT_NOT_NULL(fontPtr);
         ::DrawTextEx(*fontPtr, text.c_str(), {drawX, drawY}, fontSize, spacing, ToRL(color));
     } else {
-        ::DrawText(text.c_str(), RS::Cast<int>(drawX), RS::Cast<int>(drawY), RS::Cast<int>(fontSize), ToRL(color));
+        ::DrawText(text.c_str(), static_cast<int>(drawX), static_cast<int>(drawY), static_cast<int>(fontSize), ToRL(color));
     }
 }
 

@@ -4,24 +4,39 @@
 
 namespace RS {
 
+/** @brief Helper function to convert enum class values to raylib's expected integer codes
+ *
+ * This template function allows us to use strongly-typed enums (like KeyCode and MouseButton)
+ * while still calling raylib functions that expect plain integers. It simply casts the enum
+ * value to an int, which is safe as long as the enum values correspond to raylib's key/button codes.
+ *
+ * @tparam T The enum type (e.g., KeyCode, MouseButton)
+ * @param value The enum value to convert
+ * @return The corresponding integer code for raylib functions
+ */
+template<typename T>
+static int ToRayLibKey(T value) {
+    return static_cast<int>(value);
+}
+
 // ============================================================================
 // KEYBOARD INPUT
 // ============================================================================
 
 bool InputManager::IsKeyDown(KeyCode key) const {
-    return ::IsKeyDown(static_cast<int>(key));
+    return ::IsKeyDown(ToRayLibKey(key));
 }
 
 bool InputManager::IsKeyPressed(KeyCode key) const {
-    return ::IsKeyPressed(static_cast<int>(key));
+    return ::IsKeyPressed(ToRayLibKey(key));
 }
 
 bool InputManager::IsKeyReleased(KeyCode key) const {
-    return ::IsKeyReleased(static_cast<int>(key));
+    return ::IsKeyReleased(ToRayLibKey(key));
 }
 
 bool InputManager::IsKeyRepeating(KeyCode key) const {
-    return ::IsKeyDown(static_cast<int>(key));
+    return ::IsKeyDown(ToRayLibKey(key));
 }
 
 KeyCode InputManager::GetLastKeyPressed() const {
@@ -33,25 +48,25 @@ KeyCode InputManager::GetLastKeyPressed() const {
 // ============================================================================
 
 Vector2 InputManager::GetMousePosition() const {
-    Vector2 pos = {::GetMousePosition().x, ::GetMousePosition().y};
+    auto pos = ::GetMousePosition();
     return {pos.x, pos.y};
 }
 
 Vector2 InputManager::GetMouseDelta() const {
-    Vector2 delta = {::GetMouseDelta().x, ::GetMouseDelta().y};
+    auto delta = ::GetMouseDelta();
     return {delta.x, delta.y};
 }
 
 bool InputManager::IsMouseButtonDown(MouseButton button) const {
-    return ::IsMouseButtonDown(static_cast<int>(button));
+    return ::IsMouseButtonDown(ToRayLibKey(button));
 }
 
 bool InputManager::IsMouseButtonPressed(MouseButton button) const {
-    return ::IsMouseButtonPressed(static_cast<int>(button));
+    return ::IsMouseButtonPressed(ToRayLibKey(button));
 }
 
 bool InputManager::IsMouseButtonReleased(MouseButton button) const {
-    return ::IsMouseButtonReleased(static_cast<int>(button));
+    return ::IsMouseButtonReleased(ToRayLibKey(button));
 }
 
 float InputManager::GetMouseWheelMove() const {
@@ -71,28 +86,15 @@ bool InputManager::IsGamepadAvailable(int gamepad) const {
 }
 
 bool InputManager::IsGamepadButtonDown(int gamepad, GamepadButton button) const {
-    return ::IsGamepadButtonDown(gamepad, static_cast<int>(button));
+    return ::IsGamepadButtonDown(gamepad, ToRayLibKey(button));
 }
 
 bool InputManager::IsGamepadButtonPressed(int gamepad, GamepadButton button) const {
-    return ::IsGamepadButtonPressed(gamepad, static_cast<int>(button));
+    return ::IsGamepadButtonPressed(gamepad, ToRayLibKey(button));
 }
 
 float InputManager::GetGamepadAxisValue(int gamepad, GamepadAxis axis) const {
-    return ::GetGamepadAxisMovement(gamepad, static_cast<int>(axis));
-}
-
-// ============================================================================
-// UTILITY
-// ============================================================================
-
-void InputManager::Update() {
-    Vector2 pos = {::GetMousePosition().x, ::GetMousePosition().y};
-    lastMousePos_ = pos;
-}
-
-void InputManager::Reset() {
-    lastMousePos_ = {0, 0};
+    return ::GetGamepadAxisMovement(gamepad, ToRayLibKey(axis));
 }
 
 } // namespace RS
