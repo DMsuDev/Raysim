@@ -20,7 +20,7 @@ void RS::Canvas::SetTargetFPS(int fps)
     LOG_INFO("Setting target FPS to {}", fps);
     fps_ = fps;
     // Delegate to TimeManager to handle FPS control
-    timeManager_.SetTargetFPS(fps_);
+    time_.SetTargetFPS(fps_);
     LOG_DEBUG("FPS target updated");
 }
 
@@ -50,7 +50,7 @@ void RS::Canvas::SetTitle(const std::string& title)
 
 void RS::Canvas::SetDefaultFont(const std::string& fontPath, int fontSize)
 {
-    fontManager_.LoadFont(fontPath, fontSize);
+    font_.LoadFont(fontPath, fontSize);
 }
 
 void RS::Canvas::Background(const RS::Color& color) {
@@ -59,10 +59,10 @@ void RS::Canvas::Background(const RS::Color& color) {
 
 void RS::Canvas::Run()
 {
-    Logger::Init("RaySim", "App.log");  // Initialize logger before use
-    Logger::SetLevel(spdlog::level::info); // Set log level to trace for detailed output
+    Logger::Init("RaySim", "App.log", true);  // Initialize logger before use
+    Logger::SetConsoleLevel(spdlog::level::info); // Set log level to trace for detailed output
 
-    LOG_INFO("Startup begin");
+    LOG_INFO("[SESSION START] Startup begin");
 
     SetTraceLogLevel(LOG_ERROR); // Only log errors to avoid cluttering the console
 
@@ -74,14 +74,18 @@ void RS::Canvas::Run()
     LOG_INFO("Window initialized successfully, entering main loop");
     Setup(); // Call the user-defined setup function
 
+    isRunning_ = true;
     int frameCount = 0;
-    while (!WindowShouldClose())
+    while (isRunning_ && !WindowShouldClose())
     {
         frameCount++;
 
         // Update input and time managers
-        inputManager_.Update();
-        timeManager_.Update();
+        input_.Update();
+        time_.Update();
+
+        // Call the user-defined update function before drawing (for game logic, physics, etc.)
+        Update();
 
         // Call the user-defined draw function within the raylib drawing context
         BeginDrawing();
@@ -92,9 +96,20 @@ void RS::Canvas::Run()
         // End the drawing for this frame
         EndDrawing();
 
+        // Each 300 frames, execute the logic if needed (e.g., flush logs, perform maintenance tasks)
+        if (frameCount % 300 == 0)
+            RS::Logger::Flush();
     }
 
+    // Ensure flag is cleared when exiting the loop
+    isRunning_ = false;
+
     LOG_INFO("Window close requested, shutting down...");
+
     CloseWindow();
+
     LOG_INFO("Shutdown complete");
+
+    // Final flush to ensure all logs are written before exit
+    RS::Logger::Flush();
 }

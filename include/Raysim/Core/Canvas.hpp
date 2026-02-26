@@ -90,14 +90,25 @@ public:
     virtual void Draw() {}
 
     /**
+     * @brief User-defined update logic (called every frame before Draw())
+     *
+     * Override this method to implement non-rendering logic that should run every frame, such as game state updates,
+     * physics calculations, or AI behavior.
+     *
+     * @note This method is optional for logic that doesn't need to run every frame or can be handled within Draw(), but it provides a clear separation of concerns for update logic.
+     */
+    virtual void Update() {}
+
+    /**
      * @brief Start the main application loop
      *
-     * Initializes the window, calls Setup() once, then repeatedly calls Draw() and Update()
-     * until the window is closed. Handles all manager updates automatically.
-     * Blocks until the application terminates.
+     * Initializes the windowing and rendering systems, calls `Setup()` once, then
+     * repeatedly calls `Update()` and `Draw()` until the application exits. This
+     * method drives the integrated managers (input, time, font) and blocks until
+     * the window is closed.
      *
-     * @note This method initializes logging and raylib
-     * @see Setup(), Draw()
+     * @note Initializes logging and the underlying raylib context before calling `Setup()`.
+     * @see Setup(), Update(), Draw()
      */
     void Run();
 
@@ -107,26 +118,40 @@ public:
 
     /**
      * @brief Set the window title
-     * @param title Display name for the window
+     *
+     * Updates the visible title for the application window.
+     *
+     * @param title The display name for the window (UTF-8 string)
      */
     void SetTitle(const std::string& title);
 
     /**
-     * @brief Set target frame rate
-     * @param fps Frames per second (e.g., 60, 120, 144)
+     * @brief Set the target frames-per-second for the main loop
+     *
+     * Instructs the internal `TimeManager` to limit the application update/render
+     * rate to the provided value.
+     *
+     * @param fps Desired frames per second (must be > 0)
      * @see TimeManager::SetTargetFPS()
      */
     void SetTargetFPS(int fps);
 
     /**
-     * @brief Set window dimensions
-     * @param width Width in pixels
-     * @param height Height in pixels
+     * @brief Set the window size in pixels
+     *
+     * Resizes the application window to the specified width and height. Behavior
+     * may depend on the current fullscreen/windowed mode and underlying platform.
+     *
+     * @param width Window width in pixels (> 0)
+     * @param height Window height in pixels (> 0)
      */
     void SetSize(int width, int height);
 
     /**
-     * @brief Toggle between windowed and fullscreen modes
+     * @brief Toggle fullscreen mode
+     *
+     * Switches the window between windowed and fullscreen states. The exact
+     * fullscreen behavior (borderless, exclusive) depends on the platform/renderer.
      */
     void ToggleFullscreen();
 
@@ -148,35 +173,58 @@ public:
     // ============================================================================
 
     /**
-     * @brief Set the default font for text rendering
-     * @param fontPath Path to font file (.ttf, .otf, etc.)
-     * @param fontSize Font size in pixels
+     * @brief Set the default font used for text rendering
+     *
+     * Loads and registers a default font for the built-in rendering/text helpers.
+     * If loading fails, the font manager may keep a fallback font.
+     *
+     * @param fontPath Filesystem path to a font file (TTF/OTF)
+     * @param fontSize Desired font size in pixels (defaults to 32)
      */
     void SetDefaultFont(const std::string& fontPath, int fontSize = 32);
 
     /**
-     * @brief Get the font manager
-     * @return Reference to the FontManager instance
+     * @brief Access the font manager
+     *
+     * Returns a reference to the internal `FontManager` used to load and cache fonts.
+     *
+     * @return Reference to the `FontManager` instance owned by this Canvas
      */
-    FontManager& GetFontManager() { return fontManager_; }
+    FontManager& GetFontManager() { return font_; }
 
     /**
-     * @brief Get the input manager for keyboard, mouse, and gamepad input
-     * @return Reference to the InputManager instance
+     * @brief Get the input manager
+     *
+     * Provides access to the `InputManager` that collects keyboard, mouse, and
+     * gamepad state each frame.
+     *
+     * @return Reference to the `InputManager` instance
      */
-    InputManager& GetInputManager() { return inputManager_; }
-
-    /// @brief Get const reference to InputManager
-    const InputManager& GetInputManager() const { return inputManager_; }
+    InputManager& GetInputManager() { return input_; }
 
     /**
-     * @brief Get the time manager for FPS control and frame timing
-     * @return Reference to the TimeManager instance
+     * @brief Get const reference to the input manager
+     *
+     * @return Const reference to the `InputManager` instance
      */
-    TimeManager& GetTimeManager() { return timeManager_; }
+    const InputManager& GetInputManager() const { return input_; }
 
-    /// @brief Get const reference to TimeManager
-    const TimeManager& GetTimeManager() const { return timeManager_; }
+    /**
+     * @brief Get the time manager
+     *
+     * Returns the `TimeManager` responsible for tracking delta time, FPS and
+     * providing timing utilities to the application.
+     *
+     * @return Reference to the `TimeManager` instance
+     */
+    TimeManager& GetTimeManager() { return time_; }
+
+    /**
+     * @brief Get const reference to the time manager
+     *
+     * @return Const reference to the `TimeManager` instance
+     */
+    const TimeManager& GetTimeManager() const { return time_; }
 
     // ============================================================================
     // RANDOM SEED
@@ -194,19 +242,20 @@ public:
     // ============================================================================
 
     /**
-     * @brief Fill the entire screen with a solid color
+     * @brief Clear the screen using a solid color
      *
-     * Clears the screen and fills it with the specified color.
-     * Typically called at the start of each frame before drawing other elements.
+     * Clears the current render target and fills the entire viewport with the
+     * provided color. Call this at the beginning of a frame before other draw
+     * operations to establish a background.
      *
-     * @param color The fill color
+     * @param color Color used to clear the screen
      * @example
-     * Renderer::Background(Color::Black());  // Black background
+     * Renderer::Background(Color::Black());  // Clear to black
      */
     void Background(const RS::Color& color);
 
 private:
-    // Window configuration
+    bool isRunning_ { false };        ///< Flag indicating if the main loop is running
 
     int fps_               {60};      ///< Target frames per second
     int width_             {800};     ///< Window width in pixels
@@ -214,9 +263,9 @@ private:
     std::string title_     {"RaySim Title"};  ///< Window title
 
     // Integrated managers
-    FontManager fontManager_;         ///< Font loading and management
-    InputManager inputManager_;       ///< Keyboard, mouse, gamepad input
-    TimeManager timeManager_;         ///< FPS control and frame timing
+    FontManager font_;         ///< Font loading and management
+    InputManager input_;       ///< Keyboard, mouse, gamepad input
+    TimeManager time_;         ///< FPS control and frame timing
 };
 
 } // namespace RS
