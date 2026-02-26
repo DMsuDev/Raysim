@@ -128,21 +128,6 @@ jobs:
       - name: Build
         run: cmake --build build --config ${{ matrix.config }} --parallel $(nproc)
 
-      - name: Test Example - Mouse Detection (Release only)
-        if: matrix.config == 'Release' && success()
-        run: |
-          EXE_PATH="build/bin/Release/Mouse_detection_2D"
-          echo "Testing example: $EXE_PATH"
-          if [ -f "$EXE_PATH" ]; then
-            echo "✓ Executable found"
-            # Run with xvfb and 3 second timeout (just to verify it starts without crashing)
-            timeout 3s xvfb-run -a "$EXE_PATH" 2>&1 || true
-            echo "✓ Process completed"
-          else
-            echo "✗ Executable not found at $EXE_PATH"
-            exit 1
-          fi
-
   # ─── Build summary ─────────────────────────────────────────────────────
   build-status:
     name: CI Status

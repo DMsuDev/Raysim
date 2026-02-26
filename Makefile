@@ -154,10 +154,10 @@ TIDY_STAMP := $(TIDY_DIR)/.configured
 
 .PHONY: all configure build rebuild release relwithdebinfo \
         example-bouncing example-lissajous example-mouse \
-        example-run clean purge \
+        clean purge \
         tidy cppcheck \
         pre-commit pre-commit-install pre-commit-update \
-        tag act-ci act-quality info help
+        act-ci act-quality info help
 
 # ═════════════════════════════════════════════════════════════════════════
 #  BUILD
@@ -214,8 +214,6 @@ example-mouse: build
 	$(call _section,Example: Mouse Detection 2D)
 	@$(call FIXPATH,$(EXAMPLE_PATH)/$(BUILD_TYPE)/Mouse_detection_2D$(EXE_EXT))
 	$(call _done)
-
-example-run: example-bouncing
 
 # ═════════════════════════════════════════════════════════════════════════
 #  CLEAN
@@ -296,18 +294,6 @@ pre-commit-update:
 #  CI / RELEASE
 # ═════════════════════════════════════════════════════════════════════════
 
-tag:
-ifndef VERSION
-	$(call _fail,Usage: make tag VERSION=v0.1.0)
-else
-	$(call _section,Tag)
-	@printf "  %-14s : %s\n" "Version" "$(VERSION)"
-	@git tag -a $(VERSION) -m "Release $(VERSION)"
-	@git push origin $(VERSION)
-	$(call _ok,Tag $(VERSION) pushed)
-	$(call _done)
-endif
-
 act-ci:
 	$(call _require,HAS_ACT,act,choco install act-cli | winget install nektos.act | brew install act)
 	$(call _section,Act CI)
@@ -343,12 +329,14 @@ info:
 help:
 	@printf "\n$(LINE)───────$(RST) $(TITLE)$(PROJECT_NAME) library$(RST)\n"
 	@printf "    $(GRN)make configure$(RST)          Force CMake reconfiguration\n"
-	@printf "    $(GRN)make release$(RST)            Release build\n"
-	@printf "    $(GRN)make relwithdebinfo$(RST)     Release + debug symbols\n"
+	@printf "    $(GRN)make build$(RST)              Build (auto-configures if needed)\n"
 	@printf "    $(GRN)make rebuild$(RST)            Clean + build\n"
 	@printf "\n"
+	@printf "  $(BLD)Build Types:$(RST)\n"
+	@printf "    $(GRN)make release$(RST)            Release build\n"
+	@printf "    $(GRN)make relwithdebinfo$(RST)     Release + debug symbols\n"
+	@printf "\n"
 	@printf "  $(BLD)Examples:$(RST)\n"
-	@printf "    $(GRN)make example-run$(RST)        Run Bouncing Balls example\n"
 	@printf "    $(GRN)make example-bouncing$(RST)   Run Bouncing Balls\n"
 	@printf "    $(GRN)make example-lissajous$(RST)  Run Lissajous Curves\n"
 	@printf "    $(GRN)make example-mouse$(RST)      Run Mouse Detection 2D\n"
@@ -367,7 +355,6 @@ help:
 	@printf "    $(GRN)make pre-commit-update$(RST)  Update hook versions\n"
 	@printf "\n"
 	@printf "  $(BLD)CI / Release:$(RST)\n"
-	@printf "    $(GRN)make tag VERSION=v0.2.1$(RST) Create & push release tag\n"
 	@printf "    $(GRN)make act-ci$(RST)             Run CI workflow locally\n"
 	@printf "    $(GRN)make act-quality$(RST)        Run quality workflow locally\n"
 	@printf "\n"
