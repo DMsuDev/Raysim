@@ -40,6 +40,10 @@
     #define RS_DEBUGBREAK()
 #endif
 
+#ifdef RS_DEBUG
+    // Enable assertions only in debug builds
+    #define RS_ENABLE_ASSERTS
+#endif
 // ============================================================================
 // Source Location Support
 // ============================================================================
@@ -66,8 +70,11 @@
 #endif
 
 // ============================================================================
-// Internal implementation macros - DO NOT USE DIRECTLY
+// ASSERTION IMPLEMENTATION
 // ============================================================================
+
+// Internal implementation macros - DO NOT USE DIRECTLY
+// These are the core mechanisms used by public assertion macros
 #ifdef RS_ENABLE_ASSERTS
 
     // Base implementation: logs and breaks on assertion failure
