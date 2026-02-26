@@ -292,7 +292,7 @@ public:
     void Setup() override {
         SetSize(1200, 800);
         SetTitle("RaySim - Lissajous Curves");
-        SetDefaultFont("resources/fonts/opensans/OpenSans-Regular.ttf", 64);
+        SetDefaultFont("resources/fonts/OpenSans-Regular.ttf");
         SetTargetFPS(60);
 
         curvePoints.reserve(resolution);

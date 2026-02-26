@@ -222,7 +222,7 @@ public:
     void Setup() override {
         SetSize(1000, 700);
         SetTitle("RaySim - Bouncing Balls Physics");
-        SetDefaultFont("resources/fonts/opensans/OpenSans-Regular.ttf");
+        SetDefaultFont("resources/fonts/OpenSans-Regular.ttf");
         SetTargetFPS(60);
         SpawnRandomBalls(8);
     }

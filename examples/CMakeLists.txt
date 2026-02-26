@@ -26,7 +26,7 @@ add_custom_target(copy_examples_resources ALL
 
 add_custom_command(TARGET copy_examples_resources POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/resources
+        ${CMAKE_SOURCE_DIR}/examples/resources
         ${CMAKE_BINARY_DIR}/bin/$<CONFIG>/resources
     COMMENT "Copying resources for all examples"
 )

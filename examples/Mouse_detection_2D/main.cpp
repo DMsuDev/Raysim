@@ -26,7 +26,7 @@ public:
     void Setup() override {
         SetSize(1000, 600);
         SetTitle("RaySim - Mouse Detection Demo");
-        SetDefaultFont("resources/fonts/opensans/OpenSans-Regular.ttf");
+        SetDefaultFont("resources/fonts/OpenSans-Regular.ttf");
         SetTargetFPS(60);
     }
 
