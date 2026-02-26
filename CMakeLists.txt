@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.10..3.26)
 project(Raysim VERSION 0.2.4 LANGUAGES CXX C)
 
 # ============================================================================
@@ -26,9 +26,6 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 # Treat warnings as errors (useful for maintaining code quality)
 set(WARNINGS_AS_ERRORS OFF CACHE BOOL "Treat compiler warnings as errors" FORCE)
-
-# Hide console window on Windows Release builds
-set(HIDE_CONSOLE ON CACHE BOOL "Hide console window on Windows in Release builds" FORCE)
 
 # Enable debug assertions and logging
 set(ENABLE_DEBUG OFF CACHE BOOL "Enable debug mode with assertions and verbose logging" FORCE)
@@ -133,7 +130,7 @@ endif()
 
 # Enable debug mode: assertions and verbose logging
 if(ENABLE_DEBUG)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE AG_DEBUG)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE RS_DEBUG)
     message(STATUS "Debug mode enabled: Assertions and logging will be active")
 endif()
 
@@ -164,5 +161,4 @@ message(STATUS "")
 message(STATUS "Build Options:")
 message(STATUS "  Warnings as Errors: ${WARNINGS_AS_ERRORS}")
 message(STATUS "  Debug Mode:         ${ENABLE_DEBUG}")
-message(STATUS "  Hide Console:       ${HIDE_CONSOLE}")
 message(STATUS "────────────────────────────────────────────────────────────────")

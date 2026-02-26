@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.16)
-
 # ─── Version settings ─────────────────────────────
 set(RAYLIB_VERSION  5.5)
 set(SPDLOG_VERSION  v1.17.0)
