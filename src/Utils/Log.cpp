@@ -18,7 +18,7 @@ void Logger::Init(const std::string& app_name,
                   spdlog::level::level_enum console_level,
                   spdlog::level::level_enum file_level)
 {
-    if (s_CoreLogger)
+    if (IsInitialized())
         return; // Prevent double initialization
     try {
         // Create shared sinks (multiple loggers write to the same destinations)
@@ -133,17 +133,6 @@ void Logger::SetFileLevel(spdlog::level::level_enum level)
     assert(s_CoreLogger && "Logger not initialized. Call Logger::Init() first.");
     if (s_CoreLogger->sinks().size() > 1) {
         s_CoreLogger->sinks()[1]->set_level(level);
-    }
-}
-
-// ============================================================================
-// Flush all sinks (force immediate write to disk/console)
-// ============================================================================
-
-void Logger::Flush()
-{
-    if (s_CoreLogger) {
-        s_CoreLogger->flush();
     }
 }
 

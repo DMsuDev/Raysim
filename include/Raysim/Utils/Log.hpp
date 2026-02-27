@@ -49,7 +49,9 @@ public:
     static void SetFileLevel(spdlog::level::level_enum level);
 
     // Force flush all sinks immediately (useful for async logging)
-    static void Flush();
+    static void Flush() { if (IsInitialized()) { s_CoreLogger->flush(); } }
+
+    static bool IsInitialized() { return s_CoreLogger != nullptr; }
 
 private:
     static Shared<spdlog::logger> s_CoreLogger;
