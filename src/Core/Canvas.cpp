@@ -2,6 +2,15 @@
 
 #include <raylib.h>
 
+// Static current canvas pointer definition
+RS::Canvas* RS::Canvas::currentCanvas_ = nullptr;
+
+// Static accessor implementation
+RS::Canvas* RS::Canvas::GetCurrentCanvas()
+{
+    return currentCanvas_;
+}
+
 void RS::Canvas::SetSize(int width, int height)
 {
     LOG_INFO("Setting size to {}x{}", width, height);
@@ -57,26 +66,24 @@ void RS::Canvas::Background(const RS::Color& color) {
     ::ClearBackground(::Color{color.r, color.g, color.b, color.a});
 }
 
-void RS::Canvas::Run()
+void RS::Canvas::RunInternal()
 {
-    Logger::Init("RaySim", "App.log", true);  // Initialize logger before use
-    Logger::SetConsoleLevel(spdlog::level::info); // Set log level to trace for detailed output
+    LOG_INFO("[SESSION START] Starting application loop");
 
-    LOG_INFO("[SESSION START] Startup begin");
+    // Initialize raylib window and OpenGL context
+    ::InitWindow(width_, height_, title_.c_str());
+    LOG_DEBUG("Window initialized with size {}x{}", width_, height_);
 
-    SetTraceLogLevel(LOG_ERROR); // Only log errors to avoid cluttering the console
-
-    LOG_INFO("Starting canvas application");
-    InitWindow(width_, height_, title_.c_str());
-
+    // Set target FPS for the main loop
     SetTargetFPS(fps_);
 
-    LOG_INFO("Window initialized successfully, entering main loop");
-    Setup(); // Call the user-defined setup function
+    Setup();
+    LOG_INFO("Setup completed, entering main loop");
 
     isRunning_ = true;
+
     int frameCount = 0;
-    while (isRunning_ && !WindowShouldClose())
+    while (isRunning_ && !::WindowShouldClose())
     {
         frameCount++;
 
@@ -84,32 +91,60 @@ void RS::Canvas::Run()
         input_.Update();
         time_.Update();
 
-        // Call the user-defined update function before drawing (for game logic, physics, etc.)
         Update();
 
-        // Call the user-defined draw function within the raylib drawing context
-        BeginDrawing();
+        ::BeginDrawing();
 
-        // Call the user-defined draw function to render the frame
         Draw();
 
-        // End the drawing for this frame
-        EndDrawing();
+        ::EndDrawing();
 
         // Each 300 frames, execute the logic if needed (e.g., flush logs, perform maintenance tasks)
-        if (frameCount % 300 == 0)
-            RS::Logger::Flush();
+        if (frameCount % 300 == 0) { RS::Logger::Flush(); }
     }
 
-    // Ensure flag is cleared when exiting the loop
-    isRunning_ = false;
+    Shutdown();
+}
 
-    LOG_INFO("Window close requested, shutting down...");
-
-    CloseWindow();
-
-    LOG_INFO("Shutdown complete");
-
+void RS::Canvas::Shutdown()
+{
+    LOG_INFO("Shutting down application");
+    if (::IsWindowReady()) {
+        ::CloseWindow();
+        LOG_DEBUG("Window closed successfully");
+    }
     // Final flush to ensure all logs are written before exit
-    RS::Logger::Flush();
+    Logger::Flush();
+
+    currentCanvas_ = nullptr;
+    isRunning_ = false;
+}
+
+void RS::Canvas::Run()
+{
+    if (currentCanvas_ != nullptr)
+    {
+        LOG_ERROR("A Canvas is already running. Multiple instances are not supported.");
+        return;
+    }
+    currentCanvas_ = this;
+
+    try {
+        // Only log errors to avoid cluttering the console
+        ::SetTraceLogLevel(LOG_ERROR);
+
+        if (!Logger::IsInitialized()) {
+            Logger::Init("RaySim", "App.log", true);
+            Logger::SetConsoleLevel(spdlog::level::info);
+            Logger::SetFileLevel(spdlog::level::trace);
+        }
+
+        RunInternal();
+    } catch (const std::exception& e) {
+        Shutdown();
+        LOG_ERROR("Unhandled exception in main loop: {}", e.what());
+    } catch (...) {
+        Shutdown();
+        LOG_ERROR("Unhandled unknown exception in main loop");
+    }
 }

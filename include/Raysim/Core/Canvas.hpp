@@ -51,6 +51,14 @@ public:
     Canvas& operator=(Canvas&&) = default;
 
     /**
+     * @brief Get the currently active Canvas instance
+     *
+     * Returns a pointer to the Canvas that is currently running (set by `Run()`).
+     * May be null if no Canvas is active.
+     */
+    static Canvas* GetCurrentCanvas();
+
+    /**
      * @brief User-defined initialization (called once at application start)
      *
      * Override this method to set up resources, initialize state, and configure the window.
@@ -255,6 +263,10 @@ public:
     void Background(const RS::Color& color);
 
 private:
+
+    void RunInternal();  ///< Internal method that implements the main loop logic
+    void Shutdown();     ///< Clean up resources and close the application
+
     bool isRunning_ { false };        ///< Flag indicating if the main loop is running
 
     int fps_               {60};      ///< Target frames per second
@@ -266,6 +278,9 @@ private:
     FontManager font_;         ///< Font loading and management
     InputManager input_;       ///< Keyboard, mouse, gamepad input
     TimeManager time_;         ///< FPS control and frame timing
+
+    /// Pointer to the Canvas instance currently running (set/cleared by Run())
+    static Canvas* currentCanvas_;
 };
 
 } // namespace RS
