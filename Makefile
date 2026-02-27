@@ -281,7 +281,7 @@ test: build
 
 clean:
 	$(call _section,Clean)
-	@cmake --build $(BUILD_DIR) --target clean --config $(BUILD_TYPE) 2>/dev/null || true
+	-@cmake --build $(BUILD_DIR) --target clean --config $(BUILD_TYPE) > /dev/null
 	@cmake -E rm -rf $(BUILD_DIR)/bin
 	@cmake -E rm -f cppcheck.log
 	$(call _ok,Clean done)
