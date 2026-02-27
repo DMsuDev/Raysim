@@ -1,18 +1,10 @@
 # ============================================================================
-# Cross-platform Makefile for RaySim (CMake)
+# Cross-platform Makefile for Raysim (CMake)
 # Author: @DMsuDev
 # ============================================================================
 #
 # Works on Linux, macOS, and Windows (MSYS/MinGW or PowerShell).
 # Configurable via CLI:  make build BUILD_TYPE=Release CMAKE_GEN=Ninja
-#
-# Usage:
-#   make                    Build (Debug, auto-configures)
-#   make release            Build in Release mode
-#   make run                Build and run
-#   make tidy               Static analysis with clang-tidy
-#   make help               Show all targets
-#
 # ============================================================================
 
 .DEFAULT_GOAL := all
@@ -20,7 +12,7 @@
 
 # ─── Project ─────────────────────────────────────────────────────────────
 
-PROJECT_NAME  := RaySim
+PROJECT_NAME  := Raysim
 PROJECT_VER   := 0.2.4
 BUILD_DIR     := build
 BUILD_TYPE    ?= Debug
@@ -29,13 +21,17 @@ BUILD_TYPE    ?= Debug
 # Add directories here; cppcheck and clang-tidy pick them up automatically.
 
 SRC_DIRS      := include src examples
-SRC_FILES     := $(foreach d,$(SRC_DIRS),$(wildcard $(d)/**/*.cpp $(d)/**/*.hpp $(d)/*.cpp $(d)/*.hpp))
+ifeq ($(OS),Windows_NT)
+SRC_FILES := $(shell pwsh -NoProfile -Command "Get-ChildItem -Recurse -Include *.cpp,*.hpp -Path $(SRC_DIRS) | ForEach-Object { $$_.FullName }")
+else
+SRC_FILES := $(shell find $(SRC_DIRS) -type f \( -name "*.cpp" -o -name "*.hpp" \))
+endif
 CPP_FILES     := $(filter %.cpp,$(SRC_FILES))
 INCLUDE_FLAGS := $(addprefix -I ,$(SRC_DIRS))
 
 # ─── CMake ────────────────────────────────────────────────────────────────
 
-CONFIGURE_STAMP := $(BUILD_DIR)/.configured
+CONFIGURE_STAMP := $(BUILD_DIR)/.configured_$(BUILD_TYPE)_$(CMAKE_GEN)
 CMAKE_LISTS     := $(wildcard CMakeLists.txt vendor/CMakeLists.txt)
 CMAKE_FLAGS     = -DCMAKE_BUILD_TYPE:STRING=$(BUILD_TYPE) -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE
 
@@ -46,15 +42,39 @@ ifeq ($(OS),Windows_NT)
     PYTHON      := python -m
     EXE_EXT     := .exe
     FIXPATH      = $(subst /,\,$1)
-    CMAKE_GEN   ?= Visual Studio 18 2026
     _find_tool   = $(shell pwsh -NoProfile -Command "(Get-Command $(1) -ErrorAction SilentlyContinue).Source")
 else
     DETECTED_OS := $(shell uname -s)
     PYTHON      := python3 -m
     EXE_EXT     :=
     FIXPATH      = $1
-    CMAKE_GEN   ?= Unix Makefiles
     _find_tool   = $(shell command -v $(1) 2>/dev/null)
+endif
+
+# ─── Core Numbers ─────────────────────────────────────────────────────────
+
+ifeq ($(OS),Windows_NT)
+	CORES := $(shell pwsh -NoProfile -Command 'Write-Output $$env:NUMBER_OF_PROCESSORS')
+else
+	CORES := $(shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
+endif
+
+# ─── Platform-Specific Generator Selection ────────────────────────────────
+
+HAS_NINJA := $(call _find_tool,ninja)
+HAS_MAKE  := $(call _find_tool,make)
+
+ifeq ($(OS),Windows_NT)
+    # Windows default: Visual Studio
+    CMAKE_GEN ?= Visual Studio 18 2026
+else ifneq ($(HAS_NINJA),)
+    # Prefer Ninja if available (fastest, recommended)
+    CMAKE_GEN ?= Ninja
+else ifneq ($(HAS_MAKE),)
+    # Fallback to Unix Makefiles
+    CMAKE_GEN ?= Unix Makefiles
+else
+    $(error No supported CMake generator found. Install Ninja or Make.)
 endif
 
 # ─── Verbose (0 = silent · 1 = colored detail) ───────────────────────────
@@ -62,8 +82,11 @@ endif
 
 VERBOSE ?= 1
 
-ifneq ($(findstring s,$(MAKEFLAGS)),)
+# Optional: if the user passes -s (--silent), force VERBOSE=0
+ifneq ($(findstring -s,$(MAKEFLAGS)),)
     VERBOSE := 0
+else ifneq ($(filter -j%,$(MAKEFLAGS)),)
+	VERBOSE := 0
 endif
 
 # ─── Colors ───────────────────────────────────────────────────────────────
@@ -139,9 +162,28 @@ IS_MULTICONFIG := $(or $(findstring Visual Studio,"$(CMAKE_GEN)"),$(findstring X
 
 ifeq ($(IS_MULTICONFIG),)
     EXAMPLE_PATH ?= $(BUILD_DIR)/bin
+    define EXAMPLE_EXEC
+$(EXAMPLE_PATH)/$(1)$(EXE_EXT)
+endef
+else
+    EXAMPLE_PATH ?= $(BUILD_DIR)/bin/$(BUILD_TYPE)
+    define EXAMPLE_EXEC
+$(EXAMPLE_PATH)/$(1)$(EXE_EXT)
+endef
+endif
+
+# ─── Generator argument (optional) ────────────────────────────────────────
+
+GEN_ARG :=
+ifneq ($(CMAKE_GEN),)
+GEN_ARG := -G "$(CMAKE_GEN)"
+endif
+
+# ─── Library path ────────────────────────────────────────────────────────
+
+ifeq ($(IS_MULTICONFIG),)
     LIB_PATH     ?= $(BUILD_DIR)/lib
 else
-    EXAMPLE_PATH ?= $(BUILD_DIR)/bin
     LIB_PATH     ?= $(BUILD_DIR)/lib/$(BUILD_TYPE)
 endif
 
@@ -154,6 +196,7 @@ TIDY_STAMP := $(TIDY_DIR)/.configured
 
 .PHONY: all configure build rebuild release relwithdebinfo \
         example-bouncing example-lissajous example-mouse \
+        install test \
         clean purge \
         tidy cppcheck \
         pre-commit pre-commit-install pre-commit-update \
@@ -172,17 +215,19 @@ endif
 
 $(CONFIGURE_STAMP): $(CMAKE_LISTS)
 	$(call _banner,Configure)
-	@cmake -B $(BUILD_DIR) -G "$(CMAKE_GEN)" $(CMAKE_FLAGS)
+	@cmake -E make_directory $(BUILD_DIR)
+	@cmake -B $(BUILD_DIR) $(GEN_ARG) $(CMAKE_FLAGS)
 	@cmake -E touch $@
 
 configure:
 	$(call _banner,Configure)
-	@cmake -B $(BUILD_DIR) -G "$(CMAKE_GEN)" $(CMAKE_FLAGS)
+	@cmake -E make_directory $(BUILD_DIR)
+	@cmake -B $(BUILD_DIR) $(GEN_ARG) $(CMAKE_FLAGS)
 	@cmake -E touch $(CONFIGURE_STAMP)
 
 build: $(CONFIGURE_STAMP)
 	$(call _banner,Build)
-	@cmake --build $(BUILD_DIR) --config $(BUILD_TYPE) --parallel
+	@cmake --build $(BUILD_DIR) --config $(BUILD_TYPE) --parallel $(CORES)
 	$(call _ok,Build succeeded)
 	$(call _done)
 
@@ -202,17 +247,32 @@ relwithdebinfo:
 
 example-bouncing: build
 	$(call _section,Example: Bouncing Balls)
-	@$(call FIXPATH,$(EXAMPLE_PATH)/$(BUILD_TYPE)/Bouncing_Balls$(EXE_EXT))
+	@$(call FIXPATH,$(call EXAMPLE_EXEC,Bouncing_Balls))
 	$(call _done)
 
 example-lissajous: build
 	$(call _section,Example: Lissajous Curves)
-	@$(call FIXPATH,$(EXAMPLE_PATH)/$(BUILD_TYPE)/Lissajous_Curves$(EXE_EXT))
+	@$(call FIXPATH,$(call EXAMPLE_EXEC,Lissajous_Curves))
 	$(call _done)
 
 example-mouse: build
 	$(call _section,Example: Mouse Detection 2D)
-	@$(call FIXPATH,$(EXAMPLE_PATH)/$(BUILD_TYPE)/Mouse_detection_2D$(EXE_EXT))
+	@$(call FIXPATH,$(call EXAMPLE_EXEC,Mouse_detection_2D))
+	$(call _done)
+
+# ═════════════════════════════════════════════════════════════════════════
+#  INSTALL & TEST
+# ═════════════════════════════════════════════════════════════════════════
+
+install: build
+	$(call _section,Install)
+	@cmake --install $(BUILD_DIR) --config $(BUILD_TYPE)
+	$(call _ok,Install complete)
+	$(call _done)
+
+test: build
+	$(call _section,Tests)
+	@ctest --test-dir $(BUILD_DIR) --config $(BUILD_TYPE)
 	$(call _done)
 
 # ═════════════════════════════════════════════════════════════════════════
@@ -221,10 +281,9 @@ example-mouse: build
 
 clean:
 	$(call _section,Clean)
-	@printf "  %-14s : %s\n" "Removing" "build artifacts and $(BUILD_DIR)/bin"
-	$(if $(wildcard $(CONFIGURE_STAMP)),-@cmake --build $(BUILD_DIR) --config $(BUILD_TYPE) > /dev/null)
-	@cmake -E rm -f cppcheck.log
+	@cmake --build $(BUILD_DIR) --target clean --config $(BUILD_TYPE) 2>/dev/null || true
 	@cmake -E rm -rf $(BUILD_DIR)/bin
+	@cmake -E rm -f cppcheck.log
 	$(call _ok,Clean done)
 	$(call _done)
 
@@ -250,7 +309,11 @@ tidy: $(TIDY_STAMP)
 	$(call _section,Tidy)
 	@printf "  %-14s : %d file(s)\n" "Scanning" $(words $(CPP_FILES))
 	@printf "  %-14s : %s\n" "Build DB" "$(TIDY_DIR)/"
+ifneq ($(DETECTED_OS),Windows)
+	@printf "%s\n" $(CPP_FILES) | xargs -P $(CORES) -I{} clang-tidy -p $(TIDY_DIR) --extra-arg=-Iinclude {}
+else
 	@$(foreach f,$(CPP_FILES),clang-tidy -p $(TIDY_DIR) --extra-arg=-Iinclude $(f) ;)
+endif
 	$(call _ok,Tidy done)
 	$(call _done)
 
@@ -318,6 +381,7 @@ info:
 	@printf "  %-14s : %s\n" "Build Type" "$(BUILD_TYPE)"
 	@printf "  %-14s : %s\n" "Generator" "$(CMAKE_GEN)"
 	@printf "  %-14s : %s\n" "Platform" "$(DETECTED_OS)"
+	@printf "  %-14s : %s\n" "Parallel Jobs" "$(CORES)"
 	@printf "  %-14s : %s\n" "Library Path" "$(LIB_PATH)/"
 	@printf "  %-14s : %s\n" "Examples Path" "$(EXAMPLE_PATH)/"
 	@printf "\n$(LINE)───────$(RST) $(TITLE)Tools$(RST)\n"
@@ -342,6 +406,10 @@ help:
 	@printf "    $(GRN)make example-lissajous$(RST)  Run Lissajous Curves\n"
 	@printf "    $(GRN)make example-mouse$(RST)      Run Mouse Detection 2D\n"
 	@printf "\n"
+	@printf "  $(BLD)Install & Test:$(RST)\n"
+	@printf "    $(GRN)make install$(RST)            Install project\n"
+	@printf "    $(GRN)make test$(RST)               Run tests\n"
+	@printf "\n"
 	@printf "  $(BLD)Clean:$(RST)\n"
 	@printf "    $(GRN)make clean$(RST)              Remove build artifacts\n"
 	@printf "    $(GRN)make purge$(RST)              Delete all build directories\n"
@@ -363,7 +431,7 @@ help:
 	@printf "    $(GRN)make info$(RST)               Project configuration & tools\n"
 	@printf "    $(GRN)make help$(RST)               This help\n"
 	@printf "\n"
-	@printf "  $(BLD)Examples:$(RST)\n"
+	@printf "  $(BLD)CLI Examples:$(RST)\n"
 	@printf "    make BUILD_TYPE=Release             Release build\n"
 	@printf "    make example-bouncing               Test example\n"
 	@printf "    make tidy                           Static analysis\n"
