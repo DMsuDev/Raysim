@@ -1,7 +1,7 @@
 #pragma once
-#include "Raysim/Graphics/Color.hpp"
-#include "Raysim/Math/Vector2.hpp"
-#include "Raysim/Core/Enums.hpp"
+#include "Color.hpp"
+#include "../Math/Vector2.hpp"
+#include "OriginMode.hpp"
 
 namespace RS {
 
@@ -27,9 +27,9 @@ namespace RS {
  */
 namespace Shapes {
 
-    // ============================================================================
-    // RECTANGLE DRAWING
-    // ============================================================================
+//==============================================================================
+// Rectangle
+//==============================================================================
 
     /**
      * @brief Draw a filled rectangle with top-left at specified coordinates
@@ -138,9 +138,9 @@ namespace Shapes {
     void DrawRectRounded(float x, float y, float w, float h, float roundness, const Color& color, OriginMode origin);
 
 
-    // ============================================================================
-    // CIRCLE DRAWING
-    // ============================================================================
+//==============================================================================
+// Circle
+//==============================================================================
 
     /**
      * @brief Draw a filled circle with center at specified coordinates
@@ -198,9 +198,9 @@ namespace Shapes {
     void DrawCircleOutline(float x, float y, float radius, const Color& color, OriginMode origin);
 
 
-    // ============================================================================
-    // PRIMITIVE DRAWING (Lines, Triangles, Polygons)
-    // ============================================================================
+//==============================================================================
+// Primitives (line / triangle / polygon)
+//==============================================================================
 
     /**
      * @brief Draw a line between two points
@@ -259,9 +259,9 @@ namespace Shapes {
      */
     void DrawPolygon(float x, float y, int sides, float radius, float rotation, const Color& color);
 
-    // ============================================================================
-    // POINT DRAWING
-    // ============================================================================
+//==============================================================================
+// Point
+//==============================================================================
 
     /**
      * @brief Draw a single pixel point

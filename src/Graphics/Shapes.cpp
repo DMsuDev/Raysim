@@ -6,29 +6,34 @@
 
 namespace RS {
 
-// Helper: convert RS::Color to raylib Color
-static ::Color ToRL(const Color& c) {
-    return ::Color{c.r, c.g, c.b, c.a};
-}
-
-// Helper: convert OriginMode to normalized origin vector (0-1 range)
-static ::Vector2 OriginToVector(OriginMode origin) {
-    float x = 0.0f, y = 0.0f;
-
-    switch (origin) {
-        case OriginMode::TopLeft:      x = 0.0f; y = 0.0f; break;
-        case OriginMode::TopCenter:    x = 0.5f; y = 0.0f; break;
-        case OriginMode::TopRight:     x = 1.0f; y = 0.0f; break;
-        case OriginMode::CenterLeft:   x = 0.0f; y = 0.5f; break;
-        case OriginMode::Center:       x = 0.5f; y = 0.5f; break;
-        case OriginMode::CenterRight:  x = 1.0f; y = 0.5f; break;
-        case OriginMode::BottomLeft:   x = 0.0f; y = 1.0f; break;
-        case OriginMode::BottomCenter: x = 0.5f; y = 1.0f; break;
-        case OriginMode::BottomRight:  x = 1.0f; y = 1.0f; break;
+namespace {
+    /// Convert `RS::Color` to raylib's `Color`.
+    [[nodiscard]] constexpr ::Color ToRL(const Color& c) noexcept
+    {
+        return ::Color{ c.r, c.g, c.b, c.a };
     }
 
-    return {x, y};
-}
+    /// Convert `OriginMode` to a normalized origin vector in [0..1].
+    [[nodiscard]] constexpr ::Vector2 OriginToVector(OriginMode origin) noexcept
+    {
+        float x = 0.0f, y = 0.0f;
+
+        switch (origin) {
+            case OriginMode::TopLeft:      x = 0.0f; y = 0.0f; break;
+            case OriginMode::TopCenter:    x = 0.5f; y = 0.0f; break;
+            case OriginMode::TopRight:     x = 1.0f; y = 0.0f; break;
+            case OriginMode::CenterLeft:   x = 0.0f; y = 0.5f; break;
+            case OriginMode::Center:       x = 0.5f; y = 0.5f; break;
+            case OriginMode::CenterRight:  x = 1.0f; y = 0.5f; break;
+            case OriginMode::BottomLeft:   x = 0.0f; y = 1.0f; break;
+            case OriginMode::BottomCenter: x = 0.5f; y = 1.0f; break;
+            case OriginMode::BottomRight:  x = 1.0f; y = 1.0f; break;
+            default:                       x = 0.0f; y = 0.0f; break;
+        }
+
+        return { x, y };
+    }
+} // namespace
 
 void Shapes::DrawRect(float x, float y, float w, float h, const Color& color) {
     ::DrawRectangle(static_cast<int>(x), static_cast<int>(y),
@@ -47,9 +52,9 @@ void Shapes::DrawRectRounded(float x, float y, float w, float h, float roundness
     ::DrawRectangleRounded(rec, roundness, 8, ToRL(color));
 }
 
-// ============================================================================
-// CIRCLE DRAWING
-// ============================================================================
+//==============================================================================
+// Circle
+//==============================================================================
 
 void Shapes::DrawCircle(float x, float y, float radius, const Color& color) {
     ::DrawCircle(static_cast<int>(x), static_cast<int>(y), radius, ToRL(color));
@@ -59,9 +64,9 @@ void Shapes::DrawCircleOutline(float x, float y, float radius, const Color& colo
     ::DrawCircleLines(static_cast<int>(x), static_cast<int>(y), radius, ToRL(color));
 }
 
-// ============================================================================
-// LINE DRAWING
-// ============================================================================
+//==============================================================================
+// Line
+//==============================================================================
 
 void Shapes::DrawLine(float x1, float y1, float x2, float y2, const Color& color, float thickness) {
     RS_ASSERT(thickness > 0, "Line thickness must be positive: {}", thickness);
@@ -73,9 +78,9 @@ void Shapes::DrawLine(float x1, float y1, float x2, float y2, const Color& color
     }
 }
 
-// ============================================================================
-// TRIANGLE DRAWING
-// ============================================================================
+//==============================================================================
+// Triangle
+//==============================================================================
 
 void Shapes::DrawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, const Color& color) {
     ::DrawTriangle({x1, y1}, {x2, y2}, {x3, y3}, ToRL(color));
@@ -85,9 +90,9 @@ void Shapes::DrawTriangleOutline(float x1, float y1, float x2, float y2, float x
     ::DrawTriangleLines({x1, y1}, {x2, y2}, {x3, y3}, ToRL(color));
 }
 
-// ============================================================================
-// POLYGON DRAWING
-// ============================================================================
+//==============================================================================
+// Polygon
+//==============================================================================
 
 void Shapes::DrawPolygon(float x, float y, int sides, float radius, float rotation, const Color& color) {
     RS_ASSERT(sides >= 3, "Polygon must have at least 3 sides, got: {}", sides);
@@ -96,9 +101,9 @@ void Shapes::DrawPolygon(float x, float y, int sides, float radius, float rotati
     ::DrawPoly(center, sides, radius, rotation, ToRL(color));
 }
 
-// ============================================================================
-// POINT DRAWING
-// ============================================================================
+//==============================================================================
+// Point
+//==============================================================================
 
 void Shapes::DrawPoint(float x, float y, const Color& color) {
     ::DrawPixel(static_cast<int>(x), static_cast<int>(y), ToRL(color));
@@ -109,9 +114,9 @@ void Shapes::DrawPoint(float x, float y, float size, const Color& color) {
     ::DrawCircle(static_cast<int>(x), static_cast<int>(y), size, ToRL(color));
 }
 
-// ============================================================================
-// RECTANGLE DRAWING WITH ORIGIN MODE
-// ============================================================================
+//==============================================================================
+// Rectangle (origin mode)
+//==============================================================================
 
 void Shapes::DrawRect(float x, float y, float w, float h, const Color& color, OriginMode origin) {
     ::Rectangle rec = {x, y, w, h};
@@ -137,9 +142,9 @@ void Shapes::DrawRectRounded(float x, float y, float w, float h, float roundness
     ::DrawRectangleRounded(rec, roundness, 8, ToRL(color));
 }
 
-// ============================================================================
-// CIRCLE DRAWING WITH ORIGIN MODE
-// ============================================================================
+//==============================================================================
+// Circle (origin mode)
+//==============================================================================
 
 void Shapes::DrawCircle(float x, float y, float radius, const Color& color, OriginMode origin) {
     ::Vector2 originVec = OriginToVector(origin);

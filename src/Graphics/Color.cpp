@@ -1,26 +1,31 @@
 #include "../pch.hpp"
 
+#include "Raysim/Math/Math.hpp"
 #include "Raysim/Graphics/Color.hpp"
 
-#include <raylib.h>
-
 // =======================================================
-// COLOR OPERATIONS
+// Interpolation
 // =======================================================
 
-RS::Color RS::Color::Lerp(const RS::Color& a, const RS::Color& b, float t) {
-    RS_ASSERT(t >= 0.0f && t <= 1.0f, "Lerp parameter must be in range [0, 1], got: {}", t);
-    t = std::clamp(t, 0.0f, 1.0f);
+RS::Color RS::Color::Lerp(const RS::Color &a, const RS::Color &b, float t)
+{
+    t = Math::Clamp01(t);
+    auto lerpByte = [&](unsigned char x, unsigned char y) -> unsigned char {
+        return static_cast<unsigned char>(
+            std::lround(Math::Lerp(static_cast<float>(x), static_cast<float>(y), t))
+        );
+    };
+
     return {
-        static_cast<unsigned char>(a.r + (b.r - a.r) * t),
-        static_cast<unsigned char>(a.g + (b.g - a.g) * t),
-        static_cast<unsigned char>(a.b + (b.b - a.b) * t),
-        static_cast<unsigned char>(a.a + (b.a - a.a) * t)
+        lerpByte(a.r, b.r),
+        lerpByte(a.g, b.g),
+        lerpByte(a.b, b.b),
+        lerpByte(a.a, b.a)
     };
 }
 
 // =======================================================
-// FACTORY METHODS
+// Conversion utilities
 // =======================================================
 
 RS::Color RS::Color::FromHex(const std::string& hex) {
@@ -29,10 +34,10 @@ RS::Color RS::Color::FromHex(const std::string& hex) {
 
     try
     {
-        unsigned char r = std::stoul(hex.substr(1, 2), nullptr, 16);
-        unsigned char g = std::stoul(hex.substr(3, 2), nullptr, 16);
-        unsigned char b = std::stoul(hex.substr(5, 2), nullptr, 16);
-        unsigned char a = (hex.length() == 9) ? std::stoul(hex.substr(7, 2), nullptr, 16) : 255;
+        unsigned char r = static_cast<unsigned char>(std::stoul(hex.substr(1, 2), nullptr, 16));
+        unsigned char g = static_cast<unsigned char>(std::stoul(hex.substr(3, 2), nullptr, 16));
+        unsigned char b = static_cast<unsigned char>(std::stoul(hex.substr(5, 2), nullptr, 16));
+        unsigned char a = static_cast<unsigned char>((hex.length() == 9) ? std::stoul(hex.substr(7, 2), nullptr, 16) : 255);
 
         return Color{r, g, b, a};
     }
@@ -47,11 +52,11 @@ RS::Color RS::Color::FromHSV(float h, float s, float v, unsigned char alpha) {
     h = std::fmod(h, 360.0f);
     if (h < 0) h += 360.0f;
 
-    s = std::clamp(s, 0.0f, 1.0f);
-    v = std::clamp(v, 0.0f, 1.0f);
+    s = Math::Clamp01(s);
+    v = Math::Clamp01(v);
 
     float c = v * s; // Chroma
-    float x = c * (1.0f - std::fabs(std::fmod(h / 60.0f, 2) - 1));
+    float x = c * (1.0f - std::fabs(std::fmod(h / 60.0f, 2.0f) - 1.0f));
     float m = v - c;
 
     float values[3] = {c, x, 0};
@@ -74,17 +79,19 @@ RS::Color RS::Color::FromHSV(float h, float s, float v, unsigned char alpha) {
     float g = values[pattern[sector][1]] + m;
     float b = values[pattern[sector][2]] + m;
 
+    auto toByte = [](float v) -> unsigned char {
+        int iv = static_cast<int>(std::lround(v * 255.0f));
+        iv = std::max(0, std::min(255, iv));
+        return static_cast<unsigned char>(iv);
+    };
+
     return {
-        static_cast<unsigned char>(r * 255),
-        static_cast<unsigned char>(g * 255),
-        static_cast<unsigned char>(b * 255),
+        toByte(r),
+        toByte(g),
+        toByte(b),
         alpha
     };
 }
-
-// =======================================================
-// CONVERSION UTILITIES
-// =======================================================
 
 std::string RS::Color::ToHex(bool includeAlpha) const {
     static constexpr char hex[] = "0123456789ABCDEF";
@@ -133,9 +140,9 @@ RS::Vector3 RS::Color::ToHSV() const
     return {h, s, v};
 }
 
-// =======================================================
-// OPERATORS
-// =======================================================
+//=======================================================
+// Operators
+//=======================================================
 
 RS::Color RS::Color::operator+(const RS::Color& o) const {
     return {

@@ -1,6 +1,22 @@
 #pragma once
 
-// Main headers for the RaySim framework
+/**
+ * Copyright 2026 Dayron Mustelier (@DMsuDev)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Main headers for the Raysim framework
 
 #include "Raysim/Graphics/Shapes.hpp"
 #include "Raysim/Graphics/Texts.hpp"
@@ -11,18 +27,14 @@
 #include "Raysim/Math/Vector3.hpp"
 #include "Raysim/Math/Random.hpp"
 
-#include "Raysim/Manager/FontManager.hpp"
-#include "Raysim/Manager/TimeManager.hpp"
-
-#include "Raysim/Input/InputManager.hpp"
 #include "Raysim/Input/KeyCodes.hpp"
 
-#include "Raysim/Utils/Log.hpp"
-#include "Raysim/Utils/Assert.hpp"
-
-#include "Raysim/Core/Canvas.hpp"
+#include "Raysim/Core/Logger.hpp"
+#include "Raysim/Core/Assert.hpp"
+#include "Raysim/Core/ApplicationConfig.hpp"
+#include "Raysim/Core/Application.hpp"
 
 #define RAYSIM_VERSION_MAJOR 0
-#define RAYSIM_VERSION_MINOR 2
-#define RAYSIM_VERSION_PATCH 4
-#define RAYSIM_VERSION "0.2.4"
+#define RAYSIM_VERSION_MINOR 3
+#define RAYSIM_VERSION_PATCH 0
+#define RAYSIM_VERSION "0.3.0"

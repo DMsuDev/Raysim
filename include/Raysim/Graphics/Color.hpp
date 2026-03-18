@@ -15,23 +15,36 @@ namespace RS {
 struct Color {
     unsigned char r{255}, g{255}, b{255}, a{255};  ///< Red, Green, Blue, Alpha components
 
-    // =======================================================
-    //                     CONSTRUCTORS
-    // =======================================================
+//=======================================================
+// Constructors
+//=======================================================
 
     constexpr Color() = default;
 
-    /// @brief Construct color from RGBA components
+    /// Construct color from RGBA components
     constexpr Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 255)
         : r(r), g(g), b(b), a(a) {}
 
-    /// @brief Construct grayscale color (equal R, G, B)
+    /// Construct grayscale color (equal R, G, B)
     explicit constexpr Color(unsigned char gray, unsigned char a = 255)
         : r(gray), g(gray), b(gray), a(a) {}
 
-    // =======================================================
-    //                    COLOR OPERATIONS
-    // =======================================================
+//=======================================================
+// Operators
+//=======================================================
+
+    Color operator+(const Color& rhs) const;
+    Color operator-(const Color& rhs) const;
+
+    bool operator==(const Color& rhs) const
+    {
+        return r == rhs.r && g == rhs.g && b == rhs.b && a == rhs.a;
+    }
+    bool operator!=(const Color& rhs) const { return !(*this == rhs); }
+
+//=======================================================
+// Interpolation
+//=======================================================
 
     /**
      * @brief Linear interpolate between two colors
@@ -40,18 +53,18 @@ struct Color {
      * @param t Interpolation factor (clamped to 0-1)
      * @return Interpolated color
      */
-    static Color Lerp(const Color& a, const Color& b, float t);
+    [[nodiscard]] static Color Lerp(const Color& a, const Color& b, float t);
 
-    // =======================================================
-    //                    FACTORY METHODS
-    // =======================================================
+//=======================================================
+// Conversion utilities
+//=======================================================
 
     /**
      * @brief Create a Color from a hexadecimal string (e.g. "#RRGGBB" or "#RRGGBBAA")
      * @param hex Hexadecimal color string
      * @return Parsed Color object
      */
-    static Color FromHex(const std::string& hex);
+    [[nodiscard]] static Color FromHex(const std::string& hex);
 
     /**
      * @brief Create a Color from HSV values
@@ -61,7 +74,7 @@ struct Color {
      * @param alpha Optional alpha component (0-255, default 255)
      * @return Color object representing the HSV values
      */
-    static Color FromHSV(float h, float s, float v, unsigned char alpha = 255);
+    [[nodiscard]] static Color FromHSV(float h, float s, float v, unsigned char alpha = 255);
 
     /**
      * @brief Create a Color from HSV values using a Vector3 (hue, saturation, value)
@@ -70,49 +83,28 @@ struct Color {
      * @param alpha Optional alpha component (0-255, default 255)
      * @return Color object representing the HSV values
      */
-    static Color FromHSV(const Vector3& hsv, unsigned char alpha = 255)
+    [[nodiscard]] static Color FromHSV(const Vector3& hsv, unsigned char alpha = 255)
     {
         return FromHSV(hsv.x, hsv.y, hsv.z, alpha);
     }
-
-    // =======================================================
-    //                 CONVERSION UTILITIES
-    // =======================================================
 
     /**
      * @brief Convert this Color to a hexadecimal string (e.g. "#RRGGBBAA")
      * @param includeAlpha Whether to include the alpha component in the hex string (default false)
      * @return Hexadecimal string representation of the color
      */
-    std::string ToHex(bool includeAlpha = false) const;
+    [[nodiscard]] std::string ToHex(bool includeAlpha = false) const;
 
     /**
     * @brief Convert this Color to HSV representation
     * @return Vector3 where x = hue (0-360), y = saturation (0-1), z = value (0-1)
     */
-    Vector3 ToHSV() const;
-
-    // =======================================================
-    //                      OPERATORS
-    // =======================================================
-
-    /// @brief Add color components (bright blend)
-    Color operator+(const Color& rhs) const;
-    /// @brief Subtract color components (dark blend)
-    Color operator-(const Color& rhs) const;
-
-    /// @brief Equality comparison
-    bool operator==(const Color& rhs) const
-    {
-        return r == rhs.r && g == rhs.g && b == rhs.b && a == rhs.a;
-    }
-    /// @brief Inequality comparison
-    bool operator!=(const Color& rhs) const { return !(*this == rhs); }
+    [[nodiscard]] Vector3 ToHSV() const;
 };
 
-// =========================================================
+//=======================================================
 // PREDEFINED COLORS (ENGINE STYLE)
-// =========================================================
+//=======================================================
 
 namespace Colors
 {

@@ -1,6 +1,8 @@
 #pragma once
 
-#include "Raysim/Math/Math.hpp"
+#include "Math.hpp"
+
+#include <cstddef>
 
 namespace RS {
 
@@ -12,7 +14,7 @@ namespace RS {
  * and directions. Includes common operations like dot product, normalization, and projection.
  */
 struct Vector2 {
-    float x{0.0f}, y{0.0f};  ///< X and Y components
+    float x{0.0f}, y{0.0f};
 
     /**
      * @brief Default construct (zero vector)
@@ -30,34 +32,23 @@ struct Vector2 {
      */
     explicit constexpr Vector2(float s) noexcept : x(s), y(s) {}
 
-    // =======================================================
-    // Arithmetic operators
-    // =======================================================
+//==============================================================================
+// Operators
+//==============================================================================
 
-    /** @brief Vector addition */
     constexpr Vector2 operator+(const Vector2& o) const noexcept { return {x + o.x, y + o.y}; }
-    /** @brief Vector subtraction */
     constexpr Vector2 operator-(const Vector2& o) const noexcept { return {x - o.x, y - o.y}; }
-    /** @brief Scalar multiplication */
     constexpr Vector2 operator*(float s)          const noexcept { return {x * s, y * s}; }
-    /** @brief Scalar division */
     constexpr Vector2 operator/(float s)          const noexcept { return (s != 0.0f) ? (*this * (1.0f/s)) : Vector2{}; }
 
-    /** @brief Negation */
     constexpr Vector2 operator-() const noexcept { return {-x, -y}; }
 
-    /** @brief Compound-add */
     constexpr Vector2& operator+=(const Vector2& o) noexcept { x += o.x; y += o.y; return *this; }
-    /** @brief Compound-sub */
     constexpr Vector2& operator-=(const Vector2& o) noexcept { x -= o.x; y -= o.y; return *this; }
-    /** @brief Compound-scale */
     constexpr Vector2& operator*=(float s) noexcept { x *= s; y *= s; return *this; }
-    /** @brief Compound-divide */
     constexpr Vector2& operator/=(float s) noexcept { if (s != 0.0f) *this *= (1.0f/s); return *this; }
 
-    /** @brief Equality */
     constexpr bool operator==(const Vector2& o) const noexcept { return x == o.x && y == o.y; }
-    /** @brief Inequality */
     constexpr bool operator!=(const Vector2& o) const noexcept { return !(*this == o); }
 
     /**
@@ -74,7 +65,9 @@ struct Vector2 {
      */
     constexpr const float& operator[](size_t i) const noexcept{ return (&x)[i]; }
 
-    // ==== Math operations ====
+//==============================================================================
+// Math
+//==============================================================================
 
     /**
      * @brief Calculate vector magnitude (length)
@@ -136,10 +129,6 @@ struct Vector2 {
      */
     constexpr Vector2 Perp() const noexcept { return {-y, x}; }
 
-    // =======================================================
-    // Normalization
-    // =======================================================
-
     /**
      * @brief Return normalized vector
      * @return Unit vector in the same direction or zero vector if length is ~0
@@ -199,9 +188,9 @@ struct Vector2 {
         return *this - n * (2.0f * Dot(n));
     }
 
-    // =======================================================
-    // Static utility functions
-    // =======================================================
+//==============================================================================
+// Static utilities
+//==============================================================================
 
     /**
      * @brief Calculate distance between two points
@@ -217,49 +206,43 @@ struct Vector2 {
      * @return Squared distance between a and b
      */
     static float DistanceSquared(const Vector2& a, const Vector2& b) noexcept { return (b - a).LengthSquared(); }
+
     /**
-     * @brief Create unit vector from angle (radians)
-     * @param angle Angle in radians
-     * @return Unit vector pointing at angle
+     * @brief Create unit vector from angle
+     * @param angle Angle in radians from positive x-axis (counterclockwise)
+     * @return Unit vector at the specified angle
      */
     static Vector2 FromAngle(float angle) noexcept { return {std::cos(angle), std::sin(angle)}; }
+
     /**
-     * @brief Calculate angle between two vectors (returns 0 to 2π)
+     * @brief Angle between two vectors (0..pi)
      * @param a First vector
      * @param b Second vector
-     * @return Angle from a to b in radians in range [0, 2π)
+     * @return Angle in radians between a and b
      */
-    static float AngleBetween(const Vector2& a, const Vector2& b) noexcept
-    {
+    static float AngleBetween(const Vector2& a, const Vector2& b) noexcept {
         float dot = a.Dot(b);
-        float det = a.Cross(b);
-        float angle = std::atan2(det, dot);
-        if (angle < 0) { angle += 2 * Math::PI; }
-        return angle;
+        float mag = std::sqrt(a.LengthSquared() * b.LengthSquared());
+        if (mag < 1e-6f) return 0.0f;
+        return std::acos(dot / mag);
     }
 
-    // =======================================================
-    // Common constants
-    // =======================================================
+//==============================================================================
+// Common vectors
+//==============================================================================
 
     static constexpr Vector2 Zero() noexcept  { return {0.0f, 0.0f}; }
     static constexpr Vector2 One() noexcept   { return {1.0f, 1.0f}; }
     static constexpr Vector2 UnitX() noexcept { return {1.0f, 0.0f}; }
     static constexpr Vector2 UnitY() noexcept { return {0.0f, 1.0f}; }
 
-    // =======================================================
-    // Pixel helpers
-    // =======================================================
-
-    /** @brief Get integer pixel X (rounded) @return integer X */
+    /// Rounded x coordinate as integer (useful for pixel-space operations).
     int ix() const noexcept { return static_cast<int>(std::round(x)); }
-    /** @brief Get integer pixel Y (rounded) @return integer Y */
+
+    /// Rounded y coordinate as integer (useful for pixel-space operations).
     int iy() const noexcept { return static_cast<int>(std::round(y)); }
 };
 
-constexpr Vector2 operator*(float s, const Vector2& v) noexcept
-{
-    return {v.x * s, v.y * s};
-}
+constexpr Vector2 operator*(float s, const Vector2& v) noexcept { return v * s; }
 
 } // namespace RS

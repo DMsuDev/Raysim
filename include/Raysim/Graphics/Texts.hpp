@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Raysim/Graphics/Color.hpp"
-#include "Raysim/Math/Vector2.hpp"
-#include "Raysim/Core/Enums.hpp"
+#include "Color.hpp"
+#include "../Math/Vector2.hpp"
+#include "OriginMode.hpp"
 
 #include <string>
 
@@ -26,6 +26,10 @@ namespace RS {
  * Text::DrawText("Top-left text", 10, 10, 20, Color::Black());
  */
 namespace Text {
+
+//==============================================================================
+// Basic text
+//==============================================================================
 
     /**
      * @brief Draw text using a system-like font
@@ -64,6 +68,10 @@ namespace Text {
      */
     void DrawText(const std::string& text, float x, float y, int fontSize, const Color& color, OriginMode origin);
 
+//==============================================================================
+// Extended text
+//==============================================================================
+
     /**
      * @brief Draw text with custom spacing between characters
      *
@@ -100,6 +108,10 @@ namespace Text {
      * @see OriginMode
      */
     void DrawTextEx(const std::string& text, float x, float y, float fontSize, float spacing, const Color& color, OriginMode origin);
+
+//==============================================================================
+// Layout helpers
+//==============================================================================
 
     /**
      * @brief Draw text positioned inside a rectangle with alignment

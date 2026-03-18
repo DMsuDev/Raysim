@@ -1,0 +1,52 @@
+#pragma once
+#include "../../Interfaces/IInput.hpp"
+
+namespace RS {
+
+/**
+ * @class RaylibInput
+ * @brief Raylib implementation of the IInput interface
+ *
+ * Provides input handling for keyboard, mouse, and gamepad through raylib's input functions.
+ * All input queries are delegated directly to raylib's native functions.
+ */
+class RaylibInput : public IInput
+{
+public:
+    RaylibInput() = default;
+    ~RaylibInput() override = default;
+
+    // ============================================================================
+    // KEYBOARD INPUT
+    // ============================================================================
+
+    bool IsKeyDown(KeyCode key) const override;
+    bool IsKeyPressed(KeyCode key) const override;
+    bool IsKeyReleased(KeyCode key) const override;
+    bool IsKeyRepeating(KeyCode key) const override;
+    KeyCode GetLastKeyPressed() const override;
+
+    // ============================================================================
+    // MOUSE INPUT
+    // ============================================================================
+
+    Vector2 GetMousePosition() const override;
+    Vector2 GetMouseDelta() const override;
+    bool IsMouseButtonDown(MouseButton button) const override;
+    bool IsMouseButtonPressed(MouseButton button) const override;
+    bool IsMouseButtonReleased(MouseButton button) const override;
+    float GetMouseWheelMove() const override;
+    bool IsMouseOnScreen() const override;
+
+    // ============================================================================
+    // GAMEPAD INPUT
+    // ============================================================================
+
+    bool IsGamepadAvailable(int gamepad) const override;
+    bool IsGamepadButtonDown(int gamepad, GamepadButton button) const override;
+    bool IsGamepadButtonPressed(int gamepad, GamepadButton button) const override;
+    float GetGamepadAxisValue(int gamepad, GamepadAxis axis) const override;
+    float GetGamepadAxisValue(int gamepad, int axis) const override;
+};
+
+} // namespace RS

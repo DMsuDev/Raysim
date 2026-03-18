@@ -1,37 +1,20 @@
-# =============================================================================
-# CodeQL - Security & vulnerability analysis for C/C++
-# https://codeql.github.com/
-# =============================================================================
-name: CodeQL Analysis
+name: "CodeQL"
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
+  # push:
+  #   branches: [ "main", "master" ]
   pull_request:
-    branches: [main]
-  schedule:
-    # Run weekly on Monday at 06:00 UTC (even without commits)
-    - cron: 0 6 * * 1
+    branches: ['*']
 
-concurrency:
-  group: codeql-${{ github.ref }}
-  cancel-in-progress: true
-
-permissions:
-  actions: read
-  contents: read
-  security-events: write
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
 
 jobs:
-  analyze:
-    name: CodeQL (${{ matrix.language }})
-    runs-on: windows-latest
-    timeout-minutes: 45
-
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [c-cpp]
+  clang-tidy:
+    name: clang-tidy
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -39,41 +22,94 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt install -y cmake clang build-essential \
+            libasound2-dev libx11-dev libxrandr-dev \
+            libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev \
+            libxinerama-dev libwayland-dev libxkbcommon-dev libspdlog-dev
+
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
           path: |
             build/_deps
             vendor
-          key: codeql-deps-${{ hashFiles('vendor/CMakeLists.txt') }}
-          restore-keys: codeql-deps-
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: ${{ matrix.language }}
-          # Focus on security and correctness queries
-          queries: +security-extended,security-and-quality
-          # Only analyze project code, not vendor
-          config: |
-            paths:
-              - include
-              - examples
-              - src
-            paths-ignore:
-              - vendor
-              - build
-              - _deps
+          key: tidy-deps-${{ hashFiles('vendor/CMakeLists.txt') }}
+          restore-keys: tidy-deps-
 
       - name: Configure CMake
-        run: cmake -B build -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
-      - name: Build for CodeQL
-        run: cmake --build build --config Release --parallel $env:NUMBER_OF_PROCESSORS
+      - name: Run clang-tidy
+        run: |
+          find include examples -name '*.cpp' | while read file; do
+            echo "::group::Analyzing $file"
+            clang-tidy-18 -p build "$file" --warnings-as-errors='*' 2>&1 || true
+            echo "::endgroup::"
+          done
 
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+  codespell:
+    name: Spell Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Run codespell
+        uses: codespell-project/actions-codespell@v2
         with:
-          category: /language:${{ matrix.language }}
-          # Upload results even if analysis finds issues
-          upload: always
+          skip: build,_deps,vendor/glad,*.lock,*.json,.git
+          ignore_words_list: nd,ot,te
+          check_filenames: true
+
+  cppcheck:
+    name: cppcheck
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install cppcheck
+        run: sudo apt-get update && sudo apt-get install -y cppcheck
+
+      - name: Run cppcheck
+        run: |
+          cppcheck \
+            --enable=warning,style,performance,portability \
+            --std=c++17 \
+            --suppress=missingIncludeSystem \
+            --suppress=unmatchedSuppression \
+            --inline-suppr \
+            --error-exitcode=1 \
+            --template='{file}:{line}: {severity} ({id}): {message}' \
+            -I include \
+            include/ examples/ \
+            2>&1 | tee cppcheck-report.txt
+
+      - name: Upload cppcheck report
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: cppcheck-report
+          path: cppcheck-report.txt
+
+  quality-status:
+    name: Quality Gate
+    needs: [clang-tidy, codespell, cppcheck]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check results
+        run: |
+          results=("${{ needs.clang-tidy.result }}" "${{ needs.codespell.result }}" "${{ needs.cppcheck.result }}")
+          for r in "${results[@]}"; do
+            if [[ "$r" == "failure" ]]; then
+              echo "::error::One or more quality checks failed"
+              exit 1
+            fi
+          done
+          echo "All quality checks passed!"

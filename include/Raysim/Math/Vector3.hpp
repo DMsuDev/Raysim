@@ -1,6 +1,8 @@
 #pragma once
 
-#include "Raysim/Math/Math.hpp"
+#include "Math.hpp"
+
+#include <cstddef>
 
 namespace RS {
 
@@ -12,7 +14,7 @@ namespace RS {
  * Includes 3D-specific operations like cross product with vector result and axis rotation.
  */
 struct Vector3 {
-    float x{0.0f}, y{0.0f}, z{0.0f};  ///< X, Y, and Z components
+    float x{0.0f}, y{0.0f}, z{0.0f};
 
     /**
      * @brief Default construct (zero vector)
@@ -31,22 +33,17 @@ struct Vector3 {
      */
     explicit constexpr Vector3(float s) noexcept : x(s), y(s), z(s) {}
 
-    // =======================================================
-    // Arithmetic operators
-    // =======================================================
-    /// @brief Vector addition
+//==============================================================================
+// Operators
+//==============================================================================
+
     constexpr Vector3 operator+(const Vector3& o) const noexcept { return {x + o.x, y + o.y, z + o.z}; }
-    /// @brief Vector subtraction
     constexpr Vector3 operator-(const Vector3& o) const noexcept { return {x - o.x, y - o.y, z - o.z}; }
-    /// @brief Scalar multiplication
     constexpr Vector3 operator*(float s)          const noexcept { return {x * s, y * s, z * s}; }
-    /// @brief Scalar division
     constexpr Vector3 operator/(float s)          const noexcept { return (s != 0.0f) ? (*this * (1.0f/s)) : Vector3{}; }
 
-    /// @brief Negation
     constexpr Vector3 operator-() const noexcept { return {-x, -y, -z}; }
 
-    // ---- Compound assignment (constexpr where pure arithmetic) ----
     constexpr Vector3& operator+=(const Vector3& o) noexcept { x += o.x; y += o.y; z += o.z; return *this; }
     constexpr Vector3& operator-=(const Vector3& o) noexcept { x -= o.x; y -= o.y; z -= o.z; return *this; }
     constexpr Vector3& operator*=(float s) noexcept          { x *= s; y *= s; z *= s; return *this; }
@@ -68,11 +65,10 @@ struct Vector3 {
      */
     constexpr const float& operator[](size_t i) const noexcept { return (&x)[i]; }
 
-    // =======================================================
-    // Math operations
-    // =======================================================
+//==============================================================================
+// Math
+//==============================================================================
 
-    // ---- Norms and basic products ----
     /**
      * @brief Calculate vector magnitude (length)
      * @return Euclidean length of the vector
@@ -190,9 +186,9 @@ struct Vector3 {
     float HeadingXY() const noexcept { return std::atan2(y, x); }
 
 
-    // =======================================================
-    // Static utility functions
-    // =======================================================
+//==============================================================================
+// Static utilities
+//==============================================================================
 
     /**
      * @brief Calculate distance between two points
@@ -236,9 +232,9 @@ struct Vector3 {
     }
 
 
-    // =======================================================
-    // Common constants
-    // =======================================================
+//==============================================================================
+// Common vectors
+//==============================================================================
 
     static constexpr Vector3 Zero() noexcept  { return {0.0f, 0.0f, 0.0f}; }
     static constexpr Vector3 One() noexcept   { return {1.0f, 1.0f, 1.0f}; }
@@ -246,12 +242,13 @@ struct Vector3 {
     static constexpr Vector3 UnitY() noexcept { return {0.0f, 1.0f, 0.0f}; }
     static constexpr Vector3 UnitZ() noexcept { return {0.0f, 0.0f, 1.0f}; }
 
-    // Pixel coordinates
-    /** @brief Get integer pixel X (rounded) @return integer X */
+    /// Rounded x coordinate as integer (useful for pixel-space operations).
     int ix() const noexcept { return static_cast<int>(std::round(x)); }
-    /** @brief Get integer pixel Y (rounded) @return integer Y */
+
+    /// Rounded y coordinate as integer (useful for pixel-space operations).
     int iy() const noexcept { return static_cast<int>(std::round(y)); }
-    /** @brief Get integer pixel Z (rounded) @return integer Z */
+
+    /// Rounded z coordinate as integer (useful for pixel-space operations).
     int iz() const noexcept { return static_cast<int>(std::round(z)); }
 };
 

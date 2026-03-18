@@ -7,17 +7,22 @@
 # Configurable via CLI:  make build BUILD_TYPE=Release CMAKE_GEN=Ninja
 # ============================================================================
 
+
 .DEFAULT_GOAL := all
 .SUFFIXES:
 
-# ─── Project ─────────────────────────────────────────────────────────────
+# =========================================================================
+# Project
+# =========================================================================
 
 PROJECT_NAME  := Raysim
-PROJECT_VER   := 0.2.4
+PROJECT_VER   := 0.3.0
 BUILD_DIR     := build
-BUILD_TYPE    ?= Debug
+BUILD_TYPE    ?= Release
 
-# ─── Sources ─────────────────────────────────────────────────────────────
+# =========================================================================
+# Sources
+# =========================================================================
 # Add directories here; cppcheck and clang-tidy pick them up automatically.
 
 SRC_DIRS      := include src examples
@@ -29,13 +34,17 @@ endif
 CPP_FILES     := $(filter %.cpp,$(SRC_FILES))
 INCLUDE_FLAGS := $(addprefix -I ,$(SRC_DIRS))
 
-# ─── CMake ────────────────────────────────────────────────────────────────
+# =========================================================================
+# CMake
+# =========================================================================
 
 CONFIGURE_STAMP := $(BUILD_DIR)/.configured_$(BUILD_TYPE)_$(CMAKE_GEN)
 CMAKE_LISTS     := $(wildcard CMakeLists.txt vendor/CMakeLists.txt)
-CMAKE_FLAGS     = -DCMAKE_BUILD_TYPE:STRING=$(BUILD_TYPE) -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE
+CMAKE_FLAGS     = -DCMAKE_BUILD_TYPE:STRING=$(BUILD_TYPE) -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DRAYSIM_BUILD_EXAMPLES=ON
 
-# ─── Platform ────────────────────────────────────────────────────────────
+# =========================================================================
+# Platform
+# =========================================================================
 
 ifeq ($(OS),Windows_NT)
     DETECTED_OS := Windows
@@ -51,7 +60,9 @@ else
     _find_tool   = $(shell command -v $(1) 2>/dev/null)
 endif
 
-# ─── Core Numbers ─────────────────────────────────────────────────────────
+# =========================================================================
+# Core Numbers
+# =========================================================================
 
 ifeq ($(OS),Windows_NT)
 	CORES := $(shell pwsh -NoProfile -Command 'Write-Output $$env:NUMBER_OF_PROCESSORS')
@@ -59,7 +70,9 @@ else
 	CORES := $(shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)
 endif
 
-# ─── Platform-Specific Generator Selection ────────────────────────────────
+# =========================================================================
+# Platform-Specific Generator Selection
+# =========================================================================
 
 HAS_NINJA := $(call _find_tool,ninja)
 HAS_MAKE  := $(call _find_tool,make)
@@ -77,7 +90,9 @@ else
     $(error No supported CMake generator found. Install Ninja or Make.)
 endif
 
-# ─── Verbose (0 = silent · 1 = colored detail) ───────────────────────────
+# =========================================================================
+# Verbose (0 = silent . 1 = colored detail)
+# =========================================================================
 # Automatically silenced when make is invoked with -s or -j flags.
 
 VERBOSE ?= 1
@@ -89,7 +104,9 @@ else ifneq ($(filter -j%,$(MAKEFLAGS)),)
 	VERBOSE := 0
 endif
 
-# ─── Colors ───────────────────────────────────────────────────────────────
+# =========================================================================
+# Colors
+# =========================================================================
 
 ifeq ($(VERBOSE),1)
     RST   := \033[0m
@@ -124,13 +141,15 @@ else
     HL    :=
 endif
 
-# ─── Display helpers ─────────────────────────────────────────────────────
+# =========================================================================
+# Display helpers
+# =========================================================================
 #
 #   $(call _banner,SECTION)   project-info header (build / configure / tidy)
 #   $(call _section,TITLE)    lightweight section divider
-#   $(call _ok,MSG)           success   ✓
-#   $(call _fail,MSG)         error     ✗  (exits with code 1)
-#   $(call _warn,MSG)         warning   ⚠
+#   $(call _ok,MSG)           success   [OK]
+#   $(call _fail,MSG)         error     [ERR]  (exits with code 1)
+#   $(call _warn,MSG)         warning   [!]
 #   $(call _done)             closing rule
 #   $(call _require,VAR,name,install-hint)
 
@@ -143,20 +162,25 @@ define _banner
 endef
 
 _section = @printf "\n$(LINE)───────$(RST) $(TITLE)$(1)$(RST)\n"
-_ok      = @printf "  $(OK)✓$(RST) %s\n" "$(1)"
-_fail    = @printf "  $(ERR)✗ Error: $(1)$(RST)\n" && exit 1
-_warn    = @printf "  $(WARN)⚠ $(1)$(RST)\n"
+_ok      = @printf "  $(OK)[OK]$(RST) %s\n" "$(1)"
+_fail    = @printf "  $(ERR)[ERR] Error: $(1)$(RST)\n" && exit 1
+_warn    = @printf "  $(WARN)[!] $(1)$(RST)\n"
 _done    = @printf "$(LINE)────────────────────────────────────────────$(RST)\n"
 
 _require = $(if $($(1)),,$(call _fail,$(2) is not installed. Install: $(3)))
 
-# ─── Tool detection (evaluated once) ─────────────────────────────────────
+# =========================================================================
+# Tool detection (evaluated once)
+# =========================================================================
 
 HAS_CLANG_TIDY := $(call _find_tool,clang-tidy)
 HAS_CPPCHECK   := $(call _find_tool,cppcheck)
 HAS_ACT        := $(call _find_tool,act)
+HAS_DOXYGEN    := $(call _find_tool,doxygen)
 
-# ─── Generator layout ────────────────────────────────────────────────────
+# =========================================================================
+# Generator layout
+# =========================================================================
 
 IS_MULTICONFIG := $(or $(findstring Visual Studio,"$(CMAKE_GEN)"),$(findstring Xcode,"$(CMAKE_GEN)"))
 
@@ -172,14 +196,18 @@ $(EXAMPLE_PATH)/$(1)$(EXE_EXT)
 endef
 endif
 
-# ─── Generator argument (optional) ────────────────────────────────────────
+# =========================================================================
+# Generator argument (optional)
+# =========================================================================
 
 GEN_ARG :=
 ifneq ($(CMAKE_GEN),)
 GEN_ARG := -G "$(CMAKE_GEN)"
 endif
 
-# ─── Library path ────────────────────────────────────────────────────────
+# =========================================================================
+# Library path
+# =========================================================================
 
 ifeq ($(IS_MULTICONFIG),)
     LIB_PATH     ?= $(BUILD_DIR)/lib
@@ -187,24 +215,42 @@ else
     LIB_PATH     ?= $(BUILD_DIR)/lib/$(BUILD_TYPE)
 endif
 
-# ─── Tidy (dedicated Ninja build for compile_commands.json) ──────────────
+# =========================================================================
+# Tidy (dedicated Ninja build for compile_commands.json)
+# =========================================================================
 
 TIDY_DIR   := build-tidy
 TIDY_STAMP := $(TIDY_DIR)/.configured
 
-# ─── Phony ────────────────────────────────────────────────────────────────
+# =========================================================================
+# Documentation
+# =========================================================================
+
+DOC_BUILD      := ./docs
+DOXYGEN_CONFIG ?= Doxyfile
+
+ifeq ($(DETECTED_OS),Darwin)
+    SED_I := sed -i ''
+else
+    SED_I := sed -i
+endif
+
+# =========================================================================
+# Phony
+# =========================================================================
 
 .PHONY: all configure build rebuild release relwithdebinfo \
         example-bouncing example-lissajous example-mouse \
         install test \
         clean purge \
         tidy cppcheck \
+        docs clean-docs \
         pre-commit pre-commit-install pre-commit-update \
         act-ci act-quality info help
 
-# ═════════════════════════════════════════════════════════════════════════
-#  BUILD
-# ═════════════════════════════════════════════════════════════════════════
+# =========================================================================
+# BUILD
+# =========================================================================
 
 ifeq ($(words $(SRC_FILES)),0)
 all:
@@ -241,28 +287,28 @@ relwithdebinfo:
 	@$(MAKE) --no-print-directory build BUILD_TYPE=RelWithDebInfo
 	$(call _ok,RelWithDebInfo build complete (optimized + symbols))
 
-# ═════════════════════════════════════════════════════════════════════════
-#  EXAMPLES
-# ═════════════════════════════════════════════════════════════════════════
+# =========================================================================
+# EXAMPLES
+# =========================================================================
 
 example-bouncing: build
 	$(call _section,Example: Bouncing Balls)
-	@$(call FIXPATH,$(call EXAMPLE_EXEC,Bouncing_Balls))
+	@$(call FIXPATH,$(call EXAMPLE_EXEC,BouncingBalls))
 	$(call _done)
 
 example-lissajous: build
 	$(call _section,Example: Lissajous Curves)
-	@$(call FIXPATH,$(call EXAMPLE_EXEC,Lissajous_Curves))
+	@$(call FIXPATH,$(call EXAMPLE_EXEC,LissajousCurves))
 	$(call _done)
 
 example-mouse: build
 	$(call _section,Example: Mouse Detection 2D)
-	@$(call FIXPATH,$(call EXAMPLE_EXEC,Mouse_detection_2D))
+	@$(call FIXPATH,$(call EXAMPLE_EXEC,Mouse2D))
 	$(call _done)
 
-# ═════════════════════════════════════════════════════════════════════════
-#  INSTALL & TEST
-# ═════════════════════════════════════════════════════════════════════════
+# =========================================================================
+# INSTALL & TEST
+# =========================================================================
 
 install: build
 	$(call _section,Install)
@@ -275,9 +321,9 @@ test: build
 	@ctest --test-dir $(BUILD_DIR) --config $(BUILD_TYPE)
 	$(call _done)
 
-# ═════════════════════════════════════════════════════════════════════════
-#  CLEAN
-# ═════════════════════════════════════════════════════════════════════════
+# =========================================================================
+# CLEAN
+# =========================================================================
 
 clean:
 	$(call _section,Clean)
@@ -294,9 +340,43 @@ purge:
 	$(call _ok,Purge done)
 	$(call _done)
 
-# ═════════════════════════════════════════════════════════════════════════
-#  CODE QUALITY
-# ═════════════════════════════════════════════════════════════════════════
+# =========================================================================
+# DOCUMENTATION
+# =========================================================================
+
+$(DOXYGEN_CONFIG):
+	$(call _section,Creating Doxyfile)
+	@doxygen -g $(DOXYGEN_CONFIG)
+	@$(SED_I) 's|^PROJECT_NAME .*|PROJECT_NAME           = "$(PROJECT_NAME)"|'  $(DOXYGEN_CONFIG)
+	@$(SED_I) 's|^PROJECT_NUMBER .*|PROJECT_NUMBER         = $(PROJECT_VER)|'    $(DOXYGEN_CONFIG)
+	@$(SED_I) 's|^OUTPUT_DIRECTORY .*|OUTPUT_DIRECTORY       = $(DOC_BUILD)|'    $(DOXYGEN_CONFIG)
+	@$(SED_I) 's|^INPUT .*|INPUT                  = include src|'                     $(DOXYGEN_CONFIG)
+	@$(SED_I) 's|^RECURSIVE .*|RECURSIVE              = YES|'                    $(DOXYGEN_CONFIG)
+	@$(SED_I) 's|^GENERATE_LATEX .*|GENERATE_LATEX         = NO|'                $(DOXYGEN_CONFIG)
+	@$(SED_I) 's|^EXTRACT_ALL .*|EXTRACT_ALL            = YES|'                  $(DOXYGEN_CONFIG)
+	@$(SED_I) 's|^JAVADOC_AUTOBRIEF .*|JAVADOC_AUTOBRIEF      = YES|'            $(DOXYGEN_CONFIG)
+	$(call _ok,$(DOXYGEN_CONFIG) created - edit it to customise further)
+	$(call _done)
+
+docs: $(DOXYGEN_CONFIG)
+	$(call _require,HAS_DOXYGEN,doxygen,choco install doxygen.install | apt install doxygen | brew install doxygen)
+	$(call _section,Documentation)
+	@printf "  %-14s : %s\n" "Config" "$(DOXYGEN_CONFIG)"
+	@printf "  %-14s : %s\n" "Output" "$(DOC_BUILD)/"
+	@cmake -E make_directory $(DOC_BUILD)
+	@doxygen $(DOXYGEN_CONFIG)
+	$(call _ok,Docs generated -> $(DOC_BUILD)/html/index.html)
+	$(call _done)
+
+clean-docs:
+	$(call _section,Clean Docs)
+	@cmake -E rm -rf $(DOC_BUILD)
+	$(call _ok,Docs cleaned)
+	$(call _done)
+
+# =========================================================================
+# CODE QUALITY
+# =========================================================================
 
 $(TIDY_STAMP): $(CMAKE_LISTS)
 	$(call _section,Configure Tidy)
@@ -332,9 +412,9 @@ cppcheck:
 	$(call _ok,Results saved to cppcheck.log)
 	$(call _done)
 
-# ═════════════════════════════════════════════════════════════════════════
-#  PRE-COMMIT
-# ═════════════════════════════════════════════════════════════════════════
+# =========================================================================
+# PRE-COMMIT
+# =========================================================================
 
 pre-commit-install:
 	$(call _section,Pre-commit Install)
@@ -354,9 +434,9 @@ pre-commit-update:
 	$(call _ok,Hooks updated)
 	$(call _done)
 
-# ═════════════════════════════════════════════════════════════════════════
-#  CI / RELEASE
-# ═════════════════════════════════════════════════════════════════════════
+# =========================================================================
+# CI / RELEASE
+# =========================================================================
 
 act-ci:
 	$(call _require,HAS_ACT,act,choco install act-cli | winget install nektos.act | brew install act)
@@ -370,9 +450,9 @@ act-quality:
 	@act push -W .github/workflows/code-quality.yml --container-architecture linux/amd64
 	$(call _done)
 
-# ═════════════════════════════════════════════════════════════════════════
-#  INFO
-# ═════════════════════════════════════════════════════════════════════════
+# =========================================================================
+# INFO
+# =========================================================================
 
 info:
 	$(call _section,Configuration)
@@ -386,9 +466,10 @@ info:
 	@printf "  %-14s : %s\n" "Examples Path" "$(EXAMPLE_PATH)/"
 	@printf "\n$(LINE)───────$(RST) $(TITLE)Tools$(RST)\n"
 	@printf "  %-14s : %s\n" "Tidy Dir" "$(TIDY_DIR)/"
-	@printf "  %-14s : $(if $(HAS_CLANG_TIDY),$(OK)✓ found$(RST),$(ERR)✗ missing$(RST))\n" "clang-tidy"
-	@printf "  %-14s : $(if $(HAS_CPPCHECK),$(OK)✓ found$(RST),$(ERR)✗ missing$(RST))\n" "cppcheck"
-	@printf "  %-14s : $(if $(HAS_ACT),$(OK)✓ found$(RST),$(ERR)✗ missing$(RST))\n" "act"
+	@printf "  %-14s : $(if $(HAS_CLANG_TIDY),$(OK)[OK] found$(RST),$(ERR)[ERR] missing$(RST))\n" "clang-tidy"
+	@printf "  %-14s : $(if $(HAS_CPPCHECK),$(OK)[OK] found$(RST),$(ERR)[ERR] missing$(RST))\n" "cppcheck"
+	@printf "  %-14s : $(if $(HAS_ACT),$(OK)[OK] found$(RST),$(ERR)[ERR] missing$(RST))\n" "act"
+	@printf "  %-14s : $(if $(HAS_DOXYGEN),$(OK)[OK] found$(RST),$(ERR)[ERR] missing$(RST))\n" "doxygen"
 	$(call _done)
 
 help:
@@ -417,6 +498,10 @@ help:
 	@printf "  $(BLD)Code Quality:$(RST)\n"
 	@printf "    $(GRN)make tidy$(RST)               clang-tidy analysis\n"
 	@printf "    $(GRN)make cppcheck$(RST)           cppcheck analysis\n"
+	@printf "\n"
+	@printf "  $(BLD)Documentation:$(RST)\n"
+	@printf "    $(GRN)make docs$(RST)               Generate HTML docs (creates Doxyfile if absent)\n"
+	@printf "    $(GRN)make clean-docs$(RST)         Remove generated docs\n"
 	@printf "\n"
 	@printf "  $(BLD)Pre-commit:$(RST)\n"
 	@printf "    $(GRN)make pre-commit-install$(RST) Install git hooks\n"
