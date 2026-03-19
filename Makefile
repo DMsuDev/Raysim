@@ -16,7 +16,7 @@
 # =========================================================================
 
 PROJECT_NAME  := Raysim
-PROJECT_VER   := 0.3.0
+PROJECT_VER   := 0.3.1
 BUILD_DIR     := build
 BUILD_TYPE    ?= Release
 
@@ -38,9 +38,13 @@ INCLUDE_FLAGS := $(addprefix -I ,$(SRC_DIRS))
 # CMake
 # =========================================================================
 
-CONFIGURE_STAMP := $(BUILD_DIR)/.configured_$(BUILD_TYPE)_$(CMAKE_GEN)
 CMAKE_LISTS     := $(wildcard CMakeLists.txt vendor/CMakeLists.txt)
 CMAKE_FLAGS     = -DCMAKE_BUILD_TYPE:STRING=$(BUILD_TYPE) -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DRAYSIM_BUILD_EXAMPLES=ON
+
+# Sanitise generator name for use in file paths (replace spaces with underscores)
+empty :=
+space := $(empty) $(empty)
+CONFIGURE_STAMP := $(BUILD_DIR)/.configured_$(BUILD_TYPE)_$(subst $(space),_,$(CMAKE_GEN))
 
 # =========================================================================
 # Platform
@@ -240,7 +244,7 @@ endif
 # =========================================================================
 
 .PHONY: all configure build rebuild release relwithdebinfo \
-        example-bouncing example-lissajous example-mouse \
+        examples example-bouncing example-lissajous example-mouse example-noise \
         install test \
         clean purge \
         tidy cppcheck \
@@ -306,6 +310,19 @@ example-mouse: build
 	@$(call FIXPATH,$(call EXAMPLE_EXEC,Mouse2D))
 	$(call _done)
 
+example-noise: build
+	$(call _section,Example: Noise Landscape)
+	@$(call FIXPATH,$(call EXAMPLE_EXEC,NoiseLandscape))
+	$(call _done)
+
+examples: build
+	$(call _section,Available Examples)
+	@printf "  $(GRN)make example-bouncing$(RST)   Run Bouncing Balls\n"
+	@printf "  $(GRN)make example-lissajous$(RST)  Run Lissajous Curves\n"
+	@printf "  $(GRN)make example-mouse$(RST)      Run Mouse Detection 2D\n"
+	@printf "  $(GRN)make example-noise$(RST)      Run Noise Landscape\n"
+	$(call _done)
+
 # =========================================================================
 # INSTALL & TEST
 # =========================================================================
@@ -327,7 +344,7 @@ test: build
 
 clean:
 	$(call _section,Clean)
-	-@cmake --build $(BUILD_DIR) --target clean --config $(BUILD_TYPE) > /dev/null
+	-@cmake --build $(BUILD_DIR) --target clean --config $(BUILD_TYPE) > /dev/null 2>&1
 	@cmake -E rm -rf $(BUILD_DIR)/bin
 	@cmake -E rm -f cppcheck.log
 	$(call _ok,Clean done)
@@ -407,8 +424,8 @@ cppcheck:
 	    --suppress=unmatchedSuppression \
 	    --inline-suppr \
 	    --template="{file}:{line}: {severity} ({id}): {message}" \
-	    $(INCLUDE_FLAGS) $(SRC_DIRS) 2>&1 \
-	    $(if $(filter $(DETECTED_OS),Linux Darwin),| tee cppcheck.log,> cppcheck.log)
+	    $(INCLUDE_FLAGS) $(SRC_DIRS) \
+	    $(if $(filter $(DETECTED_OS),Linux Darwin),2>&1 | tee cppcheck.log,> cppcheck.log 2>&1)
 	$(call _ok,Results saved to cppcheck.log)
 	$(call _done)
 
@@ -483,9 +500,11 @@ help:
 	@printf "    $(GRN)make relwithdebinfo$(RST)     Release + debug symbols\n"
 	@printf "\n"
 	@printf "  $(BLD)Examples:$(RST)\n"
+	@printf "    $(GRN)make examples$(RST)            Build all & list available demos\n"
 	@printf "    $(GRN)make example-bouncing$(RST)   Run Bouncing Balls\n"
 	@printf "    $(GRN)make example-lissajous$(RST)  Run Lissajous Curves\n"
 	@printf "    $(GRN)make example-mouse$(RST)      Run Mouse Detection 2D\n"
+	@printf "    $(GRN)make example-noise$(RST)      Run Noise Landscape\n"
 	@printf "\n"
 	@printf "  $(BLD)Install & Test:$(RST)\n"
 	@printf "    $(GRN)make install$(RST)            Install project\n"
