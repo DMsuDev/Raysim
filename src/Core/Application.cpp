@@ -51,6 +51,12 @@ void Application::RunInternal()
     Window   = BackendFactory::CreateWindow(backendType_);
     Input    = BackendFactory::CreateInput(backendType_);
 
+    if (!Renderer || !Window || !Input)
+    {
+        LOG_ERROR("Failed to create one or more backend components");
+        return;
+    }
+
     Window->Init(WindowProps{config_.title, config_.width, config_.height});
     Time::Reset(); // Ensure time starts at zero when the main loop begins
 
@@ -67,7 +73,7 @@ void Application::RunInternal()
         Input->Update();
 
         // Fixed timestep updates
-        int stepsTaken = 0;
+        uint32_t stepsTaken = 0;
         while (Time::ShouldFixedStep() && stepsTaken < config_.maxFixedSteps)
         {
             FixedUpdate(Time::GetFixedDeltaTime());
@@ -180,7 +186,7 @@ void Application::SetDefaultFont(const std::string& fontPath, int fontSize)
 
 void Application::SetRandomSeed(unsigned int seed)
 {
-    Random::Seed(seed);
+    Math::Random::Seed(seed);
 }
 
 } // namespace RS

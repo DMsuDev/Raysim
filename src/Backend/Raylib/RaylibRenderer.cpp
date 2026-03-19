@@ -16,7 +16,11 @@ void RaylibRenderer::ClearScreen(const Color& color)
 
 void RaylibRenderer::ClearScreen(const Vector3& color)
 {
-    ::ClearBackground(::Color{static_cast<unsigned char>(color.x), static_cast<unsigned char>(color.y), static_cast<unsigned char>(color.z), 255});
+    auto toByte = [](float v) -> unsigned char {
+        float clamped = (v < 0.0f) ? 0.0f : (v > 1.0f) ? 1.0f : v;
+        return static_cast<unsigned char>(clamped * 255.0f + 0.5f);
+    };
+    ::ClearBackground(::Color{toByte(color.x), toByte(color.y), toByte(color.z), 255});
 }
 
 void RaylibRenderer::BeginFrame()

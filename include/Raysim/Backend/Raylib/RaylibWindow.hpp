@@ -50,10 +50,10 @@ private:
     // Internal parameters and state
     // ===============================
 
-    int width_;
-    int height_;
-    int prevWidth_;
-    int prevHeight_;
+    int width_      = 0;
+    int height_     = 0;
+    int prevWidth_  = 0;
+    int prevHeight_ = 0;
     std::string title_;
     bool isFullscreen_ = false;
 };
