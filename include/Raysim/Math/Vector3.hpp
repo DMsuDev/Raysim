@@ -40,14 +40,14 @@ struct Vector3 {
     constexpr Vector3 operator+(const Vector3& o) const noexcept { return {x + o.x, y + o.y, z + o.z}; }
     constexpr Vector3 operator-(const Vector3& o) const noexcept { return {x - o.x, y - o.y, z - o.z}; }
     constexpr Vector3 operator*(float s)          const noexcept { return {x * s, y * s, z * s}; }
-    constexpr Vector3 operator/(float s)          const noexcept { return (s != 0.0f) ? (*this * (1.0f/s)) : Vector3{}; }
+    constexpr Vector3 operator/(float s)          const noexcept { return (s != 0.0f && s == s) ? (*this * (1.0f/s)) : Vector3{}; }
 
     constexpr Vector3 operator-() const noexcept { return {-x, -y, -z}; }
 
     constexpr Vector3& operator+=(const Vector3& o) noexcept { x += o.x; y += o.y; z += o.z; return *this; }
     constexpr Vector3& operator-=(const Vector3& o) noexcept { x -= o.x; y -= o.y; z -= o.z; return *this; }
     constexpr Vector3& operator*=(float s) noexcept          { x *= s; y *= s; z *= s; return *this; }
-    constexpr Vector3& operator/=(float s) noexcept          { if (s != 0.0f) *this *= (1.0f/s); return *this; }
+    constexpr Vector3& operator/=(float s) noexcept          { if (s != 0.0f && s == s) *this *= (1.0f/s); return *this; }
 
     constexpr bool operator==(const Vector3& o) const noexcept { return x == o.x && y == o.y && z == o.z; }
     constexpr bool operator!=(const Vector3& o) const noexcept { return !(*this == o); }
