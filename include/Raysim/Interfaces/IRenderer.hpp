@@ -31,7 +31,7 @@ public:
     /// Clear the render target with a Color.
     virtual void ClearScreen(const Color& color) = 0;
 
-    /// Clear the render target with normalised RGB values (0.0 – 1.0).
+    /// Clear the render target with normalised RGB values (0.0 to 1.0).
     virtual void ClearScreen(const Vector3& color) = 0;
 
     // -- V-Sync --------------------------------------------------------------

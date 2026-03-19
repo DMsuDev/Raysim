@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10..3.26)
-project(Raysim VERSION 0.3.0 LANGUAGES CXX C)
+project(Raysim VERSION 0.3.1 LANGUAGES CXX C)
 
 # ============================================================================
 # CONFIGURATION

@@ -28,7 +28,7 @@ namespace RS {
  *
  * Inherit from this class and override the lifecycle methods to build
  * simulations, games, and interactive graphics apps.
- * Backend systems are accessed through the protected interface pointers—
+ * Backend systems are accessed through the protected interface pointers
  * no Raylib headers needed in user code.
  */
 class Application

@@ -2,16 +2,18 @@
 
 [![C++](https://img.shields.io/badge/Language-C%2B%2B-00599C?style=flat&logo=cplusplus&logoColor=white)](https://isocpp.org/)
 [![CMake](https://img.shields.io/badge/Build-CMake-064F8C?style=flat&logo=cmake&logoColor=white)](https://cmake.org/)
-[![License](https://img.shields.io/badge/License-Apache%202.0-red?style=flat&logo=apache&logoColor=white)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-0.3.0-brightgreen?style=flat)](https://github.com/yourusername/raysim/releases)
+![Status](https://img.shields.io/badge/Status-Early%20Development-yellow?style=flat)
+[![Version](https://img.shields.io/badge/Version-0.3.1-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
 
 Raysim is a C++ framework for 2D graphics and interactive applications, built on top of [raylib](https://www.raylib.com/).
 
-Inspired by **p5.js** and **Processing**, it provides a simple class-based API for drawing shapes, handling input, managing time, and running fixed-timestep simulations. Raylib headers are never exposed to user code - all access goes through clean abstract interfaces.
+Inspired by **p5.js** and **Processing**, it provides a simple class-based API for drawing shapes, handling input, managing time, and running fixed-timestep simulations. Backend headers are never exposed to user code -- all access goes through clean abstract interfaces.
 
 Useful for learning graphics programming, prototyping ideas, or building small games and simulations.
 
-## Examples
+> **Note:** This project is in **early development**. The API may change without warning, and some features are still being implemented. It is my first time developing a C++ framework. Feedback and contributions are welcome!
+
+## Quick Demos
 
 <!-- Screenshots or GIF.
     TODO:
@@ -22,14 +24,26 @@ Useful for learning graphics programming, prototyping ideas, or building small g
 | `BouncingBalls`   | Physics simulation with gravity, mouse attraction/repulsion, and ball spawning.         |
 | `LissajousCurves` | Parametric curve visualiser with animated phase shift and selectable frequency presets. |
 | `Mouse2D`         | Mouse tracking and 2D interaction.                                                      |
+| `NoiseLandscape`  | Procedurally generated scrolling terrain using various noise functions.                 |
+
+### Using Makefile
 
 ```bash
 make example-bouncing
 make example-lissajous
 make example-mouse
+make example-noise
 ```
 
----
+### Using CMake
+
+To compile the examples, enable the `RAYSIM_BUILD_EXAMPLES` option when configuring with CMake:
+
+```bash
+cmake -B build -DRAYSIM_BUILD_EXAMPLES=ON
+```
+
+> Each example is a standalone executable in `examples/` that demonstrates different features of the framework. You can run them after building the project.
 
 ## Architecture
 
@@ -64,9 +78,7 @@ Supporting systems available from any lifecycle method:
 - `RS::Time` - frame timing, fixed timestep accumulator, time scale, pause/resume
 - `RS::Logger` - structured logging via spdlog (console and log file)
 - `RS::FontManager` - font loading and global access for text rendering
-- `RS::Math::Random` - seeded RNG and procedural noise (Perlin, Simplex, Cellular)
-
----
+- `RS::Math::Random` - seeded RNG and procedural noise (Perlin 2D/3D, Simplex, Cellular, Value, fBm)
 
 ## Application Loop
 
@@ -82,7 +94,7 @@ load assets, seed the RNG, and initialise your simulation state.
 void Setup() override {
     SetTitle("My Simulation");
     SetSize(1280, 720);
-    SetRandomSeed(42);
+    SetRandomSeed(42);   // Optional: omit for a different seed every launch
     Time::SetTargetFPS(60);
 }
 ```
@@ -175,12 +187,12 @@ void Draw(float alpha) override {
 <details>
 <summary>Math</summary>
 
-| File      | Purpose                                                                                                                |
-| --------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `Vector2` | 2D vector with arithmetic operators and common utility methods.                                                        |
-| `Vector3` | 3D vector, used internally for color/clear operations and general math.                                                |
-| `Math`    | Common math helpers: clamp, lerp, map, wrap, and trigonometric utilities.                                              |
-| `Random`  | Seeded Mersenne Twister RNG. Integer and float ranges, plus Perlin, Simplex, and Cellular noise. Note: On development. |
+| File      | Purpose                                                                                                                                                                                                                                                                                                     |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Vector2` | 2D vector with arithmetic operators and common utility methods.                                                                                                                                                                                                                                             |
+| `Vector3` | 3D vector, used internally for color/clear operations and general math.                                                                                                                                                                                                                                     |
+| `Math`    | Common math helpers: clamp, lerp, map, wrap, and trigonometric utilities.                                                                                                                                                                                                                                   |
+| `Random`  | Seeded Mersenne Twister RNG. Integer and float ranges, boolean helpers, container sampling, plus coherent noise (Perlin 2D/3D, Simplex, Cellular, Value) and Fractal Brownian Motion. Seed is auto-random on startup; call `Seed()` for deterministic results or `SeedRandom()` to re-randomise at runtime. |
 
 </details>
 
@@ -225,7 +237,7 @@ cmake --build build --config Release
 `ApplicationConfig` is optional - all fields default to basic values. You can choose to provide only what you need or define individual settings in `Setup` instead. The following are all valid ways to configure your app:
 
 ```cpp
-// No config: uses defaults (1600×900, title "Raysim App")
+// No config: uses defaults (1600x900, title "Raysim App")
 MyApp app;
 
 // Partial config with designated initializers (C++20 required)
@@ -253,7 +265,8 @@ protected:
     void Setup() override {
         SetTitle("My First Raysim App");
         SetSize(800, 600);
-        SetRandomSeed(12345);
+        // Seed is auto-random on startup; call SetRandomSeed() only if you need reproducibility.
+        // SetRandomSeed(12345);
         Time::SetTargetFPS(60);
     }
 
