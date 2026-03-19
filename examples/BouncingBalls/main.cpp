@@ -158,9 +158,9 @@ private:
 
         const int STEPS = 28;
         for (int i = 0; i < STEPS; ++i) {
-            float f     = (float)i / (float)STEPS;
+            float f     = static_cast<float>(i) / static_cast<float>(STEPS);
             float r     = maxR * (1.0f - f * 0.95f);
-            auto  alpha = (unsigned char)Math::Remap(f, 0.0f, 1.0f, 220.0f, 6.0f);
+            auto  alpha = static_cast<unsigned char>(Math::Remap(f, 0.0f, 1.0f, 220.0f, 6.0f));
             Shapes::DrawCircle(center.x, center.y, r, {base.r, base.g, base.b, alpha}, OriginMode::Center);
         }
     }
@@ -219,13 +219,16 @@ private:
     void DrawStats() {
         float t = Time::GetTime();
 
-        DrawChip(18,                        20, "Balls: "   + std::to_string((int)balls_.size()),                    {70,  130, 180, 180}, t);
-        DrawChip((float)(GetWidth() - 180), 20, "FPS: "     + std::to_string(static_cast<int>(Time::GetSmoothedFPS())), {140, 90,  200, 180}, t, 4.0f);
-        DrawChip(18,                        (float)(GetHeight() - 60), "Gravity: "  + std::string(useGravity_        ? "ON" : "OFF"), {200, 120, 80,  180}, t, 3.0f);
-        DrawChip((float)(GetWidth() - 220), (float)(GetHeight() - 60), "Velocity: " + std::string(showVelocityLines_ ? "ON" : "OFF"), {100, 200, 150, 180}, t, 3.0f);
+        float w = static_cast<float>(GetWidth());
+        float h = static_cast<float>(GetHeight());
+
+        DrawChip(18,         20,       "Balls: "   + std::to_string(static_cast<int>(balls_.size())),                     {70,  130, 180, 180}, t);
+        DrawChip(w - 180.0f, 20,       "FPS: "     + std::to_string(static_cast<int>(Time::GetSmoothedFPS())), {140, 90,  200, 180}, t, 4.0f);
+        DrawChip(18,         h - 60.0f, "Gravity: "  + std::string(useGravity_        ? "ON" : "OFF"), {200, 120, 80,  180}, t, 3.0f);
+        DrawChip(w - 220.0f, h - 60.0f, "Velocity: " + std::string(showVelocityLines_ ? "ON" : "OFF"), {100, 200, 150, 180}, t, 3.0f);
 
         Text::DrawText("[LMB] Add  [RMB] Repel  [MMB] Attract  [G] Gravity  [V] Velocity  [S] Stats",
-                       20, (float)(GetHeight() - 100), 20, {200, 200, 220}, OriginMode::TopLeft);
+                       20, h - 100.0f, 20, {200, 200, 220}, OriginMode::TopLeft);
     }
 
 #pragma endregion
@@ -238,20 +241,20 @@ private:
 
     void SpawnRandomBalls(int count) {
         for (int i = 0; i < count; ++i) {
-            float x   = Random::Range(100.0f, 900.0f);
-            float y   = Random::Range(50.0f,  300.0f);
-            float vx  = Random::Range(-150.0f, 150.0f);
-            float vy  = Random::Range(-50.0f,   50.0f);
-            float r   = Random::Range(12.0f, 28.0f);
-            Color col = palette_[Random::Range(0, (int)palette_.size() - 1)];
+            float x   = Math::Random::Range(100.0f, 900.0f);
+            float y   = Math::Random::Range(50.0f,  300.0f);
+            float vx  = Math::Random::Range(-150.0f, 150.0f);
+            float vy  = Math::Random::Range(-50.0f,   50.0f);
+            float r   = Math::Random::Range(12.0f, 28.0f);
+            Color col = Math::Random::Choice(palette_);
             balls_.emplace_back(x, y, vx, vy, r, col);
         }
     }
 
     void SpawnAtMouse() {
-        float angle = Random::Range(0.0f, Math::TWO_PI);
-        float speed = Random::Range(100.0f, 300.0f);
-        float r     = Random::Range(12.0f, 28.0f);
+        float angle = Math::Random::Range(0.0f, Math::TWO_PI);
+        float speed = Math::Random::Range(100.0f, 300.0f);
+        float r     = Math::Random::Range(12.0f, 28.0f);
         hueOffset_  = Math::Repeat(hueOffset_ + 25.0f, 360.0f);
         Color col   = Color::FromHSV(hueOffset_, 0.85f, 1.0f);
         balls_.emplace_back(mousePos_.x, mousePos_.y,
@@ -282,7 +285,7 @@ public:
 
 #pragma region Update and FixedUpdate
 
-    void Update(float fixedDt) override {
+    void Update(float dt) override {
         mousePos_        = Input->GetMousePosition();
         rightMouseDown_  = Input->IsMouseButtonDown(MouseButton::Right);
         middleMouseDown_ = Input->IsMouseButtonDown(MouseButton::Middle);

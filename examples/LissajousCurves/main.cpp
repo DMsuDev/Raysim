@@ -19,32 +19,32 @@ static const std::vector<LissajousPreset> PRESETS = {
     {
         "Diagonal Line",
         1.0f, 1.0f,
-        "Ratio 1:1 → oscillators are synchronized"
+        "Ratio 1:1 -> oscillators are synchronized"
     },
     {
         "Figure Eight",
         2.0f, 1.0f,
-        "Ratio 2:1 → classic oscilloscope pattern"
+        "Ratio 2:1 -> classic oscilloscope pattern"
     },
     {
         "Parabola",
         1.0f, 2.0f,
-        "Ratio 1:2 → inverted version of the above"
+        "Ratio 1:2 -> inverted version of the above"
     },
     {
         "3-Petal Rose",
         3.0f, 2.0f,
-        "Ratio 3:2 → symmetric floral pattern"
+        "Ratio 3:2 -> symmetric floral pattern"
     },
     {
         "4-Petal Rose",
         3.0f, 1.0f,
-        "Ratio 3:1 → more complex symmetric shape"
+        "Ratio 3:1 -> more complex symmetric shape"
     },
     {
         "Complex Pattern",
         5.0f, 4.0f,
-        "Ratio 5:4 → intricate combination"
+        "Ratio 5:4 -> intricate combination"
     }
 };
 
@@ -75,8 +75,6 @@ private:
     float freqSmoothSpeed = 8.0f;
 
     //--- FIXED TIMESTEP (maintain visual consistency) ----
-    float accumulator = 0.0f;
-    const float fixedDt = 1.0f / 120.0f;
     const float angularSpeed = 2.0f;
 
     //--- Moving dot state (for alpha interpolation in Draw) --------------
@@ -93,14 +91,14 @@ private:
         Color{255, 255, 100},   // Yellow
     };
 
-    //--- SCREEN LAYOUT -----------------------------------
-    const float centerX = 600.0f;
-    const float centerY = 400.0f;
-    const float curveRadius = 300.0f;
-    const float rectX = 300.0f;
-    const float rectY = 100.0f;
-    const float rectW = 600.0f;
-    const float rectH = 600.0f;
+    //--- SCREEN LAYOUT (computed from window size) -------
+    float centerX = 600.0f;
+    float centerY = 400.0f;
+    float curveRadius = 300.0f;
+    float rectX = 300.0f;
+    float rectY = 100.0f;
+    float rectW = 600.0f;
+    float rectH = 600.0f;
 
     int currentPreset = 3;
 
@@ -112,16 +110,9 @@ private:
 
 #pragma region Utilities
 
-    /// Update the phase using a fixed timestep
-    /// Keeps animation smooth even if the framerate varies
-    /// FORMULA: phaseShift(t+dt) = phaseShift(t) + phaseRotationSpeed · dt
-    void UpdatePhase(float dt) {
-        accumulator += dt;
-        while (accumulator >= fixedDt) {
-            // Use the phase rotation speed (configurable via P/O keys)
-            phaseShift += phaseRotationSpeed * fixedDt;
-            accumulator -= fixedDt;
-        }
+    /// Update the phase using the framework's fixed timestep
+    void UpdatePhase(float fixedDt) {
+        phaseShift += phaseRotationSpeed * fixedDt;
     }
 
     /// Smooth frequency transitions using exponential interpolation
@@ -133,13 +124,13 @@ private:
 
     /// Draw the curve with color interpolation along palette
     void DrawCurveLines() {
-        const int paletteSize = (int)colors.size();
+        const int paletteSize = static_cast<int>(colors.size());
         size_t n = curvePoints.size();
         if (n < 2) return;
         for (size_t i = 0; i + 1 < n; ++i) {
             float t = static_cast<float>(i) / static_cast<float>(n - 1);
             float palettePos = t * (paletteSize - 1);
-            int idx = (int)std::floor(palettePos);
+            int idx = static_cast<int>(std::floor(palettePos));
             Color c = Color::Lerp(colors[idx],
                                   colors[std::min(idx + 1, paletteSize - 1)],
                                   palettePos - idx);
@@ -150,12 +141,12 @@ private:
 
     /// Draw markers at regular intervals along the curve
     void DrawMarkers() {
-        const int paletteSize = (int)colors.size();
+        const int paletteSize = static_cast<int>(colors.size());
         size_t n = curvePoints.size();
         for (size_t i = 0; i < n; i += 60) {
             float t = static_cast<float>(i) / static_cast<float>(n - 1);
             float palettePos = t * (paletteSize - 1);
-            int idx = (int)std::floor(palettePos);
+            int idx = static_cast<int>(std::floor(palettePos));
             Color markerColor = Color::Lerp(colors[idx],
                                             colors[std::min(idx + 1, paletteSize - 1)],
                                             palettePos - idx);
@@ -181,7 +172,7 @@ private:
         float t      = std::fmod(angle, Math::TWO_PI) / Math::TWO_PI;
         float idxF   = t * static_cast<float>(curvePoints.size() - 1);
         int   idx    = static_cast<int>(std::floor(idxF));
-        int   next   = std::min(idx + 1, (int)curvePoints.size() - 1);
+        int   next   = std::min(idx + 1, static_cast<int>(curvePoints.size()) - 1);
         Vector2 pos  = Math::Lerp(curvePoints[idx], curvePoints[next], idxF - idx);
         Shapes::DrawCircle(pos.x, pos.y, 10, Colors::RayYellow, OriginMode::Center);
     }
@@ -234,15 +225,15 @@ private:
                        OriginMode::TopLeft);
 
         // Controls at the bottom
-        y = 750;
+        float bottomY = static_cast<float>(GetHeight()) - 50.0f;
         Text::DrawText("Arrows=Freq  P/O=Dir  +/-=Speed  1-6=Preset  R=Reset",
-                   20, y, 18, Colors::LightGray, OriginMode::BottomLeft);
+                   20, bottomY, 18, Colors::LightGray, OriginMode::BottomLeft);
 
         // Description of the current preset
-        y += 25;
+        bottomY += 25;
         std::snprintf(buf, sizeof(buf), "Info: %s",
                       PRESETS[currentPreset].description.c_str());
-        Text::DrawText(std::string(buf), 20, y, 16, Color{200, 200, 150},
+        Text::DrawText(std::string(buf), 20, bottomY, 16, Color{200, 200, 150},
                        OriginMode::BottomLeft);
     }
 
@@ -277,7 +268,7 @@ public:
         curvePoints.reserve(resolution);
         paramT.resize(resolution);
         for (int i = 0; i < resolution; ++i) {
-            paramT[i] = (float)i / resolution * Math::TWO_PI;
+            paramT[i] = static_cast<float>(i) / resolution * Math::TWO_PI;
         }
 
         smoothFrequencyX = frequencyX;
@@ -290,14 +281,25 @@ public:
 #pragma region Update and Draw
 
     void Update(float dt) override {
+        // Recompute layout from current window size
+        float w = static_cast<float>(GetWidth());
+        float h = static_cast<float>(GetHeight());
+        centerX     = w * 0.5f;
+        centerY     = h * 0.5f;
+        curveRadius = Math::Min(w, h) * 0.375f;
+        rectW       = curveRadius * 2.0f;
+        rectH       = curveRadius * 2.0f;
+        rectX       = centerX - curveRadius;
+        rectY       = centerY - curveRadius;
+
         // INTERACTIVE CONTROLS
-        // Frequency control (arrow keys) — 1.2 units/sec
+        // Frequency control (arrow keys) 1.2 units/sec
         if (Input->IsKeyDown(KeyCode::Right)) frequencyX += 1.2f * dt;
         if (Input->IsKeyDown(KeyCode::Left)) frequencyX = std::max(0.1f, frequencyX - 1.2f * dt);
         if (Input->IsKeyDown(KeyCode::Up)) frequencyY += 1.2f * dt;
         if (Input->IsKeyDown(KeyCode::Down)) frequencyY = std::max(0.1f, frequencyY - 1.2f * dt);
 
-        // Phase control: P/O for direction, +/- for speed adjustment — 0.3 units/sec
+        // Phase control: P/O for direction, +/- for speed adjustment 0.3 units/sec
         if (Input->IsKeyDown(KeyCode::P)) phaseRotationSpeed = std::abs(phaseRotationSpeed);
         if (Input->IsKeyDown(KeyCode::O)) phaseRotationSpeed = -std::abs(phaseRotationSpeed);
         if (Input->IsKeyDown(KeyCode::Equal) || Input->IsKeyDown(KeyCode::KP_Add))
@@ -322,13 +324,16 @@ public:
             currentPreset = 3;
         }
 
-        UpdatePhase(dt);
         SmoothFrequencies(dt);
         GenerateCurve();
 
-        // Advance dot angle — snapshot prev first so Draw(alpha) can interpolate
+        // Advance dot angle - snapshot prev first so Draw(alpha) can interpolate
         prevDotAngle_ = dotAngle_;
         dotAngle_ += angularSpeed * dt;
+    }
+
+    void FixedUpdate(float fixedDt) override {
+        UpdatePhase(fixedDt);
     }
 
     void Draw(float alpha) override {

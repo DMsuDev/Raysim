@@ -6,8 +6,13 @@ class MouseDetection : public Application {
 
 private:
     Vector2 mousePos{0.0f, 0.0f};
-    Vector2 mouseSmootedPos{0.0f, 0.0f};
-    float squareSpeed = 10.0f; // Speed at which the squares follow the mouse
+    Vector2 mouseSmoothedPos{0.0f, 0.0f};
+    float squareSpeed = 10.0f;
+
+    // Mouse button state captured in Update for Draw
+    bool leftDown_   = false;
+    bool rightDown_  = false;
+    bool middleDown_ = false;
 
 public:
 
@@ -18,37 +23,48 @@ public:
         Time::SetTargetFPS(60);
     }
 
-    void Draw(float alpha) override {
+    void Update(float dt) override {
+        mousePos        = Input->GetMousePosition();
+        mouseSmoothedPos = Math::Lerp(mouseSmoothedPos, mousePos, squareSpeed * dt);
+
+        leftDown_   = Input->IsMouseButtonDown(MouseButton::Left);
+        rightDown_  = Input->IsMouseButtonDown(MouseButton::Right);
+        middleDown_ = Input->IsMouseButtonDown(MouseButton::Middle);
+    }
+
+    void Draw(float /*alpha*/) override {
         Background(Colors::DarkBlue);
+
+        float w = static_cast<float>(GetWidth());
+        float h = static_cast<float>(GetHeight());
 
         // Draw grid background
         Color gridColor{60, 60, 60};
         for (int x = 0; x < GetWidth(); x += 50) {
-            Shapes::DrawLine((float)x, 0, (float)x, (float)GetHeight(), gridColor);
+            Shapes::DrawLine(static_cast<float>(x), 0.0f,
+                             static_cast<float>(x), h, gridColor);
         }
         for (int y = 0; y < GetHeight(); y += 50) {
-            Shapes::DrawLine(0, (float)y, (float)GetWidth(), (float)y, gridColor);
+            Shapes::DrawLine(0.0f, static_cast<float>(y),
+                             w, static_cast<float>(y), gridColor);
         }
 
-        mousePos = Input->GetMousePosition();
-        mouseSmootedPos = Math::Lerp(mouseSmootedPos, mousePos, squareSpeed * Time::GetDeltaTime()); // Smooth mouse movement
-
         // Left rectangle - scales with mouse Y
-        float fixedY = 300.0f;
+        float fixedY = h * 0.5f;
         float baseSize = 15.0f;
         float mouseScaledY = mousePos.y / 2.0f;
         float sizeL = mouseScaledY + baseSize;
 
-        Color rectColorL = { 239, 68, 68, 200 }; // Semi-transparent red
-        Shapes::DrawRect(mouseSmootedPos.x, fixedY, sizeL, sizeL, rectColorL, OriginMode::Center);
+        Color rectColorL = { 239, 68, 68, 200 };
+        Shapes::DrawRect(mouseSmoothedPos.x, fixedY, sizeL, sizeL, rectColorL, OriginMode::Center);
 
         // Right rectangle - inverted scale
-        Color rectColorR = {  0, 161, 224, 200 }; // Semi-transparent blue
-        float invertedSize = ((600.0f - mousePos.y) / 2.0f) + baseSize;
-        Shapes::DrawRect(1000.0f - mouseSmootedPos.x, fixedY, invertedSize, invertedSize, rectColorR, OriginMode::Center);
+        Color rectColorR = {  0, 161, 224, 200 };
+        float invertedSize = ((h - mousePos.y) / 2.0f) + baseSize;
+        Shapes::DrawRect(w - mouseSmoothedPos.x, fixedY, invertedSize, invertedSize, rectColorR, OriginMode::Center);
 
-        // Center circles following mouse
-        Shapes::DrawCircle(mousePos.x, mousePos.y, 8, Colors::RayWhite, OriginMode::Center);
+        // Center circle following mouse
+        Shapes::DrawCircle(mousePos.x, mousePos.y, 8.0f, Colors::RayWhite, OriginMode::Center);
 
         // Mouse position text
         std::string posText = "Mouse: (" + std::to_string(static_cast<int>(mousePos.x)) +
@@ -56,24 +72,26 @@ public:
         Text::DrawText(posText, 50, 50, 24, Colors::White, OriginMode::TopLeft);
 
         // Instructions
-        Text::DrawText("Move your mouse! RMB, LMB or MMB to interact", 50, 550, 21, Colors::LightGray, OriginMode::BottomLeft);
+        Text::DrawText("Move your mouse! RMB, LMB or MMB to interact",
+                       50, h - 50.0f, 21, Colors::LightGray, OriginMode::BottomLeft);
 
         // Draw FPS
         std::string fpsText = "FPS: " + std::to_string(static_cast<int>(Time::GetSmoothedFPS()));
-        Text::DrawText(fpsText, 950, 50, 24, Colors::LightGray, OriginMode::TopRight);
+        Text::DrawText(fpsText, w - 50.0f, 50, 24, Colors::LightGray, OriginMode::TopRight);
 
         // Color blocks on mouse buttons
-        if (Input->IsMouseButtonDown(MouseButton::Left)) {
-            Shapes::DrawRect(200, 100, 80, 80, Colors::RayRed, OriginMode::Center);
-            Text::DrawText("LEFT", 200, 100, 20, Colors::RayBlack, OriginMode::Center);
+        float btnY = 100.0f;
+        if (leftDown_) {
+            Shapes::DrawRect(w * 0.2f, btnY, 80, 80, Colors::RayRed, OriginMode::Center);
+            Text::DrawText("LEFT", w * 0.2f, btnY, 20, Colors::RayBlack, OriginMode::Center);
         }
-        if (Input->IsMouseButtonDown(MouseButton::Right)) {
-            Shapes::DrawRect(800, 100, 80, 80, Colors::RayGreen, OriginMode::Center);
-            Text::DrawText("RIGHT", 800, 100, 20, Colors::RayBlack, OriginMode::Center);
+        if (rightDown_) {
+            Shapes::DrawRect(w * 0.8f, btnY, 80, 80, Colors::RayGreen, OriginMode::Center);
+            Text::DrawText("RIGHT", w * 0.8f, btnY, 20, Colors::RayBlack, OriginMode::Center);
         }
-        if (Input->IsMouseButtonDown(MouseButton::Middle)) {
-            Shapes::DrawRect(500, 100, 80, 80, Colors::RayBlue, OriginMode::Center);
-            Text::DrawText("MIDDLE", 500, 100, 20, Colors::RayBlack, OriginMode::Center);
+        if (middleDown_) {
+            Shapes::DrawRect(w * 0.5f, btnY, 80, 80, Colors::RayBlue, OriginMode::Center);
+            Text::DrawText("MIDDLE", w * 0.5f, btnY, 20, Colors::RayBlack, OriginMode::Center);
         }
     }
 };
