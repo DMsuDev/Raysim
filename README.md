@@ -19,6 +19,29 @@ Useful for learning graphics programming, prototyping ideas, or building small g
     TODO:
 -->
 
+<table>
+  <tr>
+    <td align="center">
+      <img src="docs/images/bouncing-balls.png" width="400" alt="Bouncing Balls" /><br />
+      <b>BouncingBalls</b>
+    </td>
+    <td align="center">
+      <img src="docs/images/lissajous-curves.png" width="400" alt="Lissajous Curves" /><br />
+      <b>LissajousCurves</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="docs/images/mouse-2d.png" width="400" alt="Mouse 2D" /><br />
+      <b>Mouse2D</b>
+    </td>
+    <td align="center">
+      <img src="docs/images/noise-landscape.png" width="400" alt="Noise Landscape" /><br />
+      <b>NoiseLandscape</b>
+    </td>
+  </tr>
+</table>
+
 | Example           | Description                                                                             |
 | ----------------- | --------------------------------------------------------------------------------------- |
 | `BouncingBalls`   | Physics simulation with gravity, mouse attraction/repulsion, and ball spawning.         |
