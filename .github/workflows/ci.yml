@@ -13,9 +13,6 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  BUILD_TYPE: Release
-
 jobs:
   build-windows:
     name: Windows (MSVC ${{ matrix.config }})
@@ -28,17 +25,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
-      - name: Cache dependencies
+      - name: Cache CMake build
         uses: actions/cache@v5
         with:
-          path: |
-            build/_deps
-            vendor
-          key: deps-win-${{ hashFiles('vendor/CMakeLists.txt') }}
-          restore-keys: deps-win-
+          path: build
+          key: build-win-${{ matrix.config }}-${{ hashFiles('vendor/CMakeLists.txt', 'CMakeLists.txt') }}
+          restore-keys: build-win-${{ matrix.config }}-
 
       - name: Configure CMake
         run: cmake -B build -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=${{ matrix.config }}
@@ -73,26 +66,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt install -y cmake clang build-essential \
+          sudo apt-get install -y --no-install-recommends \
+            cmake clang build-essential \
             libasound2-dev libx11-dev libxrandr-dev \
             libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev \
-            libxinerama-dev libwayland-dev libxkbcommon-dev \
-            xvfb libspdlog-dev
+            libxinerama-dev libwayland-dev libxkbcommon-dev libspdlog-dev
 
-      - name: Cache dependencies
+      - name: Cache CMake build
         uses: actions/cache@v5
         with:
-          path: |
-            build/_deps
-            vendor
-          key: deps-linux-${{ matrix.compiler }}-${{ hashFiles('vendor/CMakeLists.txt') }}
-          restore-keys: deps-linux-${{ matrix.compiler }}-
+          path: build
+          key: build-linux-${{ matrix.compiler }}-${{ matrix.config }}-${{ hashFiles('vendor/CMakeLists.txt', 'CMakeLists.txt') }}
+          restore-keys: build-linux-${{ matrix.compiler }}-${{ matrix.config }}-
 
       - name: Configure CMake
         env:
@@ -112,14 +101,10 @@ jobs:
       - name: Check results
         run: |
           results=("${{ needs.build-windows.result }}" "${{ needs.build-linux.result }}")
-          failed=false
           for r in "${results[@]}"; do
             if [[ "$r" == "failure" ]]; then
-              failed=true
+              echo "::error::One or more build configurations failed"
+              exit 1
             fi
           done
-          if $failed; then
-            echo "::error::One or more build configurations failed"
-            exit 1
-          fi
           echo "All builds passed!"
