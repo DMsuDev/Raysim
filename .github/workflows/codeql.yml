@@ -2,13 +2,12 @@ name: "CodeQL"
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches: [ "main", "master" ]
   pull_request:
     branches: ['*']
+  release:
+    types: [published]
 
 env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
 
 jobs:
@@ -17,46 +16,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          submodules: recursive
-
+      - uses: actions/checkout@v6
       - name: Install dependencies
+
         run: |
           sudo apt-get update
-          sudo apt install -y cmake clang build-essential \
+          sudo apt-get install -y --no-install-recommends \
+            cmake clang clang-tidy build-essential \
             libasound2-dev libx11-dev libxrandr-dev \
             libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev \
             libxinerama-dev libwayland-dev libxkbcommon-dev libspdlog-dev
 
-      - name: Cache dependencies
-        uses: actions/cache@v4
+      - name: Cache CMake build
+        uses: actions/cache@v5
         with:
-          path: |
-            build/_deps
-            vendor
-          key: tidy-deps-${{ hashFiles('vendor/CMakeLists.txt') }}
-          restore-keys: tidy-deps-
+          path: build
+          key: tidy-build-${{ hashFiles('vendor/CMakeLists.txt', 'CMakeLists.txt') }}
+          restore-keys: tidy-build-
 
       - name: Configure CMake
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
       - name: Run clang-tidy
         run: |
-          find include examples -name '*.cpp' | while read file; do
-            echo "::group::Analyzing $file"
-            clang-tidy-18 -p build "$file" --warnings-as-errors='*' 2>&1 || true
-            echo "::endgroup::"
-          done
+          find include examples -name '*.cpp' -print0 | \
+            xargs -0 -P$(nproc) -I{} clang-tidy -p build "{}" --warnings-as-errors='*' 2>&1 || true
 
   codespell:
     name: Spell Check
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
       - name: Run codespell
         uses: codespell-project/actions-codespell@v2
@@ -70,15 +61,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
       - name: Install cppcheck
-        run: sudo apt-get update && sudo apt-get install -y cppcheck
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends cppcheck
 
       - name: Run cppcheck
         run: |
           cppcheck \
+            -j$(nproc) \
             --enable=warning,style,performance,portability \
             --std=c++17 \
             --suppress=missingIncludeSystem \
