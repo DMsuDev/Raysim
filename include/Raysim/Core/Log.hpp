@@ -60,7 +60,7 @@ public:
 
     /// Clean up loggers and flush all sinks. Call on application shutdown.
     static void Shutdown();
-    
+
     // ------- Accessors -------------------------------------------------------
 
     /// @brief Returns the core (engine) logger.

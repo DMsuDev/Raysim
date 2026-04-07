@@ -53,7 +53,7 @@ public:
 
     /// @brief Retrieves the size of the window as a Vector2 (width, height).
     virtual Vector2  GetSize()     const = 0;
-    
+
     /// @brief Retrieves the width of the window.
     virtual uint32_t GetWidth()    const = 0;
 
@@ -62,8 +62,8 @@ public:
 
     /// @brief Calculates the aspect ratio of the window.
     /// @return The aspect ratio (width / height) of the window.
-    float GetAspectRatio() const 
-    { 
+    float GetAspectRatio() const
+    {
         return static_cast<float>(GetWidth()) / static_cast<float>(GetHeight());
     }
 

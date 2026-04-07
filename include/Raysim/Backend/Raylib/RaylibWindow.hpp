@@ -10,7 +10,7 @@ namespace RS {
  * @brief Raylib implementation of the Window interface.
  *
  * Creates and manages a raylib window.
- * 
+ *
  * @see Window, RaylibRendererAPI
  */
 class RaylibWindow : public Window
@@ -23,7 +23,7 @@ public:
     void OnUpdate() override { }
 
     bool ShouldClose() const override;
-    
+
     // -- Size ----------------------------------------------------------------
 
     void SetSize(uint32_t width, uint32_t height) override;

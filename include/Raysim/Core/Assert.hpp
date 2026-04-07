@@ -1,14 +1,14 @@
 /**
  * @file Assert.hpp
  * @brief Assertion macros with integrated logging and source location support.
- * 
+ *
  * This header defines a set of assertion macros that provide detailed logging
  * information on assertion failures, including the expression that failed and
  * the source location (file, line, function). The macros are split into two
  * families:
- * 
+ *
  * - `RS_CORE_ASSERT*`: Intended for engine/internal use, logs through the core logger.
- * 
+ *
  * - `RS_ASSERT*`: Intended for client/application use, logs through the client logger
  */
 #pragma once

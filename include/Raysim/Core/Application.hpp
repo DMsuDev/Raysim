@@ -173,8 +173,8 @@ private:
     Scope<Window>       m_Window;          // The main window
     Shared<RendererAPI>  m_Renderer;        // Renderer backend
     Scope<Input>        m_Input;           // Input backend
-    
-    Scope<RenderCommand> m_RenderCommand;   
+
+    Scope<RenderCommand> m_RenderCommand;
     EngineContext m_EngineContext;
 
     /// Rebuild m_EngineContext from current backend pointers.

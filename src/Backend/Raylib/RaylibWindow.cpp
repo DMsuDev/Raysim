@@ -128,7 +128,7 @@ void RaylibWindow::SetFullscreen(bool fullscreen)
         m_Data.PrevHeight = m_Data.Height;
 
         this->SetSize(::GetMonitorWidth(0), ::GetMonitorHeight(0));
-        
+
         ::ToggleFullscreen();
     }
     else

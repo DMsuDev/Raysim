@@ -7,7 +7,7 @@ namespace RS
 	/**
 	 * @enum MouseButton
 	 * @brief Mouse button codes
-	 * 
+	 *
 	 * Defines mouse buttons including left, right, middle, and additional buttons for extended mice.
 	 */
 	enum class MouseButton : uint16_t

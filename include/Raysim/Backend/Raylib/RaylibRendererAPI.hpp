@@ -8,7 +8,7 @@ namespace RS {
  * @brief Raylib implementation of the `RendererAPI` interface.
  *
  * Implements the core rendering operations using raylib's graphics functions.
- * 
+ *
  * @see RendererAPI
  */
 class RaylibRendererAPI : public RendererAPI
