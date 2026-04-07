@@ -39,7 +39,11 @@ INCLUDE_FLAGS := $(addprefix -I ,$(SRC_DIRS))
 # =========================================================================
 
 CMAKE_LISTS     := $(wildcard CMakeLists.txt vendor/CMakeLists.txt)
-CMAKE_FLAGS     = -DCMAKE_BUILD_TYPE:STRING=$(BUILD_TYPE) -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DRAYSIM_BUILD_EXAMPLES=ON
+VCPKG_TOOLCHAIN := $(CURDIR)/vcpkg/scripts/buildsystems/vcpkg.cmake
+CMAKE_FLAGS     = -DCMAKE_BUILD_TYPE:STRING=$(BUILD_TYPE) \
+                  -DCMAKE_TOOLCHAIN_FILE=$(VCPKG_TOOLCHAIN) \
+                  -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE \
+                  -DRS_BUILD_EXAMPLES=ON
 
 # Sanitise generator name for use in file paths (replace spaces with underscores)
 empty :=

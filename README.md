@@ -5,6 +5,9 @@
 ![Status](https://img.shields.io/badge/Status-Early%20Development-yellow?style=flat)
 [![Version](https://img.shields.io/badge/Version-0.3.1-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
 
+[English Readme](https://github.com/DMsuDev/Raysim/blob/main/README.md)
+ • [Readme Español](https://github.com/DMsuDev/Raysim/blob/main/README.es.md)
+
 Raysim is a C++ framework for 2D graphics and interactive applications, built on top of [raylib](https://www.raylib.com/).
 
 Inspired by **p5.js** and **Processing**, it provides a simple class-based API for drawing shapes, handling input, managing time, and running fixed-timestep simulations. Backend headers are never exposed to user code -- all access goes through clean abstract interfaces.
@@ -58,50 +61,16 @@ make example-mouse
 make example-noise
 ```
 
-### Using CMake
+### Using CMake Presets
 
-To compile the examples, enable the `RAYSIM_BUILD_EXAMPLES` option when configuring with CMake:
+To compile the examples, enable the `RS_BUILD_EXAMPLES` option (already enabled in presets):
 
 ```bash
-cmake -B build -DRAYSIM_BUILD_EXAMPLES=ON
+cmake --preset debug
+cmake --build --preset debug
 ```
 
 > Each example is a standalone executable in `examples/` that demonstrates different features of the framework. You can run them after building the project.
-
-## Architecture
-
-```txt
-+──────────────────────────────────────+
-|         User Application             |
-|     (subclass of RS::Application)    |
-+──────────────────────────────────────+
-                   |
-                   v
-+──────────────────────────────────────+
-|          RS::Application             |
-|                                      |
-|  Setup()         (once, on start)    |
-|  Update(dt)      (every frame)       |
-|  FixedUpdate(fdt)(fixed timestep)    |
-|  Draw(alpha)     (every frame)       |
-+──────────────────────────────────────+
-        |             |            |
-        v             v            v
-   IRenderer       IWindow      IInput
-        |             |            |
-        +─────────────+────────────+
-                      |
-              Raylib Backend
-         (RaylibRenderer, RaylibWindow,
-              RaylibInput)
-```
-
-Supporting systems available from any lifecycle method:
-
-- `RS::Time` - frame timing, fixed timestep accumulator, time scale, pause/resume
-- `RS::Log` - structured logging via spdlog (console and log file)
-- `RS::FontManager` - font loading and global access for text rendering
-- `RS::Math::Random` - seeded RNG and procedural noise (Perlin 2D/3D, Simplex, Cellular, Value, fBm)
 
 ## Application Loop
 
@@ -238,8 +207,20 @@ headers are confined to this layer and never leak into user code.
 
 ## Building
 
-Minimum Requirements: **CMake 3.19** and **C++17**.
-Raylib and spdlog are fetched automatically via CMake FetchContent on first configure.
+Minimum Requirements: **CMake 3.28**, **C++20**, and **Ninja**.
+Dependencies are managed via [vcpkg](https://vcpkg.io/) (included as a submodule).
+
+### Using CMake Presets
+
+```bash
+cmake --preset debug              # Configure Debug (Ninja)
+cmake --build --preset debug      # Build Debug
+
+cmake --preset release            # Configure Release (Ninja)
+cmake --build --preset release    # Build Release
+```
+
+### Using Makefile
 
 ```bash
 make build                     # configure and build (Debug by default)
@@ -248,10 +229,10 @@ make rebuild                   # clean then build
 make help                      # list all available targets
 ```
 
-Or with CMake directly:
+### Manual CMake
 
 ```bash
-cmake -B build -DCMAKE_BUILD_TYPE=Release -DRAYSIM_BUILD_EXAMPLES=ON
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DRS_BUILD_EXAMPLES=ON
 cmake --build build --config Release
 ```
 
