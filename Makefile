@@ -447,7 +447,7 @@ cppcheck:
 	$(call _done)
 
 # =========================================================================
-# PRE-COMMIT
+# ENVIRONMENT & PRE-COMMIT
 # =========================================================================
 
 venv-install:
@@ -459,6 +459,10 @@ else
 endif
 	$(call _ok,Virtual environment created and pre-commit installed)
 	$(call _done)
+
+# =========================================================================
+# PRE-COMMIT
+# =========================================================================
 
 pre-commit-install: venv-install
 	$(call _section,Pre-commit Install)
@@ -549,8 +553,10 @@ help:
 	@printf "    $(GRN)make docs$(RST)               Generate HTML docs (creates Doxyfile if absent)\n"
 	@printf "    $(GRN)make clean-docs$(RST)         Remove generated docs\n"
 	@printf "\n"
-	@printf "  $(BLD)Pre-commit:$(RST)\n"
+	@printf "  $(BLD)Environment:$(RST)\n"
 	@printf "    $(GRN)make venv-install$(RST)       Create virtual environment and install dependencies\n"
+	@printf "\n"
+	@printf "  $(BLD)Pre-commit:$(RST)\n"
 	@printf "    $(GRN)make pre-commit-install$(RST) Install git hooks\n"
 	@printf "    $(GRN)make pre-commit$(RST)         Run on all files\n"
 	@printf "    $(GRN)make pre-commit-update$(RST)  Update hook versions\n"
