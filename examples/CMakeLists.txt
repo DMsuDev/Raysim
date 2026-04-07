@@ -1,7 +1,3 @@
-if(NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-endif()
-
 # Destination for shared assets. If the generator is multi-config, place
 # assets under a config subfolder (e.g. Debug/Release) using $<CONFIG>.
 if(CMAKE_CONFIGURATION_TYPES)
@@ -17,14 +13,21 @@ add_custom_target(SharedAssets ALL
     COMMENT "Copying shared assets for examples"
 )
 
-function(add_example TARGET SOURCE)
-    add_executable(${TARGET} ${SOURCE})
-    target_link_libraries(${TARGET} PRIVATE Raysim)
-    set_target_properties(${TARGET} PROPERTIES FOLDER "Examples")
-    add_dependencies(${TARGET} SharedAssets)
-endfunction()
+message(STATUS "Building Raysim examples...")
 
-add_subdirectory(BouncingBalls)
+# Other way to add examples:
+# - Automatically find all subdirectories in the examples folder
+# - Each subdirectory is expected to have its own CMakeLists.txt that defines the example
+
+# file(GLOB EXAMPLE_DIRS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
+#
+# foreach(dir ${EXAMPLE_DIRS})
+#     if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${dir})
+#         add_subdirectory(${dir})
+#     endif()
+# endforeach()
+
 add_subdirectory(LissajousCurves)
 add_subdirectory(Mouse2D)
 add_subdirectory(NoiseLandscape)
+add_subdirectory(BouncingBalls)

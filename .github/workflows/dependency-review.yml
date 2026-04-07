@@ -18,17 +18,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
         with:
           # Fail the check (and block merge if required) on high or critical vulnerabilities
           fail-on-severity: high
-
-          # Block these strong copyleft licenses (deprecated in future versions; consider migrating to allow-lists)
-          deny-licenses: AGPL-3.0, GPL-2.0, GPL-3.0
 
           # Explicitly allow common permissive/open licenses used by typical deps (GLFW, imgui, spdlog, glm, etc.)
           allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, Zlib, BSL-1.0, 0BSD, Unlicense, MPL-2.0

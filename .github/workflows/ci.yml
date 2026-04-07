@@ -1,110 +1,76 @@
 # =============================================================================
-# CI Build - Compile and validate on every push / PR
+# CI - Cross-platform (Windows + Linux) with vcpkg
 # =============================================================================
-name: CI Build
+name: CI
 
 on:
   push:
-    branches: [main, feature/**]
+    branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build-windows:
-    name: Windows (MSVC ${{ matrix.config }})
-    runs-on: windows-latest
+  build:
     strategy:
       fail-fast: false
       matrix:
-        config: [Debug, Release]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Cache CMake build
-        uses: actions/cache@v5
-        with:
-          path: build
-          key: build-win-${{ matrix.config }}-${{ hashFiles('vendor/CMakeLists.txt', 'CMakeLists.txt') }}
-          restore-keys: build-win-${{ matrix.config }}-
-
-      - name: Configure CMake
-        run: cmake -B build -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=${{ matrix.config }}
-
-      - name: Build
-        run: cmake --build build --config ${{ matrix.config }} --parallel $env:NUMBER_OF_PROCESSORS
-
-      - name: Upload build artifact
-        if: matrix.config == 'Release' && success()
-        uses: actions/upload-artifact@v6
-        with:
-          name: ${{ github.event.repository.name }}-windows-${{ github.sha }}
-          path: build/bin/Release/
-          retention-days: 7
-
-  build-linux:
-    name: Linux (${{ matrix.compiler }}, ${{ matrix.config }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        compiler: [gcc, clang]
-        config: [Debug, Release]
         include:
-          - compiler: gcc
-            cc: gcc
-            cxx: g++
-          - compiler: clang
-            cc: clang
-            cxx: clang++
+          - os: ubuntu-latest
+            preset: debug
+            build_preset: debug
+
+          - os: ubuntu-latest
+            preset: release
+            build_preset: release
+
+          - os: windows-latest
+            preset: msvc-debug
+            build_preset: msvc-debug
+
+          - os: windows-latest
+            preset: msvc-release
+            build_preset: msvc-release
+
+    runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
 
-      - name: Install dependencies
+      - name: Install CMake & Ninja (Linux)
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            cmake clang build-essential \
-            libasound2-dev libx11-dev libxrandr-dev \
-            libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev \
-            libxinerama-dev libwayland-dev libxkbcommon-dev libspdlog-dev
+          sudo apt-get install -y cmake ninja-build \
+            libgl1-mesa-dev libx11-dev libxrandr-dev libxinerama-dev \
+            libxcursor-dev libxi-dev libxext-dev libwayland-dev \
+            libxkbcommon-dev pkg-config
 
-      - name: Cache CMake build
+      - name: Install CMake & Ninja (Windows)
+        if: runner.os == 'Windows'
+        uses: lukka/get-cmake@latest
+
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgDirectory: '${{ github.workspace }}/vcpkg'
+
+      - name: Cache build directory
         uses: actions/cache@v5
         with:
           path: build
-          key: build-linux-${{ matrix.compiler }}-${{ matrix.config }}-${{ hashFiles('vendor/CMakeLists.txt', 'CMakeLists.txt') }}
-          restore-keys: build-linux-${{ matrix.compiler }}-${{ matrix.config }}-
-
-      - name: Configure CMake
-        env:
-          CC: ${{ matrix.cc }}
-          CXX: ${{ matrix.cxx }}
-        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+          key: build-${{ runner.os }}-${{ matrix.preset }}-${{ hashFiles('vcpkg.json', '**/CMakeLists.txt', 'CMakePresets.json') }}
+          restore-keys: |
+            build-${{ runner.os }}-${{ matrix.preset }}-
 
       - name: Build
-        run: cmake --build build --config ${{ matrix.config }} --parallel $(nproc)
-
-  build-status:
-    name: CI Status
-    needs: [build-windows, build-linux]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check results
-        run: |
-          results=("${{ needs.build-windows.result }}" "${{ needs.build-linux.result }}")
-          for r in "${results[@]}"; do
-            if [[ "$r" == "failure" ]]; then
-              echo "::error::One or more build configurations failed"
-              exit 1
-            fi
-          done
-          echo "All builds passed!"
+        uses: lukka/run-cmake@v10
+        with:
+          configurePreset: ${{ matrix.preset }}
+          buildPreset: ${{ matrix.build_preset }}

@@ -364,14 +364,17 @@ purge:
 $(DOXYGEN_CONFIG):
 	$(call _section,Creating Doxyfile)
 	@doxygen -g $(DOXYGEN_CONFIG)
-	@$(SED_I) 's|^PROJECT_NAME .*|PROJECT_NAME           = "$(PROJECT_NAME)"|'  $(DOXYGEN_CONFIG)
+	@$(SED_I) 's|^PROJECT_NAME .*|PROJECT_NAME           = "$(PROJECT_NAME)"|'   $(DOXYGEN_CONFIG)
 	@$(SED_I) 's|^PROJECT_NUMBER .*|PROJECT_NUMBER         = $(PROJECT_VER)|'    $(DOXYGEN_CONFIG)
 	@$(SED_I) 's|^OUTPUT_DIRECTORY .*|OUTPUT_DIRECTORY       = $(DOC_BUILD)|'    $(DOXYGEN_CONFIG)
-	@$(SED_I) 's|^INPUT .*|INPUT                  = include src|'                     $(DOXYGEN_CONFIG)
+	@$(SED_I) 's|^INPUT .*|INPUT      = include src README.md docs/images|'      $(DOXYGEN_CONFIG)
+	@$(SED_I) 's|^IMAGE_PATH .*|IMAGE_PATH = docs/images|'                       $(DOXYGEN_CONFIG)
 	@$(SED_I) 's|^RECURSIVE .*|RECURSIVE              = YES|'                    $(DOXYGEN_CONFIG)
 	@$(SED_I) 's|^GENERATE_LATEX .*|GENERATE_LATEX         = NO|'                $(DOXYGEN_CONFIG)
 	@$(SED_I) 's|^EXTRACT_ALL .*|EXTRACT_ALL            = YES|'                  $(DOXYGEN_CONFIG)
 	@$(SED_I) 's|^JAVADOC_AUTOBRIEF .*|JAVADOC_AUTOBRIEF      = YES|'            $(DOXYGEN_CONFIG)
+	@$(SED_I) 's|^USE_MDFILE_AS_MAINPAGE .*|USE_MDFILE_AS_MAINPAGE = README.md|' $(DOXYGEN_CONFIG)
+	@$(SED_I) 's|^MARKDOWN_SUPPORT .*|MARKDOWN_SUPPORT            = YES|'        $(DOXYGEN_CONFIG)
 	$(call _ok,$(DOXYGEN_CONFIG) created - edit it to customise further)
 	$(call _done)
 
@@ -458,13 +461,13 @@ pre-commit-update:
 act-ci:
 	$(call _require,HAS_ACT,act,choco install act-cli | winget install nektos.act | brew install act)
 	$(call _section,Act CI)
-	@act push -W .github/workflows/ci.yml --container-architecture linux/amd64
+	@act push -W .github/workflows/ci.yml
 	$(call _done)
 
 act-quality:
 	$(call _require,HAS_ACT,act,choco install act-cli | winget install nektos.act | brew install act)
 	$(call _section,Act Quality)
-	@act pull_request -W .github/workflows/codeql.yml --container-architecture linux/amd64
+	@act pull_request -W .github/workflows/quality.yml --container-architecture linux/amd64
 	$(call _done)
 
 # =========================================================================
