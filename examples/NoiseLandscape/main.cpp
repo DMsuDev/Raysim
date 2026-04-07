@@ -15,6 +15,7 @@
 //==============================================================================
 
 #include "Raysim/Raysim.hpp"
+#include "Raysim/Core/EntryPoint.hpp"
 #include "SkyLayer.hpp"
 #include "TerrainLayer.hpp"
 
@@ -65,7 +66,7 @@ private:
         Text::DrawText(pauseLine,  16.0f, 44.0f, 18, Colors::LightGray);
         Text::DrawText(speedLine,  16.0f, 68.0f, 18, Colors::LightGray);
         Text::DrawText(reseedLine, 16.0f, 92.0f, 18, Colors::LightGray);
-        Text::DrawText(fpsLine, static_cast<float>(GetWidth()) - 16.0f, 16.0f, 20,
+        Text::DrawText(fpsLine, static_cast<float>(GetContext().Window->GetWidth()) - 16.0f, 16.0f, 20,
                        Colors::LightGray, OriginMode::TopRight);
     }
 
@@ -77,37 +78,37 @@ public:
 // Lifecycle
 //==============================================================================
 
-    void Setup() override
+    void OnStart() override
     {
-        SetSize(1200, 700);
-        SetTitle("Raysim - Noise Landscape");
-        SetDefaultFont("assets/fonts/OpenSans-Regular.ttf");
+        GetContext().Window->SetWindowSize(1200, 700);
+        GetContext().Window->SetWindowTitle("Raysim - Noise Landscape");
+        FontManager::LoadFont("assets/fonts/OpenSans-Regular.ttf");
         Time::SetTargetFPS(60);
-        float w = static_cast<float>(GetWidth());
-        float h = static_cast<float>(GetHeight());
+        float w = static_cast<float>(GetContext().Window->GetWidth());
+        float h = static_cast<float>(GetContext().Window->GetHeight());
         skyLayer_.emplace(w, h * SKY_HEIGHT_RATIO, STAR_COUNT, SKY_GRAD_STEPS);
         terrain_.emplace(w, h);
     }
 
-    void Update(float dt) override
+    void OnUpdate(float dt) override
     {
         //--- Mode select ------------------------------------------------
-        if (Input->IsKeyPressed(KeyCode::One))   terrain_->SetMode(NoiseMode::Perlin);
-        if (Input->IsKeyPressed(KeyCode::Two))   terrain_->SetMode(NoiseMode::Simplex);
-        if (Input->IsKeyPressed(KeyCode::Three)) terrain_->SetMode(NoiseMode::Cellular);
-        if (Input->IsKeyPressed(KeyCode::Four))  terrain_->SetMode(NoiseMode::Value);
-        if (Input->IsKeyPressed(KeyCode::Five))  terrain_->SetMode(NoiseMode::FBM);
+        if (GetContext().Input->IsKeyPressed(KeyCode::One))   terrain_->SetMode(NoiseMode::Perlin);
+        if (GetContext().Input->IsKeyPressed(KeyCode::Two))   terrain_->SetMode(NoiseMode::Simplex);
+        if (GetContext().Input->IsKeyPressed(KeyCode::Three)) terrain_->SetMode(NoiseMode::Cellular);
+        if (GetContext().Input->IsKeyPressed(KeyCode::Four))  terrain_->SetMode(NoiseMode::Value);
+        if (GetContext().Input->IsKeyPressed(KeyCode::Five))  terrain_->SetMode(NoiseMode::FBM);
 
         //--- Scroll control ---------------------------------------------
-        if (Input->IsKeyPressed(KeyCode::Space)) autoScroll_ = !autoScroll_;
+        if (GetContext().Input->IsKeyPressed(KeyCode::Space)) autoScroll_ = !autoScroll_;
 
-        if (Input->IsKeyDown(KeyCode::Up))
+        if (GetContext().Input->IsKeyDown(KeyCode::Up))
             scrollSpeed_ = Math::Min(scrollSpeed_ + 80.0f * dt, 600.0f);
-        if (Input->IsKeyDown(KeyCode::Down))
+        if (GetContext().Input->IsKeyDown(KeyCode::Down))
             scrollSpeed_ = Math::Max(scrollSpeed_ - 80.0f * dt, 5.0f);
 
         //--- Reseed - regenerate both sky and terrain -----------------------
-        if (Input->IsKeyPressed(KeyCode::R)) {
+        if (GetContext().Input->IsKeyPressed(KeyCode::R)) {
             Math::Random::SeedRandom();
             skyLayer_->Reseed();
             terrain_->Reseed();
@@ -118,9 +119,9 @@ public:
         terrain_->SetScrollX(scrollX_);
     }
 
-    void Draw(float /*alpha*/) override
+    void OnDraw(float /*alpha*/) override
     {
-        float skyH = static_cast<float>(GetHeight()) * SKY_HEIGHT_RATIO;
+        float skyH = static_cast<float>(GetContext().Window->GetHeight()) * SKY_HEIGHT_RATIO;
         skyLayer_->SetSkyHeight(skyH);
         skyLayer_->DrawSky();               // gradient background
         skyLayer_->DrawStars();             // twinkling star field
@@ -131,9 +132,12 @@ public:
     }
 };
 
-int main()
+
+//==============================================================================
+// Entry point
+//==============================================================================
+
+RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs /*args*/)
 {
-    NoiseLandscape sim;
-    sim.Run();
-    return 0;
+    return new NoiseLandscape();
 }

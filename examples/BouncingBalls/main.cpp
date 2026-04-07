@@ -13,6 +13,7 @@
 //==============================================================================
 
 #include "Raysim/Raysim.hpp"
+#include "Raysim/Core/EntryPoint.hpp"
 #include <cmath>
 #include <vector>
 
@@ -87,8 +88,8 @@ private:
         if (ball.position.x - ball.radius < 0) {
             ball.position.x  = ball.radius;
             ball.velocity.x *= -BALL_DAMPING;
-        } else if (ball.position.x + ball.radius > GetWidth()) {
-            ball.position.x  = GetWidth() - ball.radius;
+        } else if (ball.position.x + ball.radius > GetContext().Window->GetWidth()) {
+            ball.position.x  = GetContext().Window->GetWidth() - ball.radius;
             ball.velocity.x *= -BALL_DAMPING;
         }
 
@@ -96,8 +97,8 @@ private:
         if (ball.position.y - ball.radius < 0) {
             ball.position.y  = ball.radius;
             ball.velocity.y *= -BALL_DAMPING;
-        } else if (ball.position.y + ball.radius > GetHeight()) {
-            ball.position.y  = GetHeight() - ball.radius;
+        } else if (ball.position.y + ball.radius > GetContext().Window->GetHeight()) {
+            ball.position.y  = GetContext().Window->GetHeight() - ball.radius;
             ball.velocity.y *= -BALL_DAMPING;
 
             if (ball.velocity.Length() < STOP_THRESHOLD) {
@@ -152,8 +153,8 @@ private:
 #pragma region Drawing
 
     void DrawBackground() {
-        Vector2 center{ GetWidth() * 0.5f, GetHeight() * 0.45f };
-        float   maxR = Math::Max(GetWidth(), GetHeight()) * 0.95f;
+        Vector2 center{ GetContext().Window->GetWidth() * 0.5f, GetContext().Window->GetHeight() * 0.45f };
+        float   maxR = Math::Max(GetContext().Window->GetWidth(), GetContext().Window->GetHeight()) * 0.95f;
         Color   base{18, 24, 38};
 
         const int STEPS = 28;
@@ -219,8 +220,8 @@ private:
     void DrawStats() {
         float t = Time::GetTime();
 
-        float w = static_cast<float>(GetWidth());
-        float h = static_cast<float>(GetHeight());
+        float w = static_cast<float>(GetContext().Window->GetWidth());
+        float h = static_cast<float>(GetContext().Window->GetHeight());
 
         DrawChip(18,         20,       "Balls: "   + std::to_string(static_cast<int>(balls_.size())),                     {70,  130, 180, 180}, t);
         DrawChip(w - 180.0f, 20,       "FPS: "     + std::to_string(static_cast<int>(Time::GetSmoothedFPS())), {140, 90,  200, 180}, t, 4.0f);
@@ -273,10 +274,10 @@ public:
 
 #pragma region Setup
 
-    void Setup() override {
-        SetSize(1000, 700);
-        SetTitle("Raysim - Bouncing Balls Physics");
-        SetDefaultFont("assets/fonts/OpenSans-Regular.ttf");
+    void OnStart() override {
+        GetContext().Window->SetWindowSize(1000, 700);
+        GetContext().Window->SetWindowTitle("Raysim - Bouncing Balls Physics");
+        FontManager::LoadFont("assets/fonts/OpenSans-Regular.ttf");
         SpawnRandomBalls(8);
         Time::SetTargetFPS(60);
     }
@@ -285,21 +286,21 @@ public:
 
 #pragma region Update and FixedUpdate
 
-    void Update(float dt) override {
-        mousePos_        = Input->GetMousePosition();
-        rightMouseDown_  = Input->IsMouseButtonDown(MouseButton::Right);
-        middleMouseDown_ = Input->IsMouseButtonDown(MouseButton::Middle);
+    void OnUpdate(float dt) override {
+        mousePos_        = GetContext().Input->GetMousePosition();
+        rightMouseDown_  = GetContext().Input->IsMouseButtonDown(MouseButton::Right);
+        middleMouseDown_ = GetContext().Input->IsMouseButtonDown(MouseButton::Middle);
 
         //--- Toggle flags ------------------------------------------------
-        if (Input->IsKeyPressed(KeyCode::G)) useGravity_        = !useGravity_;
-        if (Input->IsKeyPressed(KeyCode::V)) showVelocityLines_ = !showVelocityLines_;
-        if (Input->IsKeyPressed(KeyCode::S)) showStats_         = !showStats_;
+        if (GetContext().Input->IsKeyPressed(KeyCode::G)) useGravity_        = !useGravity_;
+        if (GetContext().Input->IsKeyPressed(KeyCode::V)) showVelocityLines_ = !showVelocityLines_;
+        if (GetContext().Input->IsKeyPressed(KeyCode::S)) showStats_         = !showStats_;
 
         //--- Spawn -------------------------------------------------------
-        if (Input->IsMouseButtonPressed(MouseButton::Left)) SpawnAtMouse();
+        if (GetContext().Input->IsMouseButtonPressed(MouseButton::Left)) SpawnAtMouse();
     }
 
-    void FixedUpdate(float dt) override {
+    void OnFixedUpdate(float dt) override {
         //--- Mouse forces ------------------------------------------------
         if (rightMouseDown_)  ApplyMouseForce(dt, false);
         if (middleMouseDown_) ApplyMouseForce(dt, true);
@@ -320,7 +321,7 @@ public:
 
 #pragma region Draw
 
-    void Draw(float alpha) override {
+    void OnDraw(float alpha) override {
         DrawBackground();
         for (const auto& ball : balls_) DrawBall(ball);
         DrawMouseCursors();
@@ -335,8 +336,12 @@ public:
 // Entry point
 //==============================================================================
 
-int main() {
-    BouncingBalls sim;
-    sim.Run();
-    return 0;
+
+//==============================================================================
+// Entry point
+//==============================================================================
+
+RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs /*args*/)
+{
+    return new BouncingBalls();
 }
