@@ -24,7 +24,7 @@ std::unique_ptr<IWindow> BackendFactory::CreateWindow(BackendType type)
     return nullptr;
 }
 
-std::unique_ptr<IInput> BackendFactory::CreateInput(BackendType type)
+std::unique_ptr<Input> BackendFactory::CreateInput(BackendType type)
 {
     switch (type)
     {

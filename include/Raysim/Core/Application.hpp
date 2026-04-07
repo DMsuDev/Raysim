@@ -10,8 +10,7 @@
 
 #include "Raysim/Interfaces/IRenderer.hpp"
 #include "Raysim/Interfaces/IWindow.hpp"
-#include "Raysim/Interfaces/IInput.hpp"
-#
+#include "Raysim/Input/Input.hpp"
 
 #include "Raysim/Math/Random.hpp"
 
@@ -50,7 +49,7 @@ protected:
 
     std::unique_ptr<IRenderer> Renderer;
     std::unique_ptr<IWindow>   Window;
-    std::unique_ptr<IInput>    Input;
+    std::unique_ptr<Input>    Input;
 
     // -- Lifecycle -----------------------------------------------------------
 

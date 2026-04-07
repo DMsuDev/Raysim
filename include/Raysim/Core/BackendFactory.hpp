@@ -4,7 +4,7 @@
 
 #include "../Interfaces/IRenderer.hpp"
 #include "../Interfaces/IWindow.hpp"
-#include "../Interfaces/IInput.hpp"
+#include "Raysim/Input/Input.hpp"
 
 namespace RS {
 
@@ -32,7 +32,7 @@ enum class BackendType
  * @class BackendFactory
  * @brief Factory that creates concrete backend implementations
  *
- * Provides static methods to create instances of IRenderer, IWindow, and IInput
+ * Provides static methods to create instances of IRenderer, IWindow, and Input
  * based on the specified BackendType. This allows the application to remain agnostic of the underlying platform and easily switch backends if needed.
  */
 class BackendFactory
@@ -57,9 +57,9 @@ public:
     /**
      * @brief Create an input handler for the specified backend
      * @param type The backend to use
-     * @return Owning pointer to a concrete IInput implementation
+     * @return Owning pointer to a concrete Input implementation
      */
-    static std::unique_ptr<IInput> CreateInput(BackendType type);
+    static std::unique_ptr<Input> CreateInput(BackendType type);
 };
 
 } // namespace RS
