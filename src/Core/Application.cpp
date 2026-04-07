@@ -21,11 +21,11 @@ void Application::Run()
 {
     try
     {
-        if (!Logger::IsInitialized())
+        if (!Log::IsInitialized())
         {
-            Logger::Init("RaySim", config_.logFile, true);
-            Logger::SetConsoleLevel(spdlog::level::info);
-            Logger::SetFileLevel(spdlog::level::trace);
+            Log::Init(false);
+            Log::SetConsoleLevel(spdlog::level::info);
+            Log::SetFileLevel(spdlog::level::trace);
         }
 
         RunInternal();
@@ -33,18 +33,18 @@ void Application::Run()
     catch (const std::exception& e)
     {
         Shutdown();
-        LOG_ERROR("Unhandled exception: {}", e.what());
+        RS_CORE_ERROR("Unhandled exception: {}", e.what());
     }
     catch (...)
     {
         Shutdown();
-        LOG_ERROR("Unhandled unknown exception in main loop");
+        RS_CORE_ERROR("Unhandled unknown exception in main loop");
     }
 }
 
 void Application::RunInternal()
 {
-    LOG_INFO("[SESSION START] Initialising backend: {}", static_cast<int>(backendType_));
+    RS_CORE_INFO("[SESSION START] Initialising backend: {}", static_cast<int>(backendType_));
 
     // Create backend objects via factory
     Renderer = BackendFactory::CreateRenderer(backendType_);
@@ -53,16 +53,16 @@ void Application::RunInternal()
 
     if (!Renderer || !Window || !Input)
     {
-        LOG_ERROR("Failed to create one or more backend components");
+        RS_CORE_ERROR("Failed to create one or more backend components");
         return;
     }
 
     Window->Init(WindowProps{config_.title, config_.width, config_.height});
     Time::Reset(); // Ensure time starts at zero when the main loop begins
 
-    LOG_INFO("Backend ready. Calling Setup()...");
+    RS_CORE_INFO("Backend ready. Calling Setup()...");
     Setup();
-    LOG_INFO("Setup() done, entering main loop");
+    RS_CORE_INFO("Setup() done, entering main loop");
 
     isRunning_ = true;
 
@@ -82,7 +82,7 @@ void Application::RunInternal()
 
         if (stepsTaken == config_.maxFixedSteps)
         {
-            LOG_WARN("Frame drop detected! Fixed steps clamped to {}", config_.maxFixedSteps);
+            RS_CORE_WARN("Frame drop detected! Fixed steps clamped to {}", config_.maxFixedSteps);
         }
 
         Update(Time::GetDeltaTime()); // frame-based logic
@@ -92,7 +92,7 @@ void Application::RunInternal()
         Renderer->EndFrame();
 
         if (Time::GetFrameCount() % 300 == 0)
-            Logger::Flush();
+            Log::Flush();
 
         Time::EndFrame();
     }
@@ -102,8 +102,8 @@ void Application::RunInternal()
 
 void Application::Shutdown()
 {
-    LOG_INFO("Shutting down application");
-    Logger::Flush();
+    RS_CORE_INFO("Shutting down application");
+    Log::Flush();
 
     Renderer.reset();
     Input.reset();

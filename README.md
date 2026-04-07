@@ -99,7 +99,7 @@ cmake -B build -DRAYSIM_BUILD_EXAMPLES=ON
 Supporting systems available from any lifecycle method:
 
 - `RS::Time` - frame timing, fixed timestep accumulator, time scale, pause/resume
-- `RS::Logger` - structured logging via spdlog (console and log file)
+- `RS::Log` - structured logging via spdlog (console and log file)
 - `RS::FontManager` - font loading and global access for text rendering
 - `RS::Math::Random` - seeded RNG and procedural noise (Perlin 2D/3D, Simplex, Cellular, Value, fBm)
 
@@ -188,7 +188,7 @@ void Draw(float alpha) override {
 | `Application`       | Base class. Inherit from it, override lifecycle methods, access backend through `Renderer`, `Window`, and `Input`.                                            |
 | `ApplicationConfig` | Configure title, resolution, max fixed steps, and log file before the loop starts. All fields have defaults - pass only what you need.                        |
 | `Time`              | Static utility. Delta time, fixed timestep, time scale, pause/resume, FPS counters.                                                                           |
-| `Logger`            | Wraps spdlog. Writes to console and a log file. Use macros `RS_LOG_INFO`, `RS_LOG_WARN`, `RS_LOG_ERROR`.                                                      |
+| `Log`               | Wraps spdlog. Writes to console and a log file. Use macros `RS_LOG_INFO`, `RS_LOG_WARN`, `RS_LOG_ERROR`.                                                      |
 | `FontManager`       | Load a TTF/OTF font once, access it globally for text rendering. You can set a default font using `SetDefaultFont("path/to/font.ttf")` on `Setup() override`. |
 | `BackendFactory`    | Creates concrete `IRenderer`, `IWindow`, and `IInput` instances for the selected backend.                                                                     |
 

@@ -43,7 +43,7 @@ RS::Color RS::Color::FromHex(const std::string& hex) {
     }
     catch (const std::exception& e)
     {
-        LOG_ERROR("Error parsing hex color '{}': {}", hex, e.what());
+        RS_CORE_ERROR("Error parsing hex color '{}': {}", hex, e.what());
         return Color{};
     }
 }
