@@ -1,0 +1,103 @@
+# =============================================================================
+# Code Quality (Static Analysis + Linting)
+# =============================================================================
+name: Code Quality
+
+on:
+  pull_request:
+    branches: [main]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  clang-tidy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build clang-tidy \
+            libgl1-mesa-dev libx11-dev libxrandr-dev libxinerama-dev \
+            libxcursor-dev libxi-dev libxext-dev libwayland-dev \
+            libxkbcommon-dev pkg-config
+
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgDirectory: '${{ github.workspace }}/vcpkg'
+
+      - name: Configure
+        uses: lukka/run-cmake@v10
+        with:
+          configurePreset: debug
+
+      - name: Run clang-tidy
+        run: |
+          find src -name '*.cpp' -print0 | \
+          xargs -0 -P$(nproc) clang-tidy \
+            -p build/ninja/debug \
+            --warnings-as-errors='*'
+
+  cppcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install cppcheck
+        run: sudo apt-get update && sudo apt-get install -y cppcheck
+
+      - name: Run cppcheck
+        run: |
+          cppcheck -j$(nproc) \
+            --enable=all \
+            --std=c++20 \
+            --error-exitcode=1 \
+            --suppress=missingIncludeSystem \
+            --exclude=build \
+            --exclude=third_party \
+            --exclude=cmake \
+            --inline-suppr \
+            -I include \
+            src/ \
+            2>&1 | tee cppcheck-report.txt
+
+      - name: Upload cppcheck report
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: cppcheck-report
+          path: cppcheck-report.txt
+
+  codespell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run codespell
+        uses: codespell-project/actions-codespell@v2
+        with:
+          skip: build,_deps,vendor,third_party,vcpkg,cmake,*.lock,.git,CMakeFiles
+          ignore_words_list: nd,ot,te
+          check_filenames: true
+
+  quality-status:
+    needs: [clang-tidy, cppcheck, codespell]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check results
+        run: |
+          if [[ "${{ needs.clang-tidy.result }}" == "failure" || \
+                "${{ needs.cppcheck.result }}" == "failure" || \
+                "${{ needs.codespell.result }}" == "failure" ]]; then
+            echo "::error::One or more quality checks failed"
+            exit 1
+          fi
+          echo "All quality checks passed"

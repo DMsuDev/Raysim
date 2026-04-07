@@ -461,13 +461,13 @@ pre-commit-update:
 act-ci:
 	$(call _require,HAS_ACT,act,choco install act-cli | winget install nektos.act | brew install act)
 	$(call _section,Act CI)
-	@act push -W .github/workflows/ci.yml --container-architecture linux/amd64
+	@act push -W .github/workflows/ci.yml
 	$(call _done)
 
 act-quality:
 	$(call _require,HAS_ACT,act,choco install act-cli | winget install nektos.act | brew install act)
 	$(call _section,Act Quality)
-	@act pull_request -W .github/workflows/codeql.yml --container-architecture linux/amd64
+	@act pull_request -W .github/workflows/quality.yml --container-architecture linux/amd64
 	$(call _done)
 
 # =========================================================================
