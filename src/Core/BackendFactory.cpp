@@ -12,7 +12,7 @@ Scope<RendererAPI> BackendFactory::CreateRenderer(RenderAPI api)
 {
     switch (api)
     {
-        case RenderAPI::Raylib: 
+        case RenderAPI::Raylib:
         {
             RS_CORE_DEBUG("Renderer backend created: Raylib");
             return CreateScope<RaylibRendererAPI>();
@@ -29,7 +29,7 @@ Scope<Window> BackendFactory::CreateWindow(WindowBackend backend, const WindowPr
 {
     switch (backend)
     {
-        case WindowBackend::Raylib: 
+        case WindowBackend::Raylib:
         {
             RS_CORE_DEBUG("Window backend created: Raylib");
             return CreateScope<RaylibWindow>(props);
@@ -49,7 +49,7 @@ Scope<Input> BackendFactory::CreateInput(WindowBackend backend)
 {
     switch (backend)
     {
-        case WindowBackend::Raylib: 
+        case WindowBackend::Raylib:
         {
             RS_CORE_DEBUG("Input backend created: Raylib");
             return CreateScope<RaylibInput>();

@@ -9,16 +9,16 @@ extern RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs arg
 int main(int argc, char** argv)
 {
 	RS::Log::Init(true);
-	
+
 	RS_CORE_INFO("Starting application...");
-	
+
 	auto app = RS::CreateApplication({ argc, argv });
-	
+
 	app->Run();
-	
+
 	RS_CORE_INFO("Application exiting...");
 
 	delete app;
-	
+
 	RS::Log::Shutdown();
 }

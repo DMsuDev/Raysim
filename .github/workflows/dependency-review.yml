@@ -19,8 +19,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-
       - name: Dependency Review
+
         uses: actions/dependency-review-action@v4
         with:
           # Fail the check (and block merge if required) on high or critical vulnerabilities

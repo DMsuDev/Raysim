@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <ostream>
 
-namespace RS 
+namespace RS
 {
     /// @enum KeyCode
     /// @brief Keyboard key codes (mirrors raylib KeyboardKey)

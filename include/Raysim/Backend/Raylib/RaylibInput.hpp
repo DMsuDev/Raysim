@@ -17,7 +17,7 @@ public:
     ~RaylibInput() override = default;
 
     void Update() override {} // No-op, raylib handles input state internally
-    
+
     // ============================================================================
     // KEYBOARD INPUT
     // ============================================================================

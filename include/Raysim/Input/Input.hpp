@@ -7,7 +7,7 @@
 #include "Raysim/Math/Vector2.hpp"
 
 namespace RS {
-    
+
 /// @interface Input
 /// @brief Abstract interface for keyboard, mouse, and gamepad input.
 class Input
