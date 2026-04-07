@@ -45,8 +45,8 @@ repos:
     hooks:
       - id: codespell
         name: Lint spelling in source files (with --fix)
-        args: [--skip, "build,_deps,third_party,*.lock,*.json", --ignore-words-list, "nd,ot,te"]
-        exclude: ^(build/|_deps/|third_party/|.*\.lock|.*\.json)
+        args: [--skip, "build,_deps,third_party,*.lock,*.json,CMakeFiles.txt", --ignore-words-list, "nd,ot,te"]
+        exclude: ^(build/|_deps/|third_party/|.*\.lock|.*\.json|CMakeFiles.txt)
 
   # ─── YAML ────────────────────────────────────────────────────────────
   - repo: https://github.com/google/yamlfmt
