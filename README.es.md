@@ -6,11 +6,11 @@
 [![Version](https://img.shields.io/badge/Version-0.3.1-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
 
 [English Readme](https://github.com/DMsuDev/Raysim/blob/main/README.md)
- • [Readme Español](https://github.com/DMsuDev/Raysim/blob/main/README.es.md)
+• [Readme Español](https://github.com/DMsuDev/Raysim/blob/main/README.es.md)
 
 Raysim es un framework de C++ para gráficos 2D y aplicaciones interactivas, construido sobre [raylib](https://www.raylib.com/).
 
-Inspirado en **p5.js** y **Processing**, ofrece una API simple basada en clases para dibujar formas, manejar entrada, gestionar el tiempo y ejecutar simulaciones con paso de tiempo fijo. Los headers del backend nunca se exponen al código del usuario — todo el acceso pasa por interfaces abstractas limpias.
+Inspirado en **p5.js** y **Processing**, ofrece una API simple basada en clases para dibujar formas, manejar entrada, gestionar el tiempo y ejecutar simulaciones con paso de tiempo fijo. Los headers del backend nunca se exponen al código del usuario, todo el acceso pasa por interfaces abstractas limpias.
 
 Útil para aprender programación gráfica, prototipar ideas o construir pequeños juegos y simulaciones.
 
@@ -45,12 +45,12 @@ Inspirado en **p5.js** y **Processing**, ofrece una API simple basada en clases 
   </tr>
 </table>
 
-| Ejemplo           | Descripción                                                                                       |
-| ----------------- | ------------------------------------------------------------------------------------------------- |
-| `BouncingBalls`   | Simulación de física con gravedad, atracción/repulsión del mouse y generación de bolas.           |
-| `LissajousCurves` | Visualizador de curvas paramétricas con cambio de fase animado y presets de frecuencia.            |
-| `Mouse2D`         | Seguimiento del mouse e interacción 2D.                                                           |
-| `NoiseLandscape`  | Terreno con desplazamiento generado proceduralmente usando varias funciones de ruido.              |
+| Ejemplo           | Descripción                                                                             |
+| ----------------- | --------------------------------------------------------------------------------------- |
+| `BouncingBalls`   | Simulación de física con gravedad, atracción/repulsión del mouse y generación de bolas. |
+| `LissajousCurves` | Visualizador de curvas paramétricas con cambio de fase animado y presets de frecuencia. |
+| `Mouse2D`         | Seguimiento del mouse e interacción 2D.                                                 |
+| `NoiseLandscape`  | Terreno con desplazamiento generado proceduralmente usando varias funciones de ruido.   |
 
 ### Usando Makefile
 
@@ -152,38 +152,38 @@ void Draw(float alpha) override {
 <details>
 <summary>Core</summary>
 
-| Archivo             | Propósito                                                                                                                                                                |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Application`       | Clase base. Hereda de ella, sobreescribe los métodos del ciclo de vida, accede al backend a través de `Renderer`, `Window` e `Input`.                                    |
-| `ApplicationConfig` | Configura título, resolución, máximo de pasos fijos y archivo de log antes de que comience el bucle. Todos los campos tienen valores por defecto - pasa solo lo que necesites. |
-| `Time`              | Utilidad estática. Delta time, paso de tiempo fijo, escala de tiempo, pausa/reanudar, contadores de FPS.                                                                 |
-| `Log`               | Envuelve spdlog. Escribe en consola y archivo de log. Usa las macros `RS_LOG_INFO`, `RS_LOG_WARN`, `RS_LOG_ERROR`.                                                       |
+| Archivo             | Propósito                                                                                                                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Application`       | Clase base. Hereda de ella, sobreescribe los métodos del ciclo de vida, accede al backend a través de `Renderer`, `Window` e `Input`.                                                      |
+| `ApplicationConfig` | Configura título, resolución, máximo de pasos fijos y archivo de log antes de que comience el bucle. Todos los campos tienen valores por defecto - pasa solo lo que necesites.             |
+| `Time`              | Utilidad estática. Delta time, paso de tiempo fijo, escala de tiempo, pausa/reanudar, contadores de FPS.                                                                                   |
+| `Log`               | Envuelve spdlog. Escribe en consola y archivo de log. Usa las macros `RS_LOG_INFO`, `RS_LOG_WARN`, `RS_LOG_ERROR`.                                                                         |
 | `FontManager`       | Carga una fuente TTF/OTF una vez, accede globalmente para renderizado de texto. Puedes establecer una fuente por defecto usando `SetDefaultFont("ruta/fuente.ttf")` en `Setup() override`. |
-| `BackendFactory`    | Crea instancias concretas de `IRenderer`, `IWindow` e `IInput` para el backend seleccionado.                                                                             |
+| `BackendFactory`    | Crea instancias concretas de `RendererAPI`, `Window` e `Input` para el backend seleccionado.                                                                                               |
 
 </details>
 
 <details>
 <summary>Graphics</summary>
 
-| Archivo      | Propósito                                                                                                                                                                                               |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Archivo      | Propósito                                                                                                                                                                                                    |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `Shapes`     | Rellenos y contornos: rectángulos, círculos, líneas, triángulos. Cada función acepta un `OriginMode` opcional para anclar la forma en su centro o cualquier esquina/borde en lugar del top-left por defecto. |
-| `Texts`      | Dibuja cadenas de texto usando la fuente cargada.                                                                                                                                                        |
-| `Color`      | Struct de color RGBA `{r, g, b, a}` con conversión HSV. Construye cualquier color inline: `Color{255, 100, 0}`.                                                                                          |
-| `Colors`     | Namespace de presets `constexpr`: `Colors::White`, `Colors::Black`, `Colors::Cyan`, `Colors::DarkBlue`, `Colors::RayBlack`, y más. Úsalos en lugar de construir colores a mano.                           |
-| `OriginMode` | Enum usado por Shapes para controlar el punto de anclaje de una forma (TopLeft, Center, BottomRight, etc.).                                                                                              |
+| `Texts`      | Dibuja cadenas de texto usando la fuente cargada.                                                                                                                                                            |
+| `Color`      | Struct de color RGBA `{r, g, b, a}` con conversión HSV. Construye cualquier color inline: `Color{255, 100, 0}`.                                                                                              |
+| `Colors`     | Namespace de presets `constexpr`: `Colors::White`, `Colors::Black`, `Colors::Cyan`, `Colors::DarkBlue`, `Colors::RayBlack`, y más. Úsalos en lugar de construir colores a mano.                              |
+| `OriginMode` | Enum usado por Shapes para controlar el punto de anclaje de una forma (TopLeft, Center, BottomRight, etc.).                                                                                                  |
 
 </details>
 
 <details>
 <summary>Math</summary>
 
-| Archivo   | Propósito                                                                                                                                                                                                                                                                                                              |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Vector2` | Vector 2D con operadores aritméticos y métodos de utilidad comunes.                                                                                                                                                                                                                                                    |
-| `Vector3` | Vector 3D, usado internamente para operaciones de color/limpieza y matemáticas generales.                                                                                                                                                                                                                              |
-| `Math`    | Helpers matemáticos comunes: clamp, lerp, map, wrap y utilidades trigonométricas.                                                                                                                                                                                                                                      |
+| Archivo   | Propósito                                                                                                                                                                                                                                                                                                                          |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Vector2` | Vector 2D con operadores aritméticos y métodos de utilidad comunes.                                                                                                                                                                                                                                                                |
+| `Vector3` | Vector 3D, usado internamente para operaciones de color/limpieza y matemáticas generales.                                                                                                                                                                                                                                          |
+| `Math`    | Helpers matemáticos comunes: clamp, lerp, map, wrap y utilidades trigonométricas.                                                                                                                                                                                                                                                  |
 | `Random`  | RNG Mersenne Twister con semilla. Rangos de enteros y flotantes, helpers booleanos, muestreo de contenedores, más ruido coherente (Perlin 2D/3D, Simplex, Cellular, Value) y Fractal Brownian Motion. La semilla es auto-aleatoria al inicio; llama a `Seed()` para resultados deterministas o `SeedRandom()` para re-aleatorizar. |
 
 </details>
@@ -193,13 +193,13 @@ void Draw(float alpha) override {
 
 Las tres interfaces abstractas desacoplan el código del usuario de la librería subyacente:
 
-| Interfaz    | Responsabilidad                                         |
-| ----------- | ------------------------------------------------------- |
-| `IRenderer` | Inicio/fin de frame, limpieza de pantalla, control VSync. |
-| `IWindow`   | Título, tamaño, fullscreen, relación de aspecto.         |
-| `IInput`    | Teclado, botones del mouse, posición del cursor, scroll. |
+| Interfaz      | Responsabilidad                                           |
+| ------------- | --------------------------------------------------------- |
+| `RendererAPI` | Inicio/fin de frame, limpieza de pantalla, control VSync. |
+| `Window`      | Título, tamaño, fullscreen, relación de aspecto.          |
+| `Input`       | Teclado, botones del mouse, posición del cursor, scroll.  |
 
-El backend de `Raylib` es la única implementación incluida. `RaylibRenderer`,
+El backend de `Raylib` es la única implementación incluida. `RaylibRendererAPI`,
 `RaylibWindow` y `RaylibInput` satisfacen cada interfaz. Todos los headers
 específicos de raylib están confinados a esta capa y nunca se filtran al código del usuario.
 

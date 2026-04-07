@@ -6,7 +6,7 @@
 [![Version](https://img.shields.io/badge/Version-0.3.1-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
 
 [English Readme](https://github.com/DMsuDev/Raysim/blob/main/README.md)
- • [Readme Español](https://github.com/DMsuDev/Raysim/blob/main/README.es.md)
+• [Readme Español](https://github.com/DMsuDev/Raysim/blob/main/README.es.md)
 
 Raysim is a C++ framework for 2D graphics and interactive applications, built on top of [raylib](https://www.raylib.com/).
 
@@ -159,7 +159,7 @@ void Draw(float alpha) override {
 | `Time`              | Static utility. Delta time, fixed timestep, time scale, pause/resume, FPS counters.                                                                           |
 | `Log`               | Wraps spdlog. Writes to console and a log file. Use macros `RS_LOG_INFO`, `RS_LOG_WARN`, `RS_LOG_ERROR`.                                                      |
 | `FontManager`       | Load a TTF/OTF font once, access it globally for text rendering. You can set a default font using `SetDefaultFont("path/to/font.ttf")` on `Setup() override`. |
-| `BackendFactory`    | Creates concrete `IRenderer`, `IWindow`, and `IInput` instances for the selected backend.                                                                     |
+| `BackendFactory`    | Creates concrete `RendererAPI`, `Window`, and `Input` instances for the selected backend.                                                                     |
 
 </details>
 
@@ -193,13 +193,13 @@ void Draw(float alpha) override {
 
 The three abstract interfaces decouple user code from the underlying library:
 
-| Interface   | Responsibility                                    |
-| ----------- | ------------------------------------------------- |
-| `IRenderer` | Frame begin/end, screen clear, VSync control.     |
-| `IWindow`   | Title, size, fullscreen toggle, aspect ratio.     |
-| `IInput`    | Keyboard, mouse buttons, cursor position, scroll. |
+| Interface     | Responsibility                                    |
+| ------------- | ------------------------------------------------- |
+| `RendererAPI` | Frame begin/end, screen clear, VSync control.     |
+| `Window`      | Title, size, fullscreen toggle, aspect ratio.     |
+| `Input`       | Keyboard, mouse buttons, cursor position, scroll. |
 
-The `Raylib` backend is the only implementation included. `RaylibRenderer`,
+The `Raylib` backend is the only implementation included. `RaylibRendererAPI`,
 `RaylibWindow`, and `RaylibInput` satisfy each interface. All raylib-specific
 headers are confined to this layer and never leak into user code.
 
