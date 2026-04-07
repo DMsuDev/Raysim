@@ -8,7 +8,7 @@
 #include "Raysim/Math/Vector2.hpp"
 #include "Raysim/Math/Vector3.hpp"
 
-#include "Raysim/Interfaces/IRenderer.hpp"
+#include "Raysim/Renderer/RendererAPI.hpp"
 #include "Raysim/Interfaces/IWindow.hpp"
 #include "Raysim/Input/Input.hpp"
 
@@ -47,9 +47,9 @@ public:
 protected:
     // -- Backend interfaces --------------------------------------------------
 
-    std::unique_ptr<IRenderer> Renderer;
-    std::unique_ptr<IWindow>   Window;
-    std::unique_ptr<Input>    Input;
+    std::unique_ptr<RendererAPI> Renderer;
+    std::unique_ptr<IWindow>     Window;
+    std::unique_ptr<Input>       Input;
 
     // -- Lifecycle -----------------------------------------------------------
 
@@ -120,8 +120,9 @@ private:
     void Shutdown();
 
     ApplicationConfig config_;
-    BackendType       backendType_ = BackendType::Raylib;
-    bool              isRunning_   = false;
+    WindowBackend     windowBackend_ = WindowBackend::Raylib;
+    RenderAPI         renderAPI_     = RenderAPI::Raylib;
+    bool              isRunning_     = false;
 };
 
 } // namespace RS

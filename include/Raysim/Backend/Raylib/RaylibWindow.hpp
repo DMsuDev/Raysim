@@ -2,6 +2,8 @@
 
 #include "../../Interfaces/IWindow.hpp"
 
+#include "Raysim/Math/Vector2.hpp"
+
 namespace RS {
 
 class RaylibWindow : public IWindow

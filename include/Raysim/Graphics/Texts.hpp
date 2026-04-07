@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Color.hpp"
-#include "../Math/Vector2.hpp"
+#include "Raysim/Math/Vector2.hpp"
 #include "OriginMode.hpp"
 
 #include <string>

@@ -1,36 +1,36 @@
 #include "Raysim/Core/BackendFactory.hpp"
 
-#include "Raysim/Backend/Raylib/RaylibRenderer.hpp"
+#include "Raysim/Backend/Raylib/RaylibRendererAPI.hpp"
 #include "Raysim/Backend/Raylib/RaylibWindow.hpp"
 #include "Raysim/Backend/Raylib/RaylibInput.hpp"
 
 namespace RS {
 
-std::unique_ptr<IRenderer> BackendFactory::CreateRenderer(BackendType type)
+std::unique_ptr<RendererAPI> BackendFactory::CreateRenderer(RenderAPI api)
 {
-    switch (type)
+    switch (api)
     {
-        case BackendType::Raylib: return std::make_unique<RaylibRenderer>();
+        case RenderAPI::Raylib: return std::make_unique<RaylibRendererAPI>();
+        default: return nullptr;
     }
-    return nullptr;
 }
 
-std::unique_ptr<IWindow> BackendFactory::CreateWindow(BackendType type)
+std::unique_ptr<IWindow> BackendFactory::CreateWindow(WindowBackend backend)
 {
-    switch (type)
+    switch (backend)
     {
-        case BackendType::Raylib: return std::make_unique<RaylibWindow>();
+        case WindowBackend::Raylib: return std::make_unique<RaylibWindow>();
+        default: return nullptr;
     }
-    return nullptr;
 }
 
-std::unique_ptr<Input> BackendFactory::CreateInput(BackendType type)
+std::unique_ptr<Input> BackendFactory::CreateInput(WindowBackend backend)
 {
-    switch (type)
+    switch (backend)
     {
-        case BackendType::Raylib: return std::make_unique<RaylibInput>();
+        case WindowBackend::Raylib: return std::make_unique<RaylibInput>();
+        default: return nullptr;
     }
-    return nullptr;
 }
 
 } // namespace RS
