@@ -29,7 +29,7 @@
 
 #include "Raysim/Input/KeyCodes.hpp"
 
-#include "Raysim/Core/Logger.hpp"
+#include "Raysim/Core/Log.hpp"
 #include "Raysim/Core/Assert.hpp"
 #include "Raysim/Core/ApplicationConfig.hpp"
 #include "Raysim/Core/Application.hpp"
