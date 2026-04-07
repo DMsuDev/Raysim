@@ -4,95 +4,88 @@
 
 namespace RS {
 
-//==============================================================================
-// Constructor
-//==============================================================================
-
 Application::Application(const ApplicationConfig& config)
-    : windowBackend_(WindowBackend::Raylib),
-      renderAPI_(RenderAPI::Raylib),
-      config_(config)
+    : m_Configuration(config)
 {
+    // --- Create backends ----------------------------------------------
+    m_Window   = BackendFactory::CreateWindow(m_Configuration.Backend, m_Configuration.Window);
+    m_Renderer = Shared<RendererAPI>(BackendFactory::CreateRenderer(m_Configuration.Renderer).release());
+    m_Input    = BackendFactory::CreateInput(m_Configuration.Backend);
+
+    RS_CORE_ASSERT(m_Window,   "Failed to create window backend");
+    RS_CORE_ASSERT(m_Renderer, "Failed to create renderer backend");
+    RS_CORE_ASSERT(m_Input,    "Failed to create input backend");
+
+    // -- Initialise renderer backend ------------------------------------
+    m_Renderer->Init();
+
+    // -- RenderCommand --------------------------------------------------
+    m_RenderCommand = CreateScope<RenderCommand>(m_Renderer);
+    RS_CORE_ASSERT(m_RenderCommand, "Failed to create RenderCommand");
+
+    // -- Populate EngineContext ---------------------------------------------
+    RebuildContext();
+
+    RS_CORE_INFO("Application '{}' ready.", m_Configuration.Window.Title);
 }
 
-//==============================================================================
-// Lifecycle
-//==============================================================================
+Application::~Application() noexcept
+{
+    RS_CORE_INFO("Destroying application '{}'", m_Configuration.Window.Title);
+    m_RenderCommand->Shutdown();
+}
+
+// ============================================================================
+// Context
+// ============================================================================
+
+void Application::RebuildContext()
+{
+    m_EngineContext.Config    = &m_Configuration;
+    m_EngineContext.Renderer  = m_RenderCommand.get();
+    m_EngineContext.Window    = m_Window.get();
+    m_EngineContext.Input     = m_Input.get();
+}
+
+// ============================================================================
+// Main loop
+// ============================================================================
 
 void Application::Run()
 {
-    try
-    {
-        if (!Log::IsInitialized())
-        {
-            Log::Init(false);
-            Log::SetConsoleLevel(spdlog::level::info);
-            Log::SetFileLevel(spdlog::level::trace);
-        }
-
-        RunInternal();
-    }
-    catch (const std::exception& e)
-    {
-        Shutdown();
-        RS_CORE_ERROR("Unhandled exception: {}", e.what());
-    }
-    catch (...)
-    {
-        Shutdown();
-        RS_CORE_ERROR("Unhandled unknown exception in main loop");
-    }
-}
-
-void Application::RunInternal()
-{
-    RS_CORE_INFO("[SESSION START] Initialising backend: window: {}, renderer: {}",
-                 static_cast<int>(windowBackend_), static_cast<int>(renderAPI_));
-
-    // Create backend objects via factory
-    Renderer = BackendFactory::CreateRenderer(renderAPI_);
-    Window   = BackendFactory::CreateWindow(windowBackend_);
-    Input    = BackendFactory::CreateInput(windowBackend_);
-
-    if (!Renderer || !Window || !Input)
-    {
-        RS_CORE_ERROR("Failed to create one or more backend components");
-        return;
-    }
-
-    Window->Init(WindowProps{config_.title, config_.width, config_.height});
     Time::Reset(); // Ensure time starts at zero when the main loop begins
 
-    RS_CORE_INFO("Backend ready. Calling Setup()...");
-    Setup();
-    RS_CORE_INFO("Setup() done, entering main loop");
+    RS_CORE_INFO("Backend ready. Calling OnStart()...");
+    OnStart();
+    RS_CORE_INFO("OnStart() done, entering main loop");
 
-    isRunning_ = true;
+    m_Running = true;
 
-    while (isRunning_ && !Window->ShouldClose())
+    while (m_Running && !m_Window->ShouldClose())
     {
         Time::BeginFrame();
 
-        Input->Update();
+        m_Input->Update();
+
 
         // Fixed timestep updates
         uint32_t stepsTaken = 0;
-        while (Time::ShouldFixedStep() && stepsTaken < config_.maxFixedSteps)
+        while (Time::ShouldFixedStep() && stepsTaken < m_Configuration.MaxFixedSteps)
         {
-            FixedUpdate(Time::GetFixedDeltaTime());
+            OnFixedUpdate(Time::GetFixedDeltaTime());
             ++stepsTaken;
         }
 
-        if (stepsTaken == config_.maxFixedSteps)
+        if (stepsTaken == m_Configuration.MaxFixedSteps)
         {
-            RS_CORE_WARN("Frame drop detected! Fixed steps clamped to {}", config_.maxFixedSteps);
+            RS_CORE_WARN("Frame drop detected! Fixed steps clamped to {}", m_Configuration.MaxFixedSteps);
         }
 
-        Update(Time::GetDeltaTime()); // frame-based logic
+        OnUpdate(Time::GetDeltaTime()); // frame-based logic
 
-        Renderer->BeginFrame();
-        Draw(Time::GetInterpolationAlpha());
-        Renderer->EndFrame();
+        m_RenderCommand->BeginFrame();
+        OnDraw(Time::GetInterpolationAlpha());
+        m_RenderCommand->EndFrame();
 
         if (Time::GetFrameCount() % 300 == 0)
             Log::Flush();
@@ -100,78 +93,22 @@ void Application::RunInternal()
         Time::EndFrame();
     }
 
-    Shutdown();
+    Close();
 }
 
-void Application::Shutdown()
+void Application::Close()
 {
     RS_CORE_INFO("Shutting down application");
     Log::Flush();
 
-    Renderer.reset();
-    Input.reset();
+    m_RenderCommand.reset();
+    m_Renderer.reset();
+    m_Input.reset();
+    m_Window.reset(); // Destructor closes the OS window
+
     Time::Reset();
-    Window.reset(); // Destructor closes the OS window
 
-    isRunning_ = false;
-}
-
-//==============================================================================
-// Facade - window
-//==============================================================================
-
-void Application::SetTitle(const std::string& title)
-{
-    config_.title = title;
-    if (Window) Window->SetWindowTitle(title);
-}
-
-void Application::SetSize(int width, int height)
-{
-    config_.width  = static_cast<uint32_t>(width);
-    config_.height = static_cast<uint32_t>(height);
-    if (Window) Window->SetWindowSize(width, height);
-}
-
-void Application::ToggleFullscreen()
-{
-    if (Window) Window->ToggleFullscreen();
-}
-
-bool Application::IsFullscreen() const
-{
-    return Window ? Window->IsFullscreen() : false;
-}
-
-int Application::GetWidth() const
-{
-    return Window ? Window->GetWidth() : static_cast<int>(config_.width);
-}
-
-int Application::GetHeight() const
-{
-    return Window ? Window->GetHeight() : static_cast<int>(config_.height);
-}
-
-float Application::GetAspectRatio() const
-{
-    return Window ? Window->GetAspectRatio() : 1.0f;
-}
-
-Vector2 Application::GetWindowSize() const
-{
-    return Window ? Window->GetWindowSize()
-                   : Vector2{static_cast<float>(config_.width),
-                              static_cast<float>(config_.height)};
-}
-
-//==============================================================================
-// Facade - rendering
-//==============================================================================
-
-void Application::Background(const Color& color)
-{
-    Renderer->ClearScreen(color);
+    m_Running = false;
 }
 
 //==============================================================================

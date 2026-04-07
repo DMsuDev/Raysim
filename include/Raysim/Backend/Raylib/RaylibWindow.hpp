@@ -1,63 +1,84 @@
 #pragma once
 
-#include "../../Interfaces/IWindow.hpp"
-
+#include "Raysim/Core/Window.hpp"
 #include "Raysim/Math/Vector2.hpp"
 
 namespace RS {
 
-class RaylibWindow : public IWindow
+/**
+ * @class RaylibWindow
+ * @brief Raylib implementation of the Window interface.
+ *
+ * Creates and manages a raylib window.
+ * 
+ * @see Window, RaylibRendererAPI
+ */
+class RaylibWindow : public Window
 {
 public:
-    RaylibWindow() = default;
-    ~RaylibWindow() override { Shutdown(); };
+    RaylibWindow(const WindowProps& props);
+    ~RaylibWindow() override;
 
-    // Lifecycle
+    /// Raylib handles window updates internally, so this is a no-op.
+    void OnUpdate() override { }
 
-    void Init(const WindowProps& props) override;
     bool ShouldClose() const override;
+    
+    // -- Size ----------------------------------------------------------------
 
-    // Window properties setters
+    void SetSize(uint32_t width, uint32_t height) override;
+    void SetSize(const Vector2& size) override;
 
-    void SetWindowTitle(const std::string& title) override;
-    void SetWindowSize(int width, int height) override;
-    void SetWindowSize(const Vector2& size) override;
-    void ToggleFullscreen() override;
-    bool IsFullscreen() const override { return isFullscreen_; }
+    Vector2  GetSize()   const override;
+    uint32_t GetWidth()  const override { return m_Data.Width; }
+    uint32_t GetHeight() const override { return m_Data.Height; }
 
-    // Window properties getters
+    // -- Title ---------------------------------------------------------------
 
-    inline Vector2 GetWindowSize() const override { return Vector2{static_cast<float>(width_), static_cast<float>(height_)}; }
-    inline float GetAspectRatio() const override { return static_cast<float>(width_) / static_cast<float>(height_); }
-    inline uint32_t GetWidth() const override { return static_cast<uint32_t>(width_); }
-    inline uint32_t GetHeight() const override { return static_cast<uint32_t>(height_); }
-    inline const std::string& GetWindowTitle() const override { return title_; }
+    void SetTitle(const std::string& title) override;
+    const std::string& GetTitle() const override { return m_Data.Title; }
 
-    // Event handlers
-    // Empty for now, implemented later if needed
+    // -- Fullscreen ----------------------------------------------------------
+
+    void SetFullscreen(bool fullscreen) override;
+    bool IsFullscreen() const override { return m_Data.Fullscreen; }
+
+    void SetBorderlessFullscreen(bool enabled) override;
+    bool IsBorderlessFullscreen() const override { return m_Data.BorderlessFullscreen; }
+
+    // -- VSync ---------------------------------------------------------------
+
+    void SetVSync(bool enabled) override;
+    bool IsVSync() const override { return m_Data.VSync; }
+
+    // -- Native handle ----------------------------------------------
+
+    /// Raylib does not expose a native window handle, so this returns nullptr.
+    void* GetNativeWindow() const override { return nullptr; }
 
 private:
-    // ===============================
-    // Internal methods
-    // ===============================
-
-    /**
-    * @brief Shutdown the window and release resources
-    *
-    * Called by the destructor to clean up any resources associated with the window.
-    */
+    void Init(const WindowProps& props);
     void Shutdown();
 
-    // ===============================
-    // Internal parameters and state
-    // ===============================
+private:
 
-    int width_      = 0;
-    int height_     = 0;
-    int prevWidth_  = 0;
-    int prevHeight_ = 0;
-    std::string title_;
-    bool isFullscreen_ = false;
+    struct WindowData
+    {
+        std::string  Title;
+        unsigned int Width  = 0;
+        unsigned int Height = 0;
+        bool VSync = true;
+        bool Fullscreen = false;
+        bool BorderlessFullscreen = false;
+
+        // Saved windowed-mode dimensions for fullscreen toggle
+        int PrevWidth  = 0;
+        int PrevHeight = 0;
+        int PrevPosX   = 0;
+        int PrevPosY   = 0;
+    };
+
+    WindowData m_Data;
 };
 
 } // namespace RS

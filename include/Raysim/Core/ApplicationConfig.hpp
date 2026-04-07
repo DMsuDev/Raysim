@@ -1,24 +1,24 @@
 #pragma once
 
-#include <string>
-#include <cstdint>
+#include "Raysim/Core/BackendFactory.hpp"
 
 namespace RS {
 
 /**
  * @struct ApplicationConfig
- * @brief Top-level configuration for an RS::Application.
+ * @brief Configuration structure for initializing the Application.
  *
  * Pass an instance to the Application constructor to configure the window,
- * frame rate, and logging before the main loop starts.
+ * backends, frame rate, and logging before the main loop starts.
  * All fields have sensible defaults so partial initialization works fine.
  */
 struct ApplicationConfig {
-    std::string title     = "Raysim App";  ///< Window title
-    uint32_t    width     = 1600;          ///< Window width in pixels
-    uint32_t    height    = 900;           ///< Window height in pixels
-    uint32_t    maxFixedSteps = 8;         ///< Max fixed update steps per frame (prevents spiral of death)
-    std::string logFile   = "App.log";     ///< Log file name written next to the executable
+    WindowProps     Window        = WindowProps();          ///< Window properties (Title, Width, Height)
+    WindowBackend   Backend       = WindowBackend::Raylib;  ///< Platform backend (window & input)
+    RenderAPI       Renderer      = RenderAPI::Raylib;      ///< Rendering API backend
+    uint32_t        MaxFixedSteps = 8;                      ///< Max fixed update steps per frame (prevents spiral of death)
+
+    ApplicationConfig() = default;
 };
 
 } // namespace RS

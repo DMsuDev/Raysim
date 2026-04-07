@@ -4,32 +4,62 @@
 #include "Raysim/Backend/Raylib/RaylibWindow.hpp"
 #include "Raysim/Backend/Raylib/RaylibInput.hpp"
 
+#include "Raysim/Core/Assert.hpp"
+
 namespace RS {
 
-std::unique_ptr<RendererAPI> BackendFactory::CreateRenderer(RenderAPI api)
+Scope<RendererAPI> BackendFactory::CreateRenderer(RenderAPI api)
 {
     switch (api)
     {
-        case RenderAPI::Raylib: return std::make_unique<RaylibRendererAPI>();
-        default: return nullptr;
+        case RenderAPI::Raylib: 
+        {
+            RS_CORE_DEBUG("Renderer backend created: Raylib");
+            return CreateScope<RaylibRendererAPI>();
+        }
+        default:
+        {
+            RS_CORE_ERROR("Unsupported renderer backend: {}", static_cast<int>(api));
+            return nullptr;
+        }
     }
 }
 
-std::unique_ptr<IWindow> BackendFactory::CreateWindow(WindowBackend backend)
+Scope<Window> BackendFactory::CreateWindow(WindowBackend backend, const WindowProps& props)
 {
     switch (backend)
     {
-        case WindowBackend::Raylib: return std::make_unique<RaylibWindow>();
-        default: return nullptr;
+        case WindowBackend::Raylib: 
+        {
+            RS_CORE_DEBUG("Window backend created: Raylib");
+            return CreateScope<RaylibWindow>(props);
+        }
+        default:
+        {
+            RS_CORE_ERROR("Unsupported window backend: {}", static_cast<int>(backend));
+            return nullptr;
+        }
     }
+
+    return nullptr;
 }
 
-std::unique_ptr<Input> BackendFactory::CreateInput(WindowBackend backend)
+
+Scope<Input> BackendFactory::CreateInput(WindowBackend backend)
 {
     switch (backend)
     {
-        case WindowBackend::Raylib: return std::make_unique<RaylibInput>();
-        default: return nullptr;
+        case WindowBackend::Raylib: 
+        {
+            RS_CORE_DEBUG("Input backend created: Raylib");
+            return CreateScope<RaylibInput>();
+        }
+
+        default:
+        {
+            RS_CORE_ERROR("Unsupported input backend: {}", static_cast<int>(backend));
+            return nullptr;
+        }
     }
 }
 
