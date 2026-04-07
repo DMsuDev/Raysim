@@ -9,7 +9,9 @@ namespace RS {
 //==============================================================================
 
 Application::Application(const ApplicationConfig& config)
-    : backendType_(BackendType::Raylib), config_(config)
+    : windowBackend_(WindowBackend::Raylib),
+      renderAPI_(RenderAPI::Raylib),
+      config_(config)
 {
 }
 
@@ -44,12 +46,13 @@ void Application::Run()
 
 void Application::RunInternal()
 {
-    RS_CORE_INFO("[SESSION START] Initialising backend: {}", static_cast<int>(backendType_));
+    RS_CORE_INFO("[SESSION START] Initialising backend: window: {}, renderer: {}",
+                 static_cast<int>(windowBackend_), static_cast<int>(renderAPI_));
 
     // Create backend objects via factory
-    Renderer = BackendFactory::CreateRenderer(backendType_);
-    Window   = BackendFactory::CreateWindow(backendType_);
-    Input    = BackendFactory::CreateInput(backendType_);
+    Renderer = BackendFactory::CreateRenderer(renderAPI_);
+    Window   = BackendFactory::CreateWindow(windowBackend_);
+    Input    = BackendFactory::CreateInput(windowBackend_);
 
     if (!Renderer || !Window || !Input)
     {

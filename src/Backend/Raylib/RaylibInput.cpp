@@ -46,13 +46,13 @@ KeyCode RaylibInput::GetLastKeyPressed() const {
 // ============================================================================
 
 Vector2 RaylibInput::GetMousePosition() const {
-    auto pos = ::GetMousePosition();
-    return {pos.x, pos.y};
+    ::Vector2 pos = ::GetMousePosition();
+    return Vector2{pos.x, pos.y};
 }
 
 Vector2 RaylibInput::GetMouseDelta() const {
-    auto delta = ::GetMouseDelta();
-    return {delta.x, delta.y};
+    ::Vector2 delta = ::GetMouseDelta();
+    return RS::Vector2{delta.x, delta.y};
 }
 
 bool RaylibInput::IsMouseButtonDown(MouseButton button) const {

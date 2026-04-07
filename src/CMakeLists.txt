@@ -40,7 +40,7 @@ set(RAYSIM_SOURCES
 
     # Backend: Raylib implementations
     ${SRC_DIR}/Backend/Raylib/RaylibInput.cpp
-    ${SRC_DIR}/Backend/Raylib/RaylibRenderer.cpp
+    ${SRC_DIR}/Backend/Raylib/RaylibRendererAPI.cpp
     ${SRC_DIR}/Backend/Raylib/RaylibWindow.cpp
 )
 

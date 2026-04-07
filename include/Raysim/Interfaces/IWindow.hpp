@@ -1,9 +1,9 @@
 #pragma once
 #include <string>
 
-namespace RS {
+#include "Raysim/Math/Vector2.hpp"
 
-struct Vector2;
+namespace RS {
 
 /// Initial configuration used to open a window.
 struct WindowProps {

@@ -4,10 +4,9 @@
 #include "Raysim/Input/MouseCodes.hpp"
 #include "Raysim/Input/GamepadCodes.hpp"
 
-namespace RS {
+#include "Raysim/Math/Vector2.hpp"
 
-// Forward declaration to avoid circular dependency
-struct Vector2;
+namespace RS {
     
 /// @interface Input
 /// @brief Abstract interface for keyboard, mouse, and gamepad input.
