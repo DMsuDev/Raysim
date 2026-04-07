@@ -1,62 +1,79 @@
-# Create library target
-add_library(${PROJECT_NAME} STATIC)
+# Create the library target
+add_library(Raysim)
+
+# Create an alias for the library target to allow for easier linking
+add_library(Raysim::Raysim ALIAS Raysim)
+
+# ============================================================
+# SETTINGS
+# ============================================================
+
+set_project_warnings(Raysim)
+enable_coverage(Raysim)
+enable_sanitizers(Raysim)
 
 # Add precompiled headers for faster compilation
-target_precompile_headers(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/pch.hpp)
+target_precompile_headers(Raysim PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/pch.hpp)
 
 # ============================================================================
 # RAYSIM CORE LIBRARY - SOURCE FILES
 # ============================================================================
 
+set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
+
 # Source files for the main library
-target_sources(${PROJECT_NAME} PRIVATE
+set(RAYSIM_SOURCES
     # Graphics
-    Graphics/Color.cpp
-    Graphics/Shapes.cpp
-    Graphics/Texts.cpp
+    ${SRC_DIR}/Graphics/Color.cpp
+    ${SRC_DIR}/Graphics/Shapes.cpp
+    ${SRC_DIR}/Graphics/Texts.cpp
 
     # Core managers
-    Core/FontManager.cpp
-    Core/BackendFactory.cpp
-    Core/Time.cpp
-    Core/Logger.cpp
-    Core/Application.cpp
+    ${SRC_DIR}/Core/FontManager.cpp
+    ${SRC_DIR}/Core/BackendFactory.cpp
+    ${SRC_DIR}/Core/Time.cpp
+    ${SRC_DIR}/Core/Logger.cpp
+    ${SRC_DIR}/Core/Application.cpp
 
     # Math
-    Math/Random.cpp
+    ${SRC_DIR}/Math/Random.cpp
 
     # Backend: Raylib implementations
-    Backend/Raylib/RaylibInput.cpp
-    Backend/Raylib/RaylibRenderer.cpp
-    Backend/Raylib/RaylibWindow.cpp
+    ${SRC_DIR}/Backend/Raylib/RaylibInput.cpp
+    ${SRC_DIR}/Backend/Raylib/RaylibRenderer.cpp
+    ${SRC_DIR}/Backend/Raylib/RaylibWindow.cpp
 )
+
+# Add the sources to the library target
+target_sources(Raysim PRIVATE ${RAYSIM_SOURCES})
 
 # ============================================================================
 # INCLUDE DIRECTORIES
 # ============================================================================
 
-# Public include directory for headers
-target_include_directories(${PROJECT_NAME}
+# Set the target include directories
+target_include_directories(Raysim
     PUBLIC
-        ${PROJECT_SOURCE_DIR}/include
-)
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
 
-# ============================================================================
-# LINK LIBRARIES
-# ============================================================================
-
-target_link_libraries(${PROJECT_NAME}
-    PUBLIC
-        raylib
-        spdlog::spdlog_header_only
-)
-
-target_compile_definitions(${PROJECT_NAME}
     PRIVATE
-        $<$<CONFIG:Debug>:RS_DEBUG>
+        ${IMGUI_DIR}
+        ${IMGUI_DIR}/backends
 )
 
-# MSVC requires /Zc:preprocessor for __VA_OPT__ support (used in Assert.hpp)
-if(MSVC)
-    target_compile_options(${PROJECT_NAME} PRIVATE /Zc:preprocessor)
-endif()
+# ============================================================
+# Link libraries
+# ============================================================
+
+target_link_libraries(Raysim
+    PUBLIC
+        imgui
+        glfw
+        raylib
+        spdlog::spdlog
+    PRIVATE
+        glad
+        imgui_backends
+        $<$<PLATFORM_ID:Windows>:winmm>
+)
