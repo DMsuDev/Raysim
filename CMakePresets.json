@@ -6,6 +6,7 @@
       "name": "base",
       "hidden": true,
       "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "RS_BUILD_EXAMPLES": "ON",
         "RS_ENABLE_COVERAGE": "OFF"
