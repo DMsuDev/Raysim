@@ -15,3 +15,6 @@ MD033:
 
 # Allow bare URLs
 MD034: false
+
+# Allow using multiple top-level headings (e.g., for different sections of the README)
+MD041: false

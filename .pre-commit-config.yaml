@@ -6,8 +6,10 @@
 # Run all:  pre-commit run --all-files
 # Update:   pre-commit autoupdate
 # =============================================================================
+
 default_language_version:
   python: python3
+
 repos:
   # ─── General file hygiene ──────────────────────────────────────────────
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -35,7 +37,7 @@ repos:
         name: Lint markdown files (with --fix)
         args: [--fix]
         types: [markdown]
-        exclude: ^(build/|_deps/|vendor/)
+        exclude: ^(build/|_deps/|third_party/)
 
   # ─── Spell checking ──────────────────────────────────────────────────
   - repo: https://github.com/codespell-project/codespell
@@ -43,8 +45,8 @@ repos:
     hooks:
       - id: codespell
         name: Lint spelling in source files (with --fix)
-        args: [--skip, "build,_deps,vendor/glad,*.lock,*.json", --ignore-words-list, "nd,ot,te"]
-        exclude: ^(build/|_deps/|vendor/glad/)
+        args: [--skip, "build,_deps,third_party,*.lock,*.json", --ignore-words-list, "nd,ot,te"]
+        exclude: ^(build/|_deps/|third_party/|.*\.lock|.*\.json)
 
   # ─── YAML ────────────────────────────────────────────────────────────
   - repo: https://github.com/google/yamlfmt
@@ -53,4 +55,4 @@ repos:
       - id: yamlfmt
         name: Format YAML files with yamlfmt
         args: [--formatter, "indent=2,include_document_start=false,retain_line_breaks=true"]
-        exclude: ^(build/|_deps/|vendor/)
+        exclude: ^(build/|_deps/|third_party/)
