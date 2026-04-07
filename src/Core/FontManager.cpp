@@ -33,7 +33,7 @@ void RS::FontManager::LoadFont(const std::string& fontPath, int fontSize)
     RS_ASSERT(!fontPath.empty(), "Font path cannot be empty");
     RS_ASSERT(fontSize > 0, "Font size must be positive, got: {}", fontSize);
 
-    LOG_INFO("Loading font from '{}'", fontPath);
+    RS_CORE_INFO("Loading font from '{}'", fontPath);
     UnloadFont();
 
     ::Font* font = nullptr;
@@ -43,7 +43,7 @@ void RS::FontManager::LoadFont(const std::string& fontPath, int fontSize)
 
     if (::FileExists(resolvedPath.c_str()) == 0)
     {
-        LOG_WARN("File '{}' not found, loading default font", resolvedPath);
+        RS_CORE_WARN("File '{}' not found, loading default font", resolvedPath);
         font = new ::Font();
         *font = ::GetFontDefault();
         usingDefault = true;
@@ -55,7 +55,7 @@ void RS::FontManager::LoadFont(const std::string& fontPath, int fontSize)
 
         if (loadedFont->glyphCount == 0)
         {
-            LOG_WARN("Failed to load font, loading default font");
+            RS_CORE_WARN("Failed to load font, loading default font");
             delete loadedFont;
             font = new ::Font();
             *font = ::GetFontDefault();
@@ -76,9 +76,9 @@ void RS::FontManager::LoadFont(const std::string& fontPath, int fontSize)
     // Only set fontHandle for custom fonts, use DrawText fallback for default font
     if (!usingDefault) {
         fontHandle_  = FontHandle(static_cast<void*>(font));
-        LOG_INFO("Font loaded successfully");
+        RS_CORE_INFO("Font loaded successfully");
     } else {
-        LOG_INFO("Using default font, no custom font handle stored");
+        RS_CORE_INFO("Using default font, no custom font handle stored");
         delete font; // Clean up default font as it won't be used
     }
 
@@ -91,7 +91,7 @@ void RS::FontManager::UnloadFont()
 {
     if (!HasFont())
     {
-        LOG_DEBUG("Attempted to unload font, skipping because no font is loaded");
+        RS_CORE_DEBUG("Attempted to unload font, skipping because no font is loaded");
         return;
     }
 
@@ -101,11 +101,11 @@ void RS::FontManager::UnloadFont()
     if (!isDefault_)
     {
         ::UnloadFont(*font);
-        LOG_DEBUG("Font resources freed");
+        RS_CORE_DEBUG("Font resources freed");
     }
     else
     {
-        LOG_DEBUG("Skipping call to ::UnloadFont for default font");
+        RS_CORE_DEBUG("Skipping call to ::UnloadFont for default font");
     }
 
     // Free heap memory regardless of default/copy origin

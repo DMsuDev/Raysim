@@ -32,7 +32,7 @@ set(RAYSIM_SOURCES
     ${SRC_DIR}/Core/FontManager.cpp
     ${SRC_DIR}/Core/BackendFactory.cpp
     ${SRC_DIR}/Core/Time.cpp
-    ${SRC_DIR}/Core/Logger.cpp
+    ${SRC_DIR}/Core/Log.cpp
     ${SRC_DIR}/Core/Application.cpp
 
     # Math
