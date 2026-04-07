@@ -3,6 +3,7 @@
 #include "Math.hpp"
 
 #include <cstddef>
+#include <ostream>
 
 namespace RS {
 
@@ -244,5 +245,19 @@ struct Vector2 {
 };
 
 constexpr Vector2 operator*(float s, const Vector2& v) noexcept { return v * s; }
+
+// ============================================================================
+// Stream output operators
+// ============================================================================
+
+/**
+ * @brief Stream output for Vector2
+ * @param os Output stream
+ * @param v Vector2 to output
+ * @return Reference to the output stream
+ */
+inline std::ostream& operator<<(std::ostream& os, const Vector2& v) {
+    return os << "(" << v.x << ", " << v.y << ")";
+}
 
 } // namespace RS
