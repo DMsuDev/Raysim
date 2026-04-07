@@ -1,9 +1,9 @@
 #pragma once
 
-#include <memory>
+#include "Raysim/Core/Memory.hpp"
 
 #include "Raysim/Renderer/RendererAPI.hpp"
-#include "../Interfaces/IWindow.hpp"
+#include "Raysim/Core/Window.hpp"
 #include "Raysim/Input/Input.hpp"
 
 namespace RS {
@@ -71,14 +71,14 @@ public:
      * @param api The rendering API to use.
      * @return Owning pointer to a concrete RendererAPI implementation.
      */
-    static std::unique_ptr<RendererAPI> CreateRenderer(RenderAPI api);
+    static Scope<RendererAPI> CreateRenderer(RenderAPI api);
 
     /**
      * @brief Create a window for the specified backend.
      * @param backend The windowing library to use.
-     * @return Owning pointer to a concrete IWindow implementation.
+     * @return Owning pointer to a concrete Window implementation.
      */
-    static std::unique_ptr<IWindow> CreateWindow(WindowBackend backend);
+    static Scope<Window> CreateWindow(WindowBackend backend, const WindowProps& props);
 
     /**
      * @brief Create an input handler for the specified backend.
@@ -89,7 +89,7 @@ public:
      * @param backend The windowing library to use.
      * @return Owning pointer to a concrete Input implementation.
      */
-    static std::unique_ptr<Input> CreateInput(WindowBackend backend);
+    static Scope<Input> CreateInput(WindowBackend backend);
 };
 
 } // namespace RS

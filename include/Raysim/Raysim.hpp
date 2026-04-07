@@ -1,3 +1,8 @@
+#if defined(_WIN32)
+#undef DrawText
+#undef DrawTextEx
+#endif
+
 #pragma once
 
 /**

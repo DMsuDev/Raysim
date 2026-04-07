@@ -110,24 +110,6 @@ public:
      * default clear color and also clears the depth and stencil buffers.
      */
     virtual void Clear() = 0;
-
-// ====================================================================
-// V-Sync
-// ====================================================================
-
-    /**
-     * @brief Enable or disable vertical synchronisation.
-     *
-     * When enabled, the presented image is synchronised to the display
-     * refresh rate, preventing screen tearing at the cost of input latency.
-     *
-     * @param enabled `true` to enable V-Sync; `false` to disable it.
-     */
-    virtual void SetVSync(bool enabled) = 0;
-
-    /// @brief Query the current V-Sync state.
-    /// @return `true` if V-Sync is currently enabled.
-    virtual bool IsVSync() const = 0;
 };
 
 } // namespace RS

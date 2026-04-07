@@ -24,12 +24,6 @@ public:
     /// Overload to allow clearing with a linear RGB color vector [0,1]
     void ClearScreen(const Vector3& color) override;
     void Clear() override;
-    
-    void SetVSync(bool enabled) override;
-    bool IsVSync()        const override;
-
-private:
-    bool m_vsync = false;
 };
 
 } // namespace RS

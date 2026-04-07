@@ -45,16 +45,6 @@ void RaylibRendererAPI::SetViewport(uint32_t /*x*/, uint32_t /*y*/,
     // the viewport matches the window size automatically.
 }
 
-void RaylibRendererAPI::SetVSync(bool enabled)
-{
-    if (enabled) ::SetConfigFlags(FLAG_VSYNC_HINT);
-    else         ::ClearWindowState(FLAG_VSYNC_HINT);
-    m_vsync = enabled;
-}
 
-bool RaylibRendererAPI::IsVSync() const
-{
-    return m_vsync;
-}
 
 } // namespace RS
