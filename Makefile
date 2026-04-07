@@ -68,6 +68,16 @@ else
     _find_tool   = $(shell command -v $(1) 2>/dev/null)
 endif
 
+ifeq ($(DETECTED_OS),Windows)
+	ENV_SCRIPT   = scripts/setup_env.ps1
+	# Activate backend venv and run command in one line (PowerShell)
+	run_in_venv = pwsh -NoProfile -Command ".\.venv\Scripts\Activate.ps1; $(1)"
+else
+	ENV_SCRIPT   = scripts/setup_env.sh
+	# Activate backend venv and run command in one line (Bash)
+	run_in_venv = .venv/bin/activate && $(1)
+endif
+
 # =========================================================================
 # Core Numbers
 # =========================================================================
@@ -253,7 +263,7 @@ endif
         clean purge \
         tidy cppcheck \
         docs clean-docs \
-        pre-commit pre-commit-install pre-commit-update \
+        venv-install pre-commit pre-commit-install pre-commit-update \
         act-ci act-quality info help
 
 # =========================================================================
@@ -440,7 +450,17 @@ cppcheck:
 # PRE-COMMIT
 # =========================================================================
 
-pre-commit-install:
+venv-install:
+	$(call _section,Setup Virtual Environment)
+ifeq ($(DETECTED_OS),Windows)
+	@pwsh -NoProfile -ExecutionPolicy Bypass -Command "& $(ENV_SCRIPT)"
+else
+	@bash $(ENV_SCRIPT)
+endif
+	$(call _ok,Virtual environment created and pre-commit installed)
+	$(call _done)
+
+pre-commit-install: venv-install
 	$(call _section,Pre-commit Install)
 	@$(PYTHON) pre_commit install
 	@$(PYTHON) pre_commit install --hook-type commit-msg
@@ -530,6 +550,7 @@ help:
 	@printf "    $(GRN)make clean-docs$(RST)         Remove generated docs\n"
 	@printf "\n"
 	@printf "  $(BLD)Pre-commit:$(RST)\n"
+	@printf "    $(GRN)make venv-install$(RST)       Create virtual environment and install dependencies\n"
 	@printf "    $(GRN)make pre-commit-install$(RST) Install git hooks\n"
 	@printf "    $(GRN)make pre-commit$(RST)         Run on all files\n"
 	@printf "    $(GRN)make pre-commit-update$(RST)  Update hook versions\n"
