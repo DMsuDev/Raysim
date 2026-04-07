@@ -1,4 +1,5 @@
 #include "Raysim/Raysim.hpp"
+#include "Raysim/Core/EntryPoint.hpp"
 
 #include <cmath>
 #include <vector>
@@ -225,7 +226,7 @@ private:
                        OriginMode::TopLeft);
 
         // Controls at the bottom
-        float bottomY = static_cast<float>(GetHeight()) - 50.0f;
+        float bottomY = static_cast<float>(GetContext().Window->GetHeight()) - 50.0f;
         Text::DrawText("Arrows=Freq  P/O=Dir  +/-=Speed  1-6=Preset  R=Reset",
                    20, bottomY, 18, Colors::LightGray, OriginMode::BottomLeft);
 
@@ -259,10 +260,10 @@ public:
 
 #pragma region Setup
 
-    void Setup() override {
-        SetSize(1200, 800);
-        SetTitle("Raysim - Lissajous Curves");
-        SetDefaultFont("assets/fonts/OpenSans-Regular.ttf");
+    void OnStart() override {
+        GetContext().Window->SetWindowSize(1200, 800);
+        GetContext().Window->SetWindowTitle("Raysim - Lissajous Curves");
+        FontManager::LoadFont("assets/fonts/OpenSans-Regular.ttf");
         Time::SetTargetFPS(60);
 
         curvePoints.reserve(resolution);
@@ -280,10 +281,10 @@ public:
 
 #pragma region Update and Draw
 
-    void Update(float dt) override {
+    void OnUpdate(float dt) override {
         // Recompute layout from current window size
-        float w = static_cast<float>(GetWidth());
-        float h = static_cast<float>(GetHeight());
+        float w = static_cast<float>(GetContext().Window->GetWidth());
+        float h = static_cast<float>(GetContext().Window->GetHeight());
         centerX     = w * 0.5f;
         centerY     = h * 0.5f;
         curveRadius = Math::Min(w, h) * 0.375f;
@@ -294,22 +295,22 @@ public:
 
         // INTERACTIVE CONTROLS
         // Frequency control (arrow keys) 1.2 units/sec
-        if (Input->IsKeyDown(KeyCode::Right)) frequencyX += 1.2f * dt;
-        if (Input->IsKeyDown(KeyCode::Left)) frequencyX = std::max(0.1f, frequencyX - 1.2f * dt);
-        if (Input->IsKeyDown(KeyCode::Up)) frequencyY += 1.2f * dt;
-        if (Input->IsKeyDown(KeyCode::Down)) frequencyY = std::max(0.1f, frequencyY - 1.2f * dt);
+        if (GetContext().Input->IsKeyDown(KeyCode::Right)) frequencyX += 1.2f * dt;
+        if (GetContext().Input->IsKeyDown(KeyCode::Left)) frequencyX = std::max(0.1f, frequencyX - 1.2f * dt);
+        if (GetContext().Input->IsKeyDown(KeyCode::Up)) frequencyY += 1.2f * dt;
+        if (GetContext().Input->IsKeyDown(KeyCode::Down)) frequencyY = std::max(0.1f, frequencyY - 1.2f * dt);
 
         // Phase control: P/O for direction, +/- for speed adjustment 0.3 units/sec
-        if (Input->IsKeyDown(KeyCode::P)) phaseRotationSpeed = std::abs(phaseRotationSpeed);
-        if (Input->IsKeyDown(KeyCode::O)) phaseRotationSpeed = -std::abs(phaseRotationSpeed);
-        if (Input->IsKeyDown(KeyCode::Equal) || Input->IsKeyDown(KeyCode::KP_Add))
+        if (GetContext().Input->IsKeyDown(KeyCode::P)) phaseRotationSpeed = std::abs(phaseRotationSpeed);
+        if (GetContext().Input->IsKeyDown(KeyCode::O)) phaseRotationSpeed = -std::abs(phaseRotationSpeed);
+        if (GetContext().Input->IsKeyDown(KeyCode::Equal) || GetContext().Input->IsKeyDown(KeyCode::KP_Add))
             phaseRotationSpeed += 0.3f * dt;
-        if (Input->IsKeyDown(KeyCode::Minus) || Input->IsKeyDown(KeyCode::KP_Subtract))
+        if (GetContext().Input->IsKeyDown(KeyCode::Minus) || GetContext().Input->IsKeyDown(KeyCode::KP_Subtract))
             phaseRotationSpeed -= 0.3f * dt;
 
         // Select presets with number keys 1-6
         for (int i = 0; i < 6; ++i) {
-            if (Input->IsKeyPressed((KeyCode)((int)KeyCode::One + i))) {
+            if (GetContext().Input->IsKeyPressed((KeyCode)((int)KeyCode::One + i))) {
                 currentPreset = i;
                 frequencyX = PRESETS[i].frequencyX;
                 frequencyY = PRESETS[i].frequencyY;
@@ -317,7 +318,7 @@ public:
             }
         }
 
-        if (Input->IsKeyPressed(KeyCode::R)) {
+        if (GetContext().Input->IsKeyPressed(KeyCode::R)) {
             frequencyX = 3.0f;
             frequencyY = 2.0f;
             phaseShift = 0.0f;
@@ -332,12 +333,12 @@ public:
         dotAngle_ += angularSpeed * dt;
     }
 
-    void FixedUpdate(float fixedDt) override {
+    void OnFixedUpdate(float fixedDt) override {
         UpdatePhase(fixedDt);
     }
 
-    void Draw(float alpha) override {
-        Background(Colors::RayBlack);
+    void OnDraw(float alpha) override {
+        GetContext().Renderer->ClearScreen(Colors::RayBlack);
 
         DrawCurveLines();
         DrawMarkers();
@@ -350,9 +351,12 @@ public:
 
 };
 
-int main()
+
+//==============================================================================
+// Entry point
+//==============================================================================
+
+RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs /*args*/)
 {
-    LissajousSimulation sim;
-    sim.Run();
-    return 0;
+    return new LissajousSimulation();
 }

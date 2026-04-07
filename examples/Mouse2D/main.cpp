@@ -1,8 +1,13 @@
 #include "Raysim/Raysim.hpp"
+#include "Raysim/Core/EntryPoint.hpp"
 
 using namespace RS;
 
 class MouseDetection : public Application {
+
+    // Convenience accessors
+    uint32_t GetWidth()  const { return GetContext().Window->GetWidth(); }
+    uint32_t GetHeight() const { return GetContext().Window->GetHeight(); }
 
 private:
     Vector2 mousePos{0.0f, 0.0f};
@@ -16,24 +21,24 @@ private:
 
 public:
 
-    void Setup() override {
-        SetSize(1000, 600);
-        SetTitle("Raysim - Mouse Detection Demo");
-        SetDefaultFont("assets/fonts/OpenSans-Regular.ttf");
+    void OnStart() override {
+        GetContext().Window->SetWindowSize(1000, 600);
+        GetContext().Window->SetWindowTitle("Raysim - Mouse Detection Demo");
+        FontManager::LoadFont("assets/fonts/OpenSans-Regular.ttf");
         Time::SetTargetFPS(60);
     }
 
-    void Update(float dt) override {
-        mousePos        = Input->GetMousePosition();
+    void OnUpdate(float dt) override {
+        mousePos        = GetContext().Input->GetMousePosition();
         mouseSmoothedPos = Math::Lerp(mouseSmoothedPos, mousePos, squareSpeed * dt);
 
-        leftDown_   = Input->IsMouseButtonDown(MouseButton::Left);
-        rightDown_  = Input->IsMouseButtonDown(MouseButton::Right);
-        middleDown_ = Input->IsMouseButtonDown(MouseButton::Middle);
+        leftDown_   = GetContext().Input->IsMouseButtonDown(MouseButton::Left);
+        rightDown_  = GetContext().Input->IsMouseButtonDown(MouseButton::Right);
+        middleDown_ = GetContext().Input->IsMouseButtonDown(MouseButton::Middle);
     }
 
-    void Draw(float /*alpha*/) override {
-        Background(Colors::DarkBlue);
+    void OnDraw(float /*alpha*/) override {
+        GetContext().Renderer->ClearScreen(Colors::DarkBlue);
 
         float w = static_cast<float>(GetWidth());
         float h = static_cast<float>(GetHeight());
@@ -96,8 +101,11 @@ public:
     }
 };
 
-int main() {
-    MouseDetection sim;
-    sim.Run();
-    return 0;
+//==============================================================================
+// Entry point
+//==============================================================================
+
+RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
+{
+    return new MouseDetection();
 }
