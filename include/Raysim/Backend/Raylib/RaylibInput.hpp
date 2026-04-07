@@ -1,16 +1,16 @@
 #pragma once
-#include "../../Interfaces/IInput.hpp"
+#include "Raysim/Input/Input.hpp"
 
 namespace RS {
 
 /**
  * @class RaylibInput
- * @brief Raylib implementation of the IInput interface
+ * @brief Raylib implementation of the Input interface
  *
  * Provides input handling for keyboard, mouse, and gamepad through raylib's input functions.
  * All input queries are delegated directly to raylib's native functions.
  */
-class RaylibInput : public IInput
+class RaylibInput : public Input
 {
 public:
     RaylibInput() = default;
