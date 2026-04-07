@@ -83,8 +83,8 @@ function(enable_sanitizers target_name)
         -fsanitize=${SANITIZER_LIST}
       )
 
-      target_compile_options(${target_name} INTERFACE ${SANITIZER_COMPILE_FLAGS})
-      target_link_options(${target_name} INTERFACE ${SANITIZER_LINK_FLAGS})
+      target_compile_options(${target_name} PUBLIC ${SANITIZER_COMPILE_FLAGS})
+      target_link_options(${target_name} PUBLIC ${SANITIZER_LINK_FLAGS})
     endif()
 
   elseif(MSVC)
@@ -93,8 +93,7 @@ function(enable_sanitizers target_name)
     if(RS_ENABLE_ASAN)
       message(STATUS "MSVC AddressSanitizer enabled")
 
-      target_compile_options(${target_name} INTERFACE /fsanitize=address)
-      target_link_options(${target_name} INTERFACE /fsanitize=address)
+      target_compile_options(${target_name} PUBLIC /fsanitize=address)
     else()
       message(STATUS "MSVC sanitizers disabled (only ASan supported)")
     endif()
