@@ -3,7 +3,7 @@
 #include "Raysim/Graphics/Color.hpp"
 #include "Raysim/Math/Vector3.hpp"
 
-#include "Raysim/Backend/Raylib/RaylibRendererAPI.hpp"
+#include "Backend/Raylib/RaylibRendererAPI.hpp"
 
 #include <raylib.h>
 
