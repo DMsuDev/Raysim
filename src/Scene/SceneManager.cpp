@@ -37,7 +37,7 @@ void SceneManager::SetPauseState(bool pause)
 
 Scene& SceneManager::PushScene(Scope<Scene> scene)
 {
-    RS_CORE_ASSERT_TRUE(scene, "Cannot push null scene");
+    RS_CORE_ASSERT_TRUE(scene);
 
     m_SceneStack.push_back(std::move(scene));
     return *m_SceneStack.back();
@@ -121,7 +121,7 @@ void SceneManager::ResumeCurrentScene()
 
 void SceneManager::AddScene(Scope<Scene> scene)
 {
-    RS_CORE_ASSERT_TRUE(scene, "Cannot add a null scene to the SceneManager");
+    RS_CORE_ASSERT_TRUE(scene);
 
     PauseCurrentScene();
 
@@ -145,7 +145,7 @@ void SceneManager::RemoveScene()
 
 void SceneManager::SetScene(Scope<Scene> newScene)
 {
-    RS_CORE_ASSERT_TRUE(newScene, "Cannot set a null scene in the SceneManager");
+    RS_CORE_ASSERT_TRUE(newScene);
 
     // Detach all existing scenes
     while (!m_SceneStack.empty())
