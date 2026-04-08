@@ -80,8 +80,8 @@ public:
 
     void OnStart() override
     {
-        GetContext().MainWindow->SetWindowSize(1200, 700);
-        GetContext().MainWindow->SetWindowTitle("Raysim - Noise Landscape");
+        GetContext().MainWindow->SetSize(1200, 700);
+        GetContext().MainWindow->SetTitle("Raysim - Noise Landscape");
         FontManager::LoadFont("assets/fonts/OpenSans-Regular.ttf");
         Time::SetTargetFPS(60);
         float w = static_cast<float>(GetContext().MainWindow->GetWidth());

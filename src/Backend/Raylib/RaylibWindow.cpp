@@ -30,8 +30,8 @@ void RaylibWindow::Init(const WindowProps& props)
 
     RS_CORE_INFO("Initializing RaylibWindow with title '{}', size {}x{}", props.Title, props.Width, props.Height);
     m_Data.Title  = props.Title;
-    m_Data.Width  = static_cast<int>(props.Width);
-    m_Data.Height = static_cast<int>(props.Height);
+    m_Data.Width  = props.Width;
+    m_Data.Height = props.Height;
     m_Data.PrevWidth  = m_Data.Width;
     m_Data.PrevHeight = m_Data.Height;
 
@@ -60,17 +60,17 @@ bool RaylibWindow::ShouldClose() const
 // Size
 // ============================================================================
 
-void RaylibWindow::SetSize(uint32_t width, uint32_t height)
+void RaylibWindow::SetSize(int width, int height)
 {
     RS_CORE_INFO("Setting window size to {}x{}", width, height);
     RS_ASSERT(width > 0 && height > 0, "Window width and height must be greater than 0");
 
-    m_Data.Width = static_cast<int>(width);
-    m_Data.Height = static_cast<int>(height);
+    m_Data.Width = width;
+    m_Data.Height = height;
 
     if (!m_Data.Fullscreen) {
-        m_Data.PrevWidth  = m_Data.Width;
-        m_Data.PrevHeight = m_Data.Height;
+        m_Data.PrevWidth  = width;
+        m_Data.PrevHeight = height;
     }
 
     if (::IsWindowReady())
@@ -82,7 +82,7 @@ void RaylibWindow::SetSize(uint32_t width, uint32_t height)
 
 void RaylibWindow::SetSize(const Vector2& size)
 {
-    this->SetSize(static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y));
+    this->SetSize(static_cast<int>(size.x), static_cast<int>(size.y));
 }
 
 Vector2 RaylibWindow::GetSize() const
@@ -143,7 +143,7 @@ void RaylibWindow::SetFullscreen(bool fullscreen)
     RS_CORE_INFO("Changed window mode to {} ({}x{})", m_Data.Fullscreen ? "fullscreen" : "windowed", m_Data.Width, m_Data.Height);
 }
 
-void RaylibWindow::SetBorderlessFullscreen(bool enabled)
+void RaylibWindow::SetBorderlessFullscreen(bool /*enabled*/)
 {
     RS_CORE_WARN("Borderless fullscreen is not implemented in RaylibWindow, so this will be ignored");
 }
@@ -157,7 +157,7 @@ bool RaylibWindow::IsMinimized() const
 // VSync
 // ============================================================================
 
-void RaylibWindow::SetVSync(bool enabled)
+void RaylibWindow::SetVSync(bool /*enabled*/)
 {
     RS_CORE_WARN("V-Sync control is not implemented yet, so this will be ignored");
 }

@@ -261,8 +261,8 @@ public:
 #pragma region Setup
 
     void OnStart() override {
-        GetContext().MainWindow->SetWindowSize(1200, 800);
-        GetContext().MainWindow->SetWindowTitle("Raysim - Lissajous Curves");
+        GetContext().MainWindow->SetSize(1200, 800);
+        GetContext().MainWindow->SetTitle("Raysim - Lissajous Curves");
         FontManager::LoadFont("assets/fonts/OpenSans-Regular.ttf");
         Time::SetTargetFPS(60);
 

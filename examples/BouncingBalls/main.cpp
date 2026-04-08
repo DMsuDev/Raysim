@@ -275,8 +275,8 @@ public:
 #pragma region Setup
 
     void OnStart() override {
-        GetContext().MainWindow->SetWindowSize(1000, 700);
-        GetContext().MainWindow->SetWindowTitle("Raysim - Bouncing Balls Physics");
+        GetContext().MainWindow->SetSize(1000, 700);
+        GetContext().MainWindow->SetTitle("Raysim - Bouncing Balls Physics");
         FontManager::LoadFont("assets/fonts/OpenSans-Regular.ttf");
         SpawnRandomBalls(8);
         Time::SetTargetFPS(60);
