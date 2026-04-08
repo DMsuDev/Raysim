@@ -38,6 +38,10 @@ set(RAYSIM_SOURCES
     # Math
     ${SRC_DIR}/Math/Random.cpp
 
+    # Scenes
+    ${SRC_DIR}/Scene/Scene.cpp
+    ${SRC_DIR}/Scene/SceneManager.cpp
+
     # Backend: Raylib implementations
     ${SRC_DIR}/Backend/Raylib/RaylibInput.cpp
     ${SRC_DIR}/Backend/Raylib/RaylibRendererAPI.cpp
