@@ -21,8 +21,8 @@ struct EngineContext
 {
     ApplicationConfig* Config    = nullptr;  ///< Configuration settings (from Application)
     RenderCommand*     Renderer  = nullptr;  ///< Command dispatcher for rendering
-    Window*            Window    = nullptr;  ///< Main window (from BackendFactory)
-    Input*             Input     = nullptr;  ///< Input polling (from BackendFactory)
+    Window*            MainWindow = nullptr;  ///< Main window (from BackendFactory)
+    Input*             InputSystem = nullptr;  ///< Input polling (from BackendFactory)
 };
 
 } // namespace RS

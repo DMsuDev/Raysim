@@ -309,16 +309,16 @@ class MyScene : public Scene {
     Vector2 velocity = {150, 100};
 
     void OnAttach() override {
-        GetContext().Window->SetTitle("My First Scene");
-        GetContext().Window->SetSize(800, 600);
+        GetContext().MainWindow->SetTitle("My First Scene");
+        GetContext().MainWindow->SetSize(800, 600);
         Time::SetTargetFPS(60);
     }
 
     void OnFixedUpdate(float fixedDt) override {
         position += velocity * fixedDt;
 
-        float width  = static_cast<float>(GetContext().Window->GetWidth());
-        float height = static_cast<float>(GetContext().Window->GetHeight());
+        float width  = static_cast<float>(GetContext().MainWindow->GetWidth());
+        float height = static_cast<float>(GetContext().MainWindow->GetHeight());
 
         if (position.x < 20 || position.x > width - 20)  velocity.x *= -1;
         if (position.y < 20 || position.y > height - 20) velocity.y *= -1;
