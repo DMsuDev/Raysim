@@ -40,6 +40,6 @@
 #include "Raysim/Core/Application.hpp"
 
 #define RAYSIM_VERSION_MAJOR 0
-#define RAYSIM_VERSION_MINOR 3
-#define RAYSIM_VERSION_PATCH 1
-#define RAYSIM_VERSION "0.3.1"
+#define RAYSIM_VERSION_MINOR 4
+#define RAYSIM_VERSION_PATCH 0
+#define RAYSIM_VERSION "0.4.0"
