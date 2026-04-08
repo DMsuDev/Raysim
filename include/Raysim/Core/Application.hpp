@@ -29,9 +29,15 @@
 // (wingdi.h defines Rectangle as a function, winuser.h defines CloseWindow/ShowCursor)
 #if defined(_WIN32)
     #define WIN32_LEAN_AND_MEAN
-    #define NOMINMAX
-    #define NOGDI
-    #define NOUSER
+    #ifndef NOMINMAX
+        #define NOMINMAX
+    #endif
+    #ifndef NOGDI
+        #define NOGDI
+    #endif
+    #ifndef NOUSER
+        #define NOUSER
+    #endif
     #undef DrawTextEx
     #undef DrawText
 #endif
@@ -97,7 +103,7 @@ public:
     Application(const ApplicationConfig& config = ApplicationConfig());
 
     /// Virtual destructor for proper cleanup in derived classes
-    virtual ~Application();
+    virtual ~Application() noexcept;
 
     Application(const Application&)            = delete;
     Application& operator=(const Application&) = delete;
