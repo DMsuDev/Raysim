@@ -38,7 +38,7 @@ struct Ball {
 // Simulation
 //==============================================================================
 
-class BouncingBalls : public Application {
+class BouncingBalls : public Scene {
 private:
 
 #pragma region State
@@ -341,7 +341,14 @@ public:
 // Entry point
 //==============================================================================
 
-RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs /*args*/)
+RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
 {
-    return new BouncingBalls();
+    RS::ApplicationConfig config;
+    config.Window.Title  = "Raysim - Bouncing Balls Demo";
+    config.Window.Width  = 1000;
+    config.Window.Height = 600;
+
+    auto* app = new RS::Application(config);
+    app->AddScene(RS::CreateScope<BouncingBalls>());
+    return app;
 }

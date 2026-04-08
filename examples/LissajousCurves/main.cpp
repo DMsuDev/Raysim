@@ -49,7 +49,7 @@ static const std::vector<LissajousPreset> PRESETS = {
     }
 };
 
-class LissajousSimulation : public Application {
+class LissajousSimulation : public Scene {
 
 private:
 #pragma region Parameters and state variables
@@ -356,7 +356,14 @@ public:
 // Entry point
 //==============================================================================
 
-RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs /*args*/)
+RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
 {
-    return new LissajousSimulation();
+    RS::ApplicationConfig config;
+    config.Window.Title  = "Raysim - Lissajous Curves Demo";
+    config.Window.Width  = 1000;
+    config.Window.Height = 600;
+
+    auto* app = new RS::Application(config);
+    app->AddScene(RS::CreateScope<LissajousSimulation>());
+    return app;
 }

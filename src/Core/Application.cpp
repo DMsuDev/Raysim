@@ -26,6 +26,11 @@ Application::Application(const ApplicationConfig& config)
     // -- Populate EngineContext ---------------------------------------------
     RebuildContext();
 
+    // -- SceneManager ------------------------------------------------------
+    m_SceneManager.emplace(m_EngineContext); // Create the SceneManager in-place
+
+    RS_CORE_ASSERT(m_SceneManager, "Failed to create SceneManager");
+
     RS_CORE_INFO("Application '{}' ready.", m_Configuration.Window.Title);
 }
 
@@ -48,67 +53,86 @@ void Application::RebuildContext()
 }
 
 // ============================================================================
+// Scene management
+// ============================================================================
+
+void Application::AddScene(Scope<Scene> scene)
+{
+    if (m_SceneManager) {
+        m_SceneManager->AddScene(std::move(scene));
+    } else {
+        RS_CORE_ERROR("Cannot add scene: SceneManager is not initialized");
+    }
+}
+
+void Application::SetScene(Scope<Scene> newScene)
+{
+    if (m_SceneManager) {
+        m_SceneManager->SetScene(std::move(newScene));
+    } else {
+        RS_CORE_ERROR("Cannot set scene: SceneManager is not initialized");
+    }
+}
+
+// ============================================================================
 // Main loop
 // ============================================================================
 
 void Application::Run()
 {
-    Time::Reset(); // Ensure time starts at zero when the main loop begins
+    bool wasPausedDueToMinimize = false;
 
-    RS_CORE_INFO("Backend ready. Calling OnStart()...");
-    OnStart();
-    RS_CORE_INFO("OnStart() done, entering main loop");
-
-    m_Running = true;
+    auto& sm = *m_SceneManager; // Cache reference to avoid multiples pointer dereferences
 
     while (m_Running && !m_Window->ShouldClose())
     {
-        Time::BeginFrame();
+        // Poll input events and swap back buffer
+        m_Window->OnUpdate();
+        m_Minimized = m_Window->IsMinimized();
 
-        m_Input->Update();
-
-
-        // Fixed timestep updates
-        uint32_t stepsTaken = 0;
-        while (Time::ShouldFixedStep() && stepsTaken < m_Configuration.MaxFixedSteps)
+        if (!m_Minimized)
         {
-            OnFixedUpdate(Time::GetFixedDeltaTime());
-            ++stepsTaken;
-        }
+            if (wasPausedDueToMinimize)
+            {
+                // Resume the scene if it was paused due to minimize
+                sm.ResumeCurrentScene();
+                wasPausedDueToMinimize = false;
+            }
 
-        if (stepsTaken == m_Configuration.MaxFixedSteps)
+            // Run the active scene (timing, fixed update, variable update, draw)
+            auto& scene = sm.GetCurrentScene();
+            scene.Run();
+        }
+        else
         {
-            RS_CORE_WARN("Frame drop detected! Fixed steps clamped to {}", m_Configuration.MaxFixedSteps);
+            if (!wasPausedDueToMinimize)
+            {
+                RS_CORE_DEBUG("Window minimized, pausing scene.");
+                printf("Window minimized, pausing scene.\n");
+                sm.PauseCurrentScene();
+                wasPausedDueToMinimize = true;
+            }
+
+            // Skip updating and rendering to save CPU/GPU resources
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
-
-        OnUpdate(Time::GetDeltaTime()); // frame-based logic
-
-        m_RenderCommand->BeginFrame();
-        OnDraw(Time::GetInterpolationAlpha());
-        m_RenderCommand->EndFrame();
-
-        if (Time::GetFrameCount() % 300 == 0)
-            Log::Flush();
-
-        Time::EndFrame();
     }
-
-    Close();
 }
 
 void Application::Close()
 {
+    m_Running = false;
+
     RS_CORE_INFO("Shutting down application");
     Log::Flush();
 
     m_RenderCommand.reset();
+    m_SceneManager.reset();
     m_Renderer.reset();
     m_Input.reset();
-    m_Window.reset(); // Destructor closes the OS window
+    m_Window.reset();
 
     Time::Reset();
-
-    m_Running = false;
 }
 
 //==============================================================================

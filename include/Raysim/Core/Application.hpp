@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <memory>
 #include <string>
 
@@ -12,6 +13,8 @@
 #include "Raysim/Renderer/RenderCommand.hpp"
 #include "Raysim/Core/Window.hpp"
 #include "Raysim/Input/Input.hpp"
+
+#include "Raysim/Scene/SceneManager.hpp"
 
 #include "Raysim/Math/Random.hpp"
 
@@ -35,7 +38,7 @@
 
 namespace RS {
 
-    // ============================================================================
+// ============================================================================
 // Command-line arguments wrapper
 // ============================================================================
 
@@ -90,37 +93,35 @@ struct ApplicationCommandLineArgs {
 class Application
 {
 public:
-    explicit Application(const ApplicationConfig& config = {});
-    ~Application() noexcept;
+    /// Constructor: initializes application with specification
+    Application(const ApplicationConfig& config = ApplicationConfig());
+
+    /// Virtual destructor for proper cleanup in derived classes
+    virtual ~Application();
 
     Application(const Application&)            = delete;
     Application& operator=(const Application&) = delete;
     Application(Application&&)                 = default;
     Application& operator=(Application&&)      = default;
 
-    /// Initialises the backend, opens the window and runs the main loop.
+    /// Start the main application loop. This will run until the window is closed or Quit() is called.
     void Run();
 
+    /// Add a scene to the SceneManager.
+    /// The scene becomes active immediately if no other scenes are active.
+    void AddScene(Scope<Scene> scene);
+
+    /// Replace all scenes with a single new scene.
+    void SetScene(Scope<Scene> newScene);
+
+    /// Get reference to the application window
+    Window& GetWindow() { return *m_Window; }
+
+    /// Request application shutdown
+    /// The application will finish the current frame before exiting
+    void Close();
+
 protected:
-
-    // -- Lifecycle -----------------------------------------------------------
-
-    /// Called once before the main loop. Use it to configure the window, load assets, etc.
-    virtual void OnStart() {}
-
-    /// Called once per frame for non-rendering logic (input, physics, AI, ...).
-    /// @param dt Scaled delta time for this frame (seconds). Same as Time::GetDeltaTime().
-    virtual void OnUpdate(float dt) { (void)dt; }
-
-    /// Called at a fixed timestep (configured via Time::SetFixedDeltaTime()).
-    /// Prefer this over OnUpdate() for deterministic physics simulations.
-    /// @param fixedDt Fixed scaled timestep (seconds). Same as Time::GetFixedDeltaTime().
-    virtual void OnFixedUpdate(float fixedDt) { (void)fixedDt; }
-
-    /// Called once per frame after OnUpdate(). Issue all draw commands here.
-    /// @param alpha Interpolation factor in [0, 1) for blending physics snapshots. Same as Time::GetInterpolationAlpha().
-    /// Avoid mutating game state inside OnDraw().
-    virtual void OnDraw(float alpha) = 0;
 
     // -- Resources -----------------------------------------------------------
 
@@ -134,47 +135,16 @@ protected:
     /// Seed the global RNG for reproducible results.
     void SetRandomSeed(unsigned int seed);
 
-    // -- Simulation control --------------------------------------------------
-
-    /// Pauses the simulation (delegates to Time::Pause()).
-    void Pause()   { Time::Pause(); }
-
-    /// Resumes the simulation (delegates to Time::Resume()).
-    void Resume()  { Time::Resume(); }
-
-    /// Toggles pause/resume state.
-    void TogglePause() { Time::IsPaused() ? Time::Resume() : Time::Pause(); }
-
-    /// Returns true if the simulation is currently paused.
-    bool IsPaused() const { return Time::IsPaused(); }
-
-    /// Requests the application to stop after the current frame.
-    void Quit() { m_Running = false; }
-
-    // Request application shutdown
-    // The application will finish the current frame before exiting
-    void Close();
-
-// ===========================================================================
-// Engine context access
-// ===========================================================================
-
-    /// @brief Get the engine context bound to this scene.
-    /// @return The engine context.
-    const EngineContext& GetContext() const { return m_EngineContext; }
-
 private:
 
-// ========================================================================
-// Private members
-// ========================================================================
-
-    ApplicationConfig   m_Configuration;   // Application configuration
-    Scope<Window>       m_Window;          // The main window
-    Shared<RendererAPI>  m_Renderer;        // Renderer backend
-    Scope<Input>        m_Input;           // Input backend
+    ApplicationConfig   m_Configuration;  // Application configuration
+    Scope<Window>       m_Window;         // The main window
+    Shared<RendererAPI> m_Renderer;      // Renderer backend
+    Scope<Input>        m_Input;          // Input backend
 
     Scope<RenderCommand> m_RenderCommand;
+
+    std::optional<SceneManager> m_SceneManager;
     EngineContext m_EngineContext;
 
     /// Rebuild m_EngineContext from current backend pointers.

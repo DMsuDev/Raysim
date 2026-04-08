@@ -3,7 +3,7 @@
 
 using namespace RS;
 
-class MouseDetection : public Application {
+class MouseDetection : public Scene {
 
     // Convenience accessors
     uint32_t GetWidth()  const { return GetContext().Window->GetWidth(); }
@@ -107,5 +107,12 @@ public:
 
 RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
 {
-    return new MouseDetection();
+    RS::ApplicationConfig config;
+    config.Window.Title  = "Raysim - Mouse Detection Demo";
+    config.Window.Width  = 1000;
+    config.Window.Height = 600;
+
+    auto* app = new RS::Application(config);
+    app->AddScene(RS::CreateScope<MouseDetection>());
+    return app;
 }

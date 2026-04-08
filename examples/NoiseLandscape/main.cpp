@@ -28,7 +28,7 @@ using namespace RS;
 // NoiseLandscape
 //==============================================================================
 
-class NoiseLandscape : public Application {
+class NoiseLandscape : public Scene {
 private:
 
 #pragma region State
@@ -137,7 +137,14 @@ public:
 // Entry point
 //==============================================================================
 
-RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs /*args*/)
+RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
 {
-    return new NoiseLandscape();
+    RS::ApplicationConfig config;
+    config.Window.Title  = "Raysim - Noise Landscape Demo";
+    config.Window.Width  = 1000;
+    config.Window.Height = 600;
+
+    auto* app = new RS::Application(config);
+    app->AddScene(RS::CreateScope<NoiseLandscape>());
+    return app;
 }
