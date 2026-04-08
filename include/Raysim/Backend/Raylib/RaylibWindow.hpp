@@ -46,6 +46,8 @@ public:
     void SetBorderlessFullscreen(bool enabled) override;
     bool IsBorderlessFullscreen() const override { return m_Data.BorderlessFullscreen; }
 
+    bool IsMinimized() const override;
+
     // -- VSync ---------------------------------------------------------------
 
     void SetVSync(bool enabled) override;
