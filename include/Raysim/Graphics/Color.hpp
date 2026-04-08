@@ -21,13 +21,23 @@ struct Color {
 
     constexpr Color() = default;
 
-    /// Construct color from RGBA components
-    constexpr Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 255)
-        : r(r), g(g), b(b), a(a) {}
+    /**
+     * @brief Construct a Color from RGBA components
+     * @param in_r Red component (0-255)
+     * @param in_g Green component (0-255)
+     * @param in_b Blue component (0-255)
+     * @param in_a Alpha component (0-255, default 255)
+     */
+    constexpr Color(unsigned char in_r, unsigned char in_g, unsigned char in_b, unsigned char in_a = 255)
+        : r(in_r), g(in_g), b(in_b), a(in_a) {}
 
-    /// Construct grayscale color (equal R, G, B)
-    explicit constexpr Color(unsigned char gray, unsigned char a = 255)
-        : r(gray), g(gray), b(gray), a(a) {}
+    /**
+     * @brief Construct grayscale color (equal R, G, B)
+     * @param gray Grayscale value
+     * @param in_a Alpha component (default 255)
+     */
+    explicit constexpr Color(unsigned char gray, unsigned char in_a = 255)
+        : r(gray), g(gray), b(gray), a(in_a) {}
 
 //=======================================================
 // Operators

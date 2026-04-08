@@ -124,8 +124,9 @@ private:
 
 private:
     EngineContext m_Context;      // Engine subsystems available to this scene
-    uint16_t      m_SceneID;      // Unique identifier for this scene
+
     std::string   m_Name;         // Name of the scene (for lookup and debugging)
+    uint16_t      m_SceneID;      // Unique identifier for this scene
 
     bool m_Initialized = false;   // Whether the scene has been attached to the manager at least once (used to call OnAttach)
     bool m_IsRunning = false;     // Current running state of the scene

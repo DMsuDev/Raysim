@@ -23,10 +23,10 @@ struct Vector2 {
     constexpr Vector2() noexcept = default;
     /**
      * @brief Construct from x and y components
-     * @param x X component
-     * @param y Y component
+     * @param in_x X component
+     * @param in_y Y component
      */
-    constexpr Vector2(float x, float y) noexcept : x(x), y(y) {}
+    constexpr Vector2(float in_x, float in_y) noexcept : x(in_x), y(in_y) {}
     /**
      * @brief Construct uniform vector (x = y = s)
      * @param s Scalar applied to both components

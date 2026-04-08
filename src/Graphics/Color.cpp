@@ -79,8 +79,8 @@ RS::Color RS::Color::FromHSV(float h, float s, float v, unsigned char alpha) {
     float g = values[pattern[sector][1]] + m;
     float b = values[pattern[sector][2]] + m;
 
-    auto toByte = [](float v) -> unsigned char {
-        int iv = static_cast<int>(std::lround(v * 255.0f));
+    auto toByte = [](float m_value) -> unsigned char {
+        int iv = static_cast<int>(std::lround(m_value * 255.0f));
         iv = std::max(0, std::min(255, iv));
         return static_cast<unsigned char>(iv);
     };
@@ -100,7 +100,7 @@ std::string RS::Color::ToHex(bool includeAlpha) const {
     buffer[1] = hex[r >> 4]; buffer[2] = hex[r & 0xF];
     buffer[3] = hex[g >> 4]; buffer[4] = hex[g & 0xF];
     buffer[5] = hex[b >> 4]; buffer[6] = hex[b & 0xF];
-    int len = 7;
+    std::size_t len = 7;
     if (includeAlpha) {
         buffer[7] = hex[a >> 4]; buffer[8] = hex[a & 0xF];
         len = 9;
@@ -111,12 +111,12 @@ std::string RS::Color::ToHex(bool includeAlpha) const {
 RS::Vector3 RS::Color::ToHSV() const
 {
     // Normalize RGB values to [0, 1]
-    float r = this->r * (1.0f / 255.0f);
-    float g = this->g * (1.0f / 255.0f);
-    float b = this->b * (1.0f / 255.0f);
+    float _r = this->r * (1.0f / 255.0f);
+    float _g = this->g * (1.0f / 255.0f);
+    float _b = this->b * (1.0f / 255.0f);
 
-    float maxc = std::max({r, g, b});
-    float minc = std::min({r, g, b});
+    float maxc = std::max({_r, _g, _b});
+    float minc = std::min({_r, _g, _b});
     float delta = maxc - minc;
 
     float h = 0.0f;
@@ -125,12 +125,12 @@ RS::Vector3 RS::Color::ToHSV() const
 
     if (delta > 0.0f)
     {
-        if (maxc == r)
-            h = (g - b) / delta;
-        else if (maxc == g)
-            h = 2.0f + (b - r) / delta;
+        if (maxc == _r)
+            h = (_g - _b) / delta;
+        else if (maxc == _g)
+            h = 2.0f + (_b - _r) / delta;
         else
-            h = 4.0f + (r - g) / delta;
+            h = 4.0f + (_r - _g) / delta;
 
         h *= 60.0f;
 

@@ -233,9 +233,9 @@ float SimplexNoise(float x, float y)
     int   j  = static_cast<int>(std::floor(y + s));
 
     // Unskew back to (x,y) space for the cell origin
-    float t  = static_cast<float>(i + j) * G2;
-    float x0 = x - (static_cast<float>(i) - t);
-    float y0 = y - (static_cast<float>(j) - t);
+    float unskew  = static_cast<float>(i + j) * G2;
+    float x0 = x - (static_cast<float>(i) - unskew);
+    float y0 = y - (static_cast<float>(j) - unskew);
 
     // Determine which simplex triangle we're in
     int i1, j1;
