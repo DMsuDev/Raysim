@@ -3,7 +3,7 @@
 [![C++](https://img.shields.io/badge/Language-C%2B%2B-00599C?style=flat&logo=cplusplus&logoColor=white)](https://isocpp.org/)
 [![CMake](https://img.shields.io/badge/Build-CMake-064F8C?style=flat&logo=cmake&logoColor=white)](https://cmake.org/)
 ![Status](https://img.shields.io/badge/Status-Early%20Development-yellow?style=flat)
-[![Version](https://img.shields.io/badge/Version-0.3.1-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
+[![Version](https://img.shields.io/badge/Version-0.4.0-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
 
 [English Readme](https://github.com/DMsuDev/Raysim/blob/main/README.md)
 • [Readme Español](https://github.com/DMsuDev/Raysim/blob/main/README.es.md)
@@ -74,35 +74,50 @@ cmake --build --preset debug
 
 ## Application Loop
 
-Each application cycle runs four methods in order. Only `Draw` is mandatory.
+Each application cycle runs through the active scene's lifecycle methods in order.
 
 <details>
-<summary>Setup</summary>
+<summary>OnAttach</summary>
 
-Called once before the main loop starts. Use it to configure the window,
-load assets, seed the RNG, and initialise your simulation state.
+Called once when the scene is first attached to the SceneManager. Use it to
+load assets, create entities, and initialise scene state.
 
 ```cpp
-void Setup() override {
-    SetTitle("My Simulation");
-    SetSize(1280, 720);
-    SetRandomSeed(42);   // Optional: omit for a different seed every launch
-    Time::SetTargetFPS(60);
+class MyScene : public Scene {
+protected:
+    void OnAttach() override {
+        GetContext().Window->SetTitle("My Scene");
+    }
+};
+```
+
+</details>
+
+<details>
+<summary>OnStart</summary>
+
+Called each time the scene starts (after `OnAttach` or when resumed). Use it to
+reset game state, restart timers, or initialise dynamic resources.
+
+```cpp
+void OnStart() override {
+    position = {400, 300};
+    velocity = {150, 100};
 }
 ```
 
 </details>
 
 <details>
-<summary>Update</summary>
+<summary>OnUpdate</summary>
 
 Called every frame. Use it for input polling, game logic, and anything that
 reads or writes simulation state. Receives the scaled delta time in seconds
 so movement stays frame-rate independent.
 
 ```cpp
-void Update(float dt) override {
-    if (Input->IsKeyPressed(Key::Space)) TogglePause();
+void OnUpdate(float dt) override {
+    if (GetContext().Input->IsKeyPressed(Key::Space)) SetPaused(!IsPaused());
     position += velocity * dt;
 }
 ```
@@ -110,7 +125,7 @@ void Update(float dt) override {
 </details>
 
 <details>
-<summary>FixedUpdate</summary>
+<summary>OnFixedUpdate</summary>
 
 Called at a fixed timestep regardless of the actual frame rate. Use it for
 physics integration and deterministic simulation steps. The accumulator runs
@@ -118,7 +133,7 @@ as many fixed steps as needed to catch up with real time, capped by
 `maxFixedSteps` of `ApplicationConfig` to avoid a spiral of death.
 
 ```cpp
-void FixedUpdate(float fixedDt) override {
+void OnFixedUpdate(float fixedDt) override {
     velocity += gravity * fixedDt;
     position += velocity * fixedDt;
 }
@@ -127,23 +142,54 @@ void FixedUpdate(float fixedDt) override {
 </details>
 
 <details>
-<summary>Draw</summary>
+<summary>OnDraw</summary>
 
-Called every frame after `Update`. Issue all rendering commands here.
+Called every frame after `OnUpdate`. Issue all rendering commands here.
 Receives an interpolation factor `alpha` in `[0, 1)` representing how far
 the simulation has advanced into the next fixed step. Use it to lerp between
 the previous and current physics snapshot so visuals stay smooth at any
-frame rate. Do not mutate state inside `Draw`.
+frame rate. Do not mutate state inside `OnDraw`.
 
 ```cpp
-void Draw(float alpha) override {
-    Background(Color::Black());
+void OnDraw(float alpha) override {
+    GetContext().Renderer->Clear(Colors::DarkBlue);
     Vector2 renderPos = prevPosition + (position - prevPosition) * alpha;
-    Shapes::DrawCircle(renderPos.x, renderPos.y, radius, Color::White());
+    Shapes::DrawCircle(renderPos.x, renderPos.y, 20.0f, Colors::RayWhite);
 }
 ```
 
-> Using a separate Draw step is ideal because it keeps code structure clean and avoids inconsistencies with the physics loop. However, it’s optional. If you prefer, you can put all your rendering logic in Update and leave Draw empty. In that case, the `alpha` parameter will always be 0 since there’s no interpolation happening, but it won’t cause any issues.
+> Using a separate Draw step is ideal because it keeps code structure clean and avoids inconsistencies with the physics loop. However, it's optional. If you prefer, you can put all your rendering logic in OnUpdate and leave OnDraw empty. In that case, the `alpha` parameter will always be 0 since there's no interpolation happening, but it won't cause any issues.
+
+</details>
+
+<details>
+<summary>OnPause / OnResume</summary>
+
+- `OnPause`: Called when the scene is paused. Use it to pause animations, stop timers, etc.
+- `OnResume`: Called when the scene is resumed from a paused state. Use it to resume animations, restart timers, etc.
+
+```cpp
+void OnPause() override {
+    RS_LOG_INFO("Scene paused");
+}
+
+void OnResume() override {
+    RS_LOG_INFO("Scene resumed");
+}
+```
+
+</details>
+
+<details>
+<summary>OnDetach</summary>
+
+Called when the scene is removed or replaced. Clean up resources, detach entities, etc.
+
+```cpp
+void OnDetach() override {
+    // Clean up scene resources
+}
+```
 
 </details>
 
@@ -152,14 +198,26 @@ void Draw(float alpha) override {
 <details>
 <summary>Core</summary>
 
-| File                | Purpose                                                                                                                                                       |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Application`       | Base class. Inherit from it, override lifecycle methods, access backend through `Renderer`, `Window`, and `Input`.                                            |
-| `ApplicationConfig` | Configure title, resolution, max fixed steps, and log file before the loop starts. All fields have defaults - pass only what you need.                        |
-| `Time`              | Static utility. Delta time, fixed timestep, time scale, pause/resume, FPS counters.                                                                           |
-| `Log`               | Wraps spdlog. Writes to console and a log file. Use macros `RS_LOG_INFO`, `RS_LOG_WARN`, `RS_LOG_ERROR`.                                                      |
-| `FontManager`       | Load a TTF/OTF font once, access it globally for text rendering. You can set a default font using `SetDefaultFont("path/to/font.ttf")` on `Setup() override`. |
-| `BackendFactory`    | Creates concrete `RendererAPI`, `Window`, and `Input` instances for the selected backend.                                                                     |
+| File                | Purpose                                                                                                                                                                                      |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Application`       | Base class. Create scenes and register them with `SetScene()` or `AddScene()`. Access backend through `GetContext()`.                                                                        |
+| `ApplicationConfig` | Configure title, resolution, max fixed steps, and log file before the loop starts. All fields have defaults - pass only what you need.                                                       |
+| `Time`              | Static utility. Delta time, fixed timestep, time scale, pause/resume, FPS counters.                                                                                                          |
+| `Log`               | Wraps spdlog. Writes to console and a log file. Use macros `RS_LOG_INFO`, `RS_LOG_WARN`, `RS_LOG_ERROR`.                                                                                     |
+| `FontManager`       | Load a TTF/OTF font once, access it globally for text rendering. You can set a default font using `SetDefaultFont("path/to/font.ttf")` on `OnAttach() override`.                             |
+| `BackendFactory`    | Creates concrete `RendererAPI`, `Window`, and `Input` instances for the selected backend.                                                                                                    |
+| `Scene`             | Base class for scenes. Provides lifecycle callbacks (OnAttach, OnStart, OnUpdate, OnFixedUpdate, OnDraw, OnPause, OnResume, OnDetach). Scenes receive an EngineContext for subsystem access. |
+| `SceneManager`      | Manages a LIFO stack of scenes. Supports push/pop operations, pause/resume, and scene lookup by ID or name.                                                                                  |
+
+</details>
+
+<details>
+<summary>Scene</summary>
+
+| File           | Purpose                                                                                                                                                                                                                                 |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Scene`        | Base class for scenes. Provides lifecycle callbacks (OnStart, OnUpdate, OnFixedUpdate, OnDraw, OnAttach, OnDetach, OnPause, OnResume). Each scene receives an EngineContext for Window, Renderer, and Input access.                     |
+| `SceneManager` | Manages a LIFO stack of scenes. Operations: AddScene (push), RemoveScene (pop), SetScene (replace all). Flow control: PauseCurrentScene, ResumeCurrentScene. Lookup: GetCurrentScene, GetSceneByID, GetSceneByName, GetUnderlyingScene. |
 
 </details>
 
@@ -238,61 +296,49 @@ cmake --build build --config Release
 
 ## Quick Start
 
-`ApplicationConfig` is optional - all fields default to basic values. You can choose to provide only what you need or define individual settings in `Setup` instead. The following are all valid ways to configure your app:
+Create a scene by inheriting from `Scene` and override the lifecycle methods. Then register it with your application using `SetScene()` or `AddScene()`.
 
 ```cpp
-// No config: uses defaults (1600x900, title "Raysim App")
-MyApp app;
+#include "Raysim/Raysim.hpp"
+#include "Raysim/Core/EntryPoint.hpp"
 
-// Partial config with designated initializers (C++20 required)
-MyApp app(ApplicationConfig{ .title = "My Sim", .width = 1280, .height = 720 });
-
-// Full config
-MyApp app(ApplicationConfig{
-    .title         = "My Sim",
-    .width         = 1920,
-    .height        = 1080,
-    .maxFixedSteps = 8,
-    .logFile       = "mysim.log"
-});
-```
-
-```cpp
-#include <Raysim/Raysim.hpp>
 using namespace RS;
 
-class MyApp : public Application {
+class MyScene : public Scene {
     Vector2 position = {400, 300};
     Vector2 velocity = {150, 100};
 
-protected:
-    void Setup() override {
-        SetTitle("My First Raysim App");
-        SetSize(800, 600);
-        // Seed is auto-random on startup; call SetRandomSeed() only if you need reproducibility.
-        // SetRandomSeed(12345);
+    void OnAttach() override {
+        GetContext().Window->SetTitle("My First Scene");
+        GetContext().Window->SetSize(800, 600);
         Time::SetTargetFPS(60);
     }
 
-    void FixedUpdate(float fixedDt) override {
+    void OnFixedUpdate(float fixedDt) override {
         position += velocity * fixedDt;
 
-        if (position.x < 20 || position.x > GetWidth() - 20)  velocity.x *= -1;
-        if (position.y < 20 || position.y > GetHeight() - 20) velocity.y *= -1;
+        float width  = static_cast<float>(GetContext().Window->GetWidth());
+        float height = static_cast<float>(GetContext().Window->GetHeight());
+
+        if (position.x < 20 || position.x > width - 20)  velocity.x *= -1;
+        if (position.y < 20 || position.y > height - 20) velocity.y *= -1;
     }
 
-    void Draw(float /*alpha*/) override {
-        Background(Colors::DarkBlue);
+    void OnDraw(float /*alpha*/) override {
+        GetContext().Renderer->ClearScreen(Colors::DarkBlue);
         Shapes::DrawCircle(position.x, position.y, 20.0f, Colors::RayWhite);
     }
 };
 
-int main() {
-    MyApp app;
-    app.Run();
-    return 0;
+RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
+{
+    auto* app = new Application();
+    app->AddScene(CreateScope<MyScene>());
+    return app;
 }
 ```
+
+> **Note:** The seed is auto-random on startup. Call `SetRandomSeed(value)` in `OnAttach()` only if you need reproducibility.
 
 ## License
 
