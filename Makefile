@@ -16,7 +16,7 @@
 # =========================================================================
 
 PROJECT_NAME  := Raysim
-PROJECT_VER   := 0.3.1
+PROJECT_VER   := 0.4.0
 BUILD_DIR     := build
 BUILD_TYPE    ?= Release
 

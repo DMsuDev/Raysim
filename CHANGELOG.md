@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2026-04-08
+
+### Added
+
+- **Scene System**: New `Scene` base class and `SceneManager` for scene-based architecture
+  - `Scene` provides lifecycle callbacks: `OnAttach`, `OnStart`, `OnUpdate`, `OnFixedUpdate`, `OnDraw`, `OnDetach`, `OnPause`, `OnResume`
+  - `SceneManager` manages a LIFO stack of scenes with push/pop/replace operations
+  - Each scene receives an `EngineContext` for subsystem access (Window, Renderer, Input)
+- New `IsMinimized()` method to `Window` interface and `RaylibWindow` implementation
+
+### Changed
+
+- **Application Refactor**: Applications now integrate with `SceneManager` for scene management
+- **Window/Input Access**: Examples updated to use `GetContext()` instead of direct `Window`/`Input` member access
+- Refactored window system and application flow for better scene integration
+- Replaced `IRenderer` interface with `RendererAPI` and updated backend implementations
+- Updated input handling to use new `Input` interface and related classes
+- Added stream output operators (`<<`) for `Vector2` and `Vector3`
+- Replaced `Logger` with `Log` class for consistent logging across the application
+
+### Fixed
+
+- CMake: sanitizer flags now correctly propagate to targets (`PUBLIC` instead of `PRIVATE`)
+- `codespell` skip pattern corrected for CMakeFiles
+
+### Build
+
+- Migrated dependencies to vcpkg (added `vcpkg.json`, removed vendor CMakeLists.txt)
+- Updated CMake minimum to 3.28
+- Environment setup scripts enhanced for cross-platform compatibility
+
 ## [0.3.1] - 2026-03-19
 
 ### Added
