@@ -22,8 +22,8 @@ private:
 public:
 
     void OnStart() override {
-        GetContext().MainWindow->SetWindowSize(1000, 600);
-        GetContext().MainWindow->SetWindowTitle("Raysim - Mouse Detection Demo");
+        GetContext().MainWindow->SetSize(1000, 600);
+        GetContext().MainWindow->SetTitle("Raysim - Mouse Detection Demo");
         FontManager::LoadFont("assets/fonts/OpenSans-Regular.ttf");
         Time::SetTargetFPS(60);
     }

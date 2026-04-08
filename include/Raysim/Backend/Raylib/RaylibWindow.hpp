@@ -26,12 +26,12 @@ public:
 
     // -- Size ----------------------------------------------------------------
 
-    void SetSize(uint32_t width, uint32_t height) override;
+    void SetSize(int width, int height) override;
     void SetSize(const Vector2& size) override;
 
     Vector2  GetSize()   const override;
-    uint32_t GetWidth()  const override { return m_Data.Width; }
-    uint32_t GetHeight() const override { return m_Data.Height; }
+    int GetWidth()  const override { return m_Data.Width; }
+    int GetHeight() const override { return m_Data.Height; }
 
     // -- Title ---------------------------------------------------------------
 
@@ -67,8 +67,8 @@ private:
     struct WindowData
     {
         std::string  Title;
-        unsigned int Width  = 0;
-        unsigned int Height = 0;
+        int Width  = 0;
+        int Height = 0;
         bool VSync = true;
         bool Fullscreen = false;
         bool BorderlessFullscreen = false;

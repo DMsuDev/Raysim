@@ -12,11 +12,11 @@ namespace RS {
 /// @brief Configuration properties for creating a window.
 struct WindowProps {
     std::string Title  = "Raysim App";  ///< The title of the window.
-    uint32_t    Width  = 1600;          ///< The width of the window in pixels.
-    uint32_t    Height = 900;           ///< The height of the window in pixels.
+    int         Width  = 1600;          ///< The width of the window in pixels.
+    int         Height = 900;           ///< The height of the window in pixels.
 
     WindowProps() = default;
-    WindowProps(const std::string& title, uint32_t width, uint32_t height)
+    WindowProps(const std::string& title, int width, int height)
         : Title(title), Width(width), Height(height) {}
 };
 
@@ -45,20 +45,20 @@ public:
     /// @brief Sets the size of the window.
     /// @param width The new width of the window.
     /// @param height The new height of the window.
-    virtual void SetSize(uint32_t width, uint32_t height) = 0;
+    virtual void SetSize(int width, int height) = 0;
 
     /// @brief Sets the size of the window using a Vector2.
     /// @param size A Vector2 containing the new width (x) and height (y) of the window.
-    virtual void SetSize(const Vector2& size)         = 0;
+    virtual void SetSize(const Vector2& size) = 0;
 
     /// @brief Retrieves the size of the window as a Vector2 (width, height).
-    virtual Vector2  GetSize()     const = 0;
+    virtual Vector2  GetSize() const = 0;
 
     /// @brief Retrieves the width of the window.
-    virtual uint32_t GetWidth()    const = 0;
+    virtual int GetWidth() const = 0;
 
     /// @brief Retrieves the height of the window.
-    virtual uint32_t GetHeight()   const = 0;
+    virtual int GetHeight() const = 0;
 
     /// @brief Calculates the aspect ratio of the window.
     /// @return The aspect ratio (width / height) of the window.
@@ -115,10 +115,6 @@ public:
     /// @brief Retrieves the title of the window.
     virtual const std::string& GetTitle() const = 0;
 
-    // Convenience aliases used by Scene code
-    void SetWindowTitle(const std::string& title) { SetTitle(title); }
-    void SetWindowSize(uint32_t w, uint32_t h)    { SetSize(w, h); }
-
 // ===========================================================
 // Native handle
 // ===========================================================
@@ -126,13 +122,6 @@ public:
     /// @brief Retrieves the underlying native window handle.
     /// @return A platform-specific pointer (e.g., GLFWwindow*, HWND, etc.).
     virtual void* GetNativeWindow() const = 0;
-
-    /**
-     * @brief Factory method to create a new window instance.
-     * @param props The properties to initialize the window with.
-     * @return A unique pointer to the created window instance.
-     */
-    static Scope<Window> Create(const WindowProps& props = WindowProps());
 };
 
 } // namespace RS
