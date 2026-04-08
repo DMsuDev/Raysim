@@ -1,6 +1,6 @@
 #include "../../pch.hpp"
 
-#include "Raysim/Backend/Raylib/RaylibInput.hpp"
+#include "Backend/Raylib/RaylibInput.hpp"
 
 #include <raylib.h>
 

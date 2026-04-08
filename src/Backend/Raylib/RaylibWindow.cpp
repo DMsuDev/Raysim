@@ -1,7 +1,7 @@
 #include "../../pch.hpp"
 
 #include "Raysim/Math/Vector2.hpp"
-#include "Raysim/Backend/Raylib/RaylibWindow.hpp"
+#include "Backend/Raylib/RaylibWindow.hpp"
 
 #include <raylib.h>
 

@@ -1,8 +1,8 @@
 #include "Raysim/Core/BackendFactory.hpp"
 
-#include "Raysim/Backend/Raylib/RaylibRendererAPI.hpp"
-#include "Raysim/Backend/Raylib/RaylibWindow.hpp"
-#include "Raysim/Backend/Raylib/RaylibInput.hpp"
+#include "Backend/Raylib/RaylibRendererAPI.hpp"
+#include "Backend/Raylib/RaylibWindow.hpp"
+#include "Backend/Raylib/RaylibInput.hpp"
 
 #include "Raysim/Core/Assert.hpp"
 
