@@ -3,7 +3,7 @@
 [![C++](https://img.shields.io/badge/Language-C%2B%2B-00599C?style=flat&logo=cplusplus&logoColor=white)](https://isocpp.org/)
 [![CMake](https://img.shields.io/badge/Build-CMake-064F8C?style=flat&logo=cmake&logoColor=white)](https://cmake.org/)
 ![Status](https://img.shields.io/badge/Status-Early%20Development-yellow?style=flat)
-[![Version](https://img.shields.io/badge/Version-0.3.1-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
+[![Version](https://img.shields.io/badge/Version-0.4.0-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
 
 [English Readme](https://github.com/DMsuDev/Raysim/blob/main/README.md)
 • [Readme Español](https://github.com/DMsuDev/Raysim/blob/main/README.es.md)
@@ -74,35 +74,50 @@ cmake --build --preset debug
 
 ## Bucle de Aplicación
 
-Cada ciclo de la aplicación ejecuta cuatro métodos en orden. Solo `Draw` es obligatorio.
+Cada ciclo de la aplicación ejecuta los métodos del ciclo de vida de la escena activa en orden.
 
 <details>
-<summary>Setup</summary>
+<summary>OnAttach</summary>
 
-Se llama una vez antes de que comience el bucle principal. Úsalo para configurar la ventana,
-cargar assets, establecer la semilla del RNG e inicializar el estado de tu simulación.
+Se llama una vez cuando la escena se adjunta por primera vez al SceneManager. Úsalo para
+cargar assets, crear entidades e inicializar el estado de la escena.
 
 ```cpp
-void Setup() override {
-    SetTitle("My Simulation");
-    SetSize(1280, 720);
-    SetRandomSeed(42);   // Opcional: omitir para una semilla diferente en cada ejecución
-    Time::SetTargetFPS(60);
+class MyScene : public Scene {
+protected:
+    void OnAttach() override {
+        GetContext().Window->SetTitle("Mi Escena");
+    }
+};
+```
+
+</details>
+
+<details>
+<summary>OnStart</summary>
+
+Se llama cada vez que la escena comienza (después de `OnAttach` o cuando se reanuda). Úsalo para
+reiniciar el estado del juego, reiniciar temporizadores o inicializar recursos dinámicos.
+
+```cpp
+void OnStart() override {
+    position = {400, 300};
+    velocity = {150, 100};
 }
 ```
 
 </details>
 
 <details>
-<summary>Update</summary>
+<summary>OnUpdate</summary>
 
 Se llama cada frame. Úsalo para consultar la entrada, lógica del juego y todo lo que
 lea o escriba estado de la simulación. Recibe el delta time escalado en segundos
 para que el movimiento sea independiente del frame rate.
 
 ```cpp
-void Update(float dt) override {
-    if (Input->IsKeyPressed(Key::Space)) TogglePause();
+void OnUpdate(float dt) override {
+    if (GetContext().Input->IsKeyPressed(Key::Space)) SetPaused(!IsPaused());
     position += velocity * dt;
 }
 ```
@@ -110,7 +125,7 @@ void Update(float dt) override {
 </details>
 
 <details>
-<summary>FixedUpdate</summary>
+<summary>OnFixedUpdate</summary>
 
 Se llama con un paso de tiempo fijo independientemente del frame rate real. Úsalo para
 integración de física y pasos de simulación deterministas. El acumulador ejecuta
@@ -118,7 +133,7 @@ tantos pasos fijos como sea necesario para alcanzar el tiempo real, limitado por
 `maxFixedSteps` de `ApplicationConfig` para evitar una espiral de la muerte.
 
 ```cpp
-void FixedUpdate(float fixedDt) override {
+void OnFixedUpdate(float fixedDt) override {
     velocity += gravity * fixedDt;
     position += velocity * fixedDt;
 }
@@ -127,23 +142,54 @@ void FixedUpdate(float fixedDt) override {
 </details>
 
 <details>
-<summary>Draw</summary>
+<summary>OnDraw</summary>
 
-Se llama cada frame después de `Update`. Emite todos los comandos de renderizado aquí.
+Se llama cada frame después de `OnUpdate`. Emite todos los comandos de renderizado aquí.
 Recibe un factor de interpolación `alpha` en `[0, 1)` que representa cuánto ha avanzado
 la simulación hacia el siguiente paso fijo. Úsalo para interpolar entre la captura
 de física anterior y la actual para que los visuales se mantengan suaves a cualquier
-frame rate. No mutes estado dentro de `Draw`.
+frame rate. No mutes estado dentro de `OnDraw`.
 
 ```cpp
-void Draw(float alpha) override {
-    Background(Color::Black());
+void OnDraw(float alpha) override {
+    GetContext().Renderer->Clear(Colors::DarkBlue);
     Vector2 renderPos = prevPosition + (position - prevPosition) * alpha;
-    Shapes::DrawCircle(renderPos.x, renderPos.y, radius, Color::White());
+    Shapes::DrawCircle(renderPos.x, renderPos.y, 20.0f, Colors::RayWhite);
 }
 ```
 
-> Usar un paso de Draw separado es ideal porque mantiene la estructura del código limpia y evita inconsistencias con el bucle de física. Sin embargo, es opcional. Si prefieres, puedes poner toda tu lógica de renderizado en Update y dejar Draw vacío. En ese caso, el parámetro `alpha` siempre será 0 ya que no hay interpolación, pero no causará ningún problema.
+> Usar un paso de Draw separado es ideal porque mantiene la estructura del código limpia y evita inconsistencias con el bucle de física. Sin embargo, es opcional. Si prefieres, puedes poner toda tu lógica de renderizado en OnUpdate y dejar OnDraw vacío. En ese caso, el parámetro `alpha` siempre será 0 ya que no hay interpolación, pero no causará ningún problema.
+
+</details>
+
+<details>
+<summary>OnPause / OnResume</summary>
+
+- `OnPause`: Se llama cuando la escena se pausa. Úsalo para pausar animaciones, detener temporizadores, etc.
+- `OnResume`: Se llama cuando la escena se reanuda desde un estado de pausa. Úsalo para reanudar animaciones, reiniciar temporizadores, etc.
+
+```cpp
+void OnPause() override {
+    RS_LOG_INFO("Escena pausada");
+}
+
+void OnResume() override {
+    RS_LOG_INFO("Escena reanudada");
+}
+```
+
+</details>
+
+<details>
+<summary>OnDetach</summary>
+
+Se llama cuando la escena se elimina o reemplaza. Limpia recursos, desadjunta entidades, etc.
+
+```cpp
+void OnDetach() override {
+    // Limpiar recursos de la escena
+}
+```
 
 </details>
 
@@ -152,14 +198,26 @@ void Draw(float alpha) override {
 <details>
 <summary>Core</summary>
 
-| Archivo             | Propósito                                                                                                                                                                                  |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Application`       | Clase base. Hereda de ella, sobreescribe los métodos del ciclo de vida, accede al backend a través de `Renderer`, `Window` e `Input`.                                                      |
-| `ApplicationConfig` | Configura título, resolución, máximo de pasos fijos y archivo de log antes de que comience el bucle. Todos los campos tienen valores por defecto - pasa solo lo que necesites.             |
-| `Time`              | Utilidad estática. Delta time, paso de tiempo fijo, escala de tiempo, pausa/reanudar, contadores de FPS.                                                                                   |
-| `Log`               | Envuelve spdlog. Escribe en consola y archivo de log. Usa las macros `RS_LOG_INFO`, `RS_LOG_WARN`, `RS_LOG_ERROR`.                                                                         |
-| `FontManager`       | Carga una fuente TTF/OTF una vez, accede globalmente para renderizado de texto. Puedes establecer una fuente por defecto usando `SetDefaultFont("ruta/fuente.ttf")` en `Setup() override`. |
-| `BackendFactory`    | Crea instancias concretas de `RendererAPI`, `Window` e `Input` para el backend seleccionado.                                                                                               |
+| Archivo             | Propósito                                                                                                                                                                                                           |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Application`       | Clase base. Crea escenas y regístralas con `SetScene()` o `AddScene()`. Accede al backend a través de `GetContext()`.                                                                                               |
+| `ApplicationConfig` | Configura título, resolución, máximo de pasos fijos y archivo de log antes de que comience el bucle. Todos los campos tienen valores por defecto - pasa solo lo que necesites.                                      |
+| `Time`              | Utilidad estática. Delta time, paso de tiempo fijo, escala de tiempo, pausa/reanudar, contadores de FPS.                                                                                                            |
+| `Log`               | Envuelve spdlog. Escribe en consola y archivo de log. Usa las macros `RS_LOG_INFO`, `RS_LOG_WARN`, `RS_LOG_ERROR`.                                                                                                  |
+| `FontManager`       | Carga una fuente TTF/OTF una vez, accede globalmente para renderizado de texto. Puedes establecer una fuente por defecto usando `SetDefaultFont("ruta/fuente.ttf")` en `OnAttach() override`.                       |
+| `BackendFactory`    | Crea instancias concretas de `RendererAPI`, `Window` e `Input` para el backend seleccionado.                                                                                                                        |
+| `Scene`             | Clase base para escenas. Proporciona callbacks del ciclo de vida (OnAttach, OnStart, OnUpdate, OnFixedUpdate, OnDraw, OnPause, OnResume, OnDetach). Las escenas reciben un EngineContext para acceso a subsistemas. |
+| `SceneManager`      | Gestiona una pila LIFO de escenas. Soporta operaciones push/pop, pausa/reanudar y búsqueda de escenas por ID o nombre.                                                                                              |
+
+</details>
+
+<details>
+<summary>Scene</summary>
+
+| Archivo        | Propósito                                                                                                                                                                                                                                             |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Scene`        | Clase base para escenas. Proporciona callbacks del ciclo de vida (OnStart, OnUpdate, OnFixedUpdate, OnDraw, OnAttach, OnDetach, OnPause, OnResume). Cada escena recibe un EngineContext para acceso a Window, Renderer e Input.                       |
+| `SceneManager` | Gestiona una pila LIFO de escenas. Operaciones: AddScene (push), RemoveScene (pop), SetScene (reemplazar todo). Control de flujo: PauseCurrentScene, ResumeCurrentScene. Búsqueda: GetCurrentScene, GetSceneByID, GetSceneByName, GetUnderlyingScene. |
 
 </details>
 
@@ -238,61 +296,49 @@ cmake --build build --config Release
 
 ## Inicio Rápido
 
-`ApplicationConfig` es opcional - todos los campos tienen valores por defecto. Puedes elegir proporcionar solo lo que necesites o definir configuraciones individuales en `Setup`. Las siguientes son todas formas válidas de configurar tu aplicación:
+Crea una escena heredando de `Scene` y sobreescribe los métodos del ciclo de vida. Luego regístrala con tu aplicación usando `SetScene()` o `AddScene()`.
 
 ```cpp
-// Sin config: usa valores por defecto (1600x900, título "Raysim App")
-MyApp app;
+#include "Raysim/Raysim.hpp"
+#include "Raysim/Core/EntryPoint.hpp"
 
-// Config parcial con designated initializers (requiere C++20)
-MyApp app(ApplicationConfig{ .title = "My Sim", .width = 1280, .height = 720 });
-
-// Config completa
-MyApp app(ApplicationConfig{
-    .title         = "My Sim",
-    .width         = 1920,
-    .height        = 1080,
-    .maxFixedSteps = 8,
-    .logFile       = "mysim.log"
-});
-```
-
-```cpp
-#include <Raysim/Raysim.hpp>
 using namespace RS;
 
-class MyApp : public Application {
+class MyScene : public Scene {
     Vector2 position = {400, 300};
     Vector2 velocity = {150, 100};
 
-protected:
-    void Setup() override {
-        SetTitle("My First Raysim App");
-        SetSize(800, 600);
-        // La semilla es auto-aleatoria al inicio; llama a SetRandomSeed() solo si necesitas reproducibilidad.
-        // SetRandomSeed(12345);
+    void OnAttach() override {
+        GetContext().Window->SetTitle("Mi Primera App Raysim");
+        GetContext().Window->SetSize(800, 600);
         Time::SetTargetFPS(60);
     }
 
-    void FixedUpdate(float fixedDt) override {
+    void OnFixedUpdate(float fixedDt) override {
         position += velocity * fixedDt;
 
-        if (position.x < 20 || position.x > GetWidth() - 20)  velocity.x *= -1;
-        if (position.y < 20 || position.y > GetHeight() - 20) velocity.y *= -1;
+        float width  = static_cast<float>(GetContext().Window->GetWidth());
+        float height = static_cast<float>(GetContext().Window->GetHeight());
+
+        if (position.x < 20 || position.x > width - 20)  velocity.x *= -1;
+        if (position.y < 20 || position.y > height - 20) velocity.y *= -1;
     }
 
-    void Draw(float /*alpha*/) override {
-        Background(Colors::DarkBlue);
+    void OnDraw(float /*alpha*/) override {
+        GetContext().Renderer->ClearScreen(Colors::DarkBlue);
         Shapes::DrawCircle(position.x, position.y, 20.0f, Colors::RayWhite);
     }
 };
 
-int main() {
-    MyApp app;
-    app.Run();
-    return 0;
+RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
+{
+    auto* app = new Application();
+    app->AddScene(CreateScope<MyScene>());
+    return app;
 }
 ```
+
+> **Nota:** La semilla es auto-aleatoria al inicio. Llama a `SetRandomSeed(valor)` en `OnAttach()` solo si necesitas reproducibilidad.
 
 ## Licencia
 
