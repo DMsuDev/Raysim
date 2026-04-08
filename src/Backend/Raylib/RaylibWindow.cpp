@@ -148,6 +148,11 @@ void RaylibWindow::SetBorderlessFullscreen(bool enabled)
     RS_CORE_WARN("Borderless fullscreen is not implemented in RaylibWindow, so this will be ignored");
 }
 
+bool RaylibWindow::IsMinimized() const
+{
+    return ::IsWindowState(FLAG_WINDOW_MINIMIZED);
+}
+
 // ============================================================================
 // VSync
 // ============================================================================

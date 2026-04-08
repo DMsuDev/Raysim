@@ -85,6 +85,9 @@ public:
     /// @brief Checks if borderless fullscreen mode is enabled.
     virtual bool IsBorderlessFullscreen() const = 0;
 
+    /// @brief Checks if the window is currently minimized.
+    virtual bool IsMinimized() const  = 0;
+
 // ====================================================================
 // V-Sync
 // ====================================================================
