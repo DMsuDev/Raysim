@@ -46,10 +46,10 @@ Application::~Application() noexcept
 
 void Application::RebuildContext()
 {
-    m_EngineContext.Config    = &m_Configuration;
-    m_EngineContext.Renderer  = m_RenderCommand.get();
-    m_EngineContext.Window    = m_Window.get();
-    m_EngineContext.Input     = m_Input.get();
+    m_EngineContext.Config      = &m_Configuration;
+    m_EngineContext.Renderer    = m_RenderCommand.get();
+    m_EngineContext.MainWindow  = m_Window.get();
+    m_EngineContext.InputSystem = m_Input.get();
 }
 
 // ============================================================================
