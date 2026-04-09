@@ -66,7 +66,7 @@ private:
         Text::DrawText(pauseLine,  16.0f, 44.0f, 18, Colors::LightGray);
         Text::DrawText(speedLine,  16.0f, 68.0f, 18, Colors::LightGray);
         Text::DrawText(reseedLine, 16.0f, 92.0f, 18, Colors::LightGray);
-        Text::DrawText(fpsLine, static_cast<float>(GetContext().MainWindow->GetWidth()) - 16.0f, 16.0f, 20,
+        Text::DrawText(fpsLine, static_cast<float>(Window().GetWidth()) - 16.0f, 16.0f, 20,
                        Colors::LightGray, OriginMode::TopRight);
     }
 
@@ -80,12 +80,12 @@ public:
 
     void OnStart() override
     {
-        GetContext().MainWindow->SetSize(1200, 700);
-        GetContext().MainWindow->SetTitle("Raysim - Noise Landscape");
+        Window().SetSize(1200, 700);
+        Window().SetTitle("Raysim - Noise Landscape");
         FontManager::LoadFont("assets/fonts/OpenSans-Regular.ttf");
         Time::SetTargetFPS(60);
-        float w = static_cast<float>(GetContext().MainWindow->GetWidth());
-        float h = static_cast<float>(GetContext().MainWindow->GetHeight());
+        float w = static_cast<float>(Window().GetWidth());
+        float h = static_cast<float>(Window().GetHeight());
         skyLayer_.emplace(w, h * SKY_HEIGHT_RATIO, STAR_COUNT, SKY_GRAD_STEPS);
         terrain_.emplace(w, h);
     }
@@ -93,22 +93,22 @@ public:
     void OnUpdate(float dt) override
     {
         //--- Mode select ------------------------------------------------
-        if (GetContext().InputSystem->IsKeyPressed(KeyCode::One))   terrain_->SetMode(NoiseMode::Perlin);
-        if (GetContext().InputSystem->IsKeyPressed(KeyCode::Two))   terrain_->SetMode(NoiseMode::Simplex);
-        if (GetContext().InputSystem->IsKeyPressed(KeyCode::Three)) terrain_->SetMode(NoiseMode::Cellular);
-        if (GetContext().InputSystem->IsKeyPressed(KeyCode::Four))  terrain_->SetMode(NoiseMode::Value);
-        if (GetContext().InputSystem->IsKeyPressed(KeyCode::Five))  terrain_->SetMode(NoiseMode::FBM);
+        if (Input().IsKeyPressed(KeyCode::One))   terrain_->SetMode(NoiseMode::Perlin);
+        if (Input().IsKeyPressed(KeyCode::Two))   terrain_->SetMode(NoiseMode::Simplex);
+        if (Input().IsKeyPressed(KeyCode::Three)) terrain_->SetMode(NoiseMode::Cellular);
+        if (Input().IsKeyPressed(KeyCode::Four))  terrain_->SetMode(NoiseMode::Value);
+        if (Input().IsKeyPressed(KeyCode::Five))  terrain_->SetMode(NoiseMode::FBM);
 
         //--- Scroll control ---------------------------------------------
-        if (GetContext().InputSystem->IsKeyPressed(KeyCode::Space)) autoScroll_ = !autoScroll_;
+        if (Input().IsKeyPressed(KeyCode::Space)) autoScroll_ = !autoScroll_;
 
-        if (GetContext().InputSystem->IsKeyDown(KeyCode::Up))
+        if (Input().IsKeyDown(KeyCode::Up))
             scrollSpeed_ = Math::Min(scrollSpeed_ + 80.0f * dt, 600.0f);
-        if (GetContext().InputSystem->IsKeyDown(KeyCode::Down))
+        if (Input().IsKeyDown(KeyCode::Down))
             scrollSpeed_ = Math::Max(scrollSpeed_ - 80.0f * dt, 5.0f);
 
         //--- Reseed - regenerate both sky and terrain -----------------------
-        if (GetContext().InputSystem->IsKeyPressed(KeyCode::R)) {
+        if (Input().IsKeyPressed(KeyCode::R)) {
             Math::Random::SeedRandom();
             skyLayer_->Reseed();
             terrain_->Reseed();
@@ -121,7 +121,7 @@ public:
 
     void OnDraw(float /*alpha*/) override
     {
-        float skyH = static_cast<float>(GetContext().MainWindow->GetHeight()) * SKY_HEIGHT_RATIO;
+        float skyH = static_cast<float>(Window().GetHeight()) * SKY_HEIGHT_RATIO;
         skyLayer_->SetSkyHeight(skyH);
         skyLayer_->DrawSky();               // gradient background
         skyLayer_->DrawStars();             // twinkling star field

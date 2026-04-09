@@ -226,7 +226,7 @@ private:
                        OriginMode::TopLeft);
 
         // Controls at the bottom
-        float bottomY = static_cast<float>(GetContext().MainWindow->GetHeight()) - 50.0f;
+        float bottomY = static_cast<float>(Window().GetHeight()) - 50.0f;
         Text::DrawText("Arrows=Freq  P/O=Dir  +/-=Speed  1-6=Preset  R=Reset",
                    20, bottomY, 18, Colors::LightGray, OriginMode::BottomLeft);
 
@@ -261,8 +261,8 @@ public:
 #pragma region Setup
 
     void OnStart() override {
-        GetContext().MainWindow->SetSize(1200, 800);
-        GetContext().MainWindow->SetTitle("Raysim - Lissajous Curves");
+        Window().SetSize(1200, 800);
+        Window().SetTitle("Raysim - Lissajous Curves");
         FontManager::LoadFont("assets/fonts/OpenSans-Regular.ttf");
         Time::SetTargetFPS(60);
 
@@ -283,8 +283,8 @@ public:
 
     void OnUpdate(float dt) override {
         // Recompute layout from current window size
-        float w = static_cast<float>(GetContext().MainWindow->GetWidth());
-        float h = static_cast<float>(GetContext().MainWindow->GetHeight());
+        float w = static_cast<float>(Window().GetWidth());
+        float h = static_cast<float>(Window().GetHeight());
         centerX     = w * 0.5f;
         centerY     = h * 0.5f;
         curveRadius = Math::Min(w, h) * 0.375f;
@@ -295,22 +295,22 @@ public:
 
         // INTERACTIVE CONTROLS
         // Frequency control (arrow keys) 1.2 units/sec
-        if (GetContext().InputSystem->IsKeyDown(KeyCode::Right)) frequencyX += 1.2f * dt;
-        if (GetContext().InputSystem->IsKeyDown(KeyCode::Left)) frequencyX = std::max(0.1f, frequencyX - 1.2f * dt);
-        if (GetContext().InputSystem->IsKeyDown(KeyCode::Up)) frequencyY += 1.2f * dt;
-        if (GetContext().InputSystem->IsKeyDown(KeyCode::Down)) frequencyY = std::max(0.1f, frequencyY - 1.2f * dt);
+        if (Input().IsKeyDown(KeyCode::Right)) frequencyX += 1.2f * dt;
+        if (Input().IsKeyDown(KeyCode::Left)) frequencyX = std::max(0.1f, frequencyX - 1.2f * dt);
+        if (Input().IsKeyDown(KeyCode::Up)) frequencyY += 1.2f * dt;
+        if (Input().IsKeyDown(KeyCode::Down)) frequencyY = std::max(0.1f, frequencyY - 1.2f * dt);
 
         // Phase control: P/O for direction, +/- for speed adjustment 0.3 units/sec
-        if (GetContext().InputSystem->IsKeyDown(KeyCode::P)) phaseRotationSpeed = std::abs(phaseRotationSpeed);
-        if (GetContext().InputSystem->IsKeyDown(KeyCode::O)) phaseRotationSpeed = -std::abs(phaseRotationSpeed);
-        if (GetContext().InputSystem->IsKeyDown(KeyCode::Equal) || GetContext().InputSystem->IsKeyDown(KeyCode::KP_Add))
+        if (Input().IsKeyDown(KeyCode::P)) phaseRotationSpeed = std::abs(phaseRotationSpeed);
+        if (Input().IsKeyDown(KeyCode::O)) phaseRotationSpeed = -std::abs(phaseRotationSpeed);
+        if (Input().IsKeyDown(KeyCode::Equal) || Input().IsKeyDown(KeyCode::KP_Add))
             phaseRotationSpeed += 0.3f * dt;
-        if (GetContext().InputSystem->IsKeyDown(KeyCode::Minus) || GetContext().InputSystem->IsKeyDown(KeyCode::KP_Subtract))
+        if (Input().IsKeyDown(KeyCode::Minus) || Input().IsKeyDown(KeyCode::KP_Subtract))
             phaseRotationSpeed -= 0.3f * dt;
 
         // Select presets with number keys 1-6
         for (int i = 0; i < 6; ++i) {
-            if (GetContext().InputSystem->IsKeyPressed((KeyCode)((int)KeyCode::One + i))) {
+            if (Input().IsKeyPressed((KeyCode)((int)KeyCode::One + i))) {
                 currentPreset = i;
                 frequencyX = PRESETS[i].frequencyX;
                 frequencyY = PRESETS[i].frequencyY;
@@ -318,7 +318,7 @@ public:
             }
         }
 
-        if (GetContext().InputSystem->IsKeyPressed(KeyCode::R)) {
+        if (Input().IsKeyPressed(KeyCode::R)) {
             frequencyX = 3.0f;
             frequencyY = 2.0f;
             phaseShift = 0.0f;
@@ -338,7 +338,7 @@ public:
     }
 
     void OnDraw(float alpha) override {
-        GetContext().Renderer->ClearScreen(Colors::RayBlack);
+        Renderer().ClearScreen(Colors::RayBlack);
 
         DrawCurveLines();
         DrawMarkers();

@@ -87,6 +87,10 @@ class MyScene : public Scene {
 protected:
     void OnAttach() override {
         GetContext().Window->SetTitle("Mi Escena");
+
+        // Tambien puedes usar el acceso directo de conveniencia:
+
+        Window().SetTitle("Mi Escena");
     }
 };
 ```
@@ -117,7 +121,7 @@ para que el movimiento sea independiente del frame rate.
 
 ```cpp
 void OnUpdate(float dt) override {
-    if (GetContext().Input->IsKeyPressed(Key::Space)) SetPaused(!IsPaused());
+    if (Input().IsKeyPressed(Key::Space)) SetPaused(!IsPaused());
     position += velocity * dt;
 }
 ```
@@ -152,7 +156,7 @@ frame rate. No mutes estado dentro de `OnDraw`.
 
 ```cpp
 void OnDraw(float alpha) override {
-    GetContext().Renderer->Clear(Colors::DarkBlue);
+    Renderer().Clear(Colors::DarkBlue);
     Vector2 renderPos = prevPosition + (position - prevPosition) * alpha;
     Shapes::DrawCircle(renderPos.x, renderPos.y, 20.0f, Colors::RayWhite);
 }
@@ -309,27 +313,27 @@ class MyScene : public Scene {
     Vector2 velocity = {150, 100};
 
     void OnAttach() override {
-           GetContext().MainWindow->SetTitle("Mi Primera App Raysim");
-           GetContext().MainWindow->SetSize(800, 600);
+           Window().SetTitle("Mi Primera App Raysim");
+           Window().SetSize(800, 600);
         Time::SetTargetFPS(60);
     }
 
     void OnFixedUpdate(float fixedDt) override {
         position += velocity * fixedDt;
 
-            float width  = static_cast<float>(GetContext().MainWindow->GetWidth());
-            float height = static_cast<float>(GetContext().MainWindow->GetHeight());
+            float width  = static_cast<float>(Window().GetWidth());
+            float height = static_cast<float>(Window().GetHeight());
 
         if (position.x < 20 || position.x > width - 20)  velocity.x *= -1;
         if (position.y < 20 || position.y > height - 20) velocity.y *= -1;
     }
 
     void OnDraw(float /*alpha*/) override {
-        GetContext().Renderer->ClearScreen(Colors::DarkBlue);
+        Renderer().ClearScreen(Colors::DarkBlue);
         Shapes::DrawCircle(position.x, position.y, 20.0f, Colors::RayWhite);
     }
 };
-        if (GetContext().InputSystem->IsKeyPressed(Key::Space)) SetPaused(!IsPaused());
+        if (Input().IsKeyPressed(Key::Space)) SetPaused(!IsPaused());
 RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
 {
     auto* app = new Application();
