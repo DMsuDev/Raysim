@@ -3,7 +3,7 @@
 [![C++](https://img.shields.io/badge/Language-C%2B%2B-00599C?style=flat&logo=cplusplus&logoColor=white)](https://isocpp.org/)
 [![CMake](https://img.shields.io/badge/Build-CMake-064F8C?style=flat&logo=cmake&logoColor=white)](https://cmake.org/)
 ![Status](https://img.shields.io/badge/Status-Early%20Development-yellow?style=flat)
-[![Version](https://img.shields.io/badge/Version-0.4.0-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
+[![Version](https://img.shields.io/badge/Version-0.4.1-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
 
 [English Readme](https://github.com/DMsuDev/Raysim/blob/main/README.md)
 • [Readme Español](https://github.com/DMsuDev/Raysim/blob/main/README.es.md)

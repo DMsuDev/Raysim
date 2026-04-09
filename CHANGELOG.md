@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.1] - 2026-04-09
+
+### Added
+
+- Direct access methods to core subsystems, replacing `GetContext()` usage.
+
+### Changed
+
+- Removed redundant `Application::GetWindow()` method.
+- Moved headers from `include/Raysim/backend/` to `include/backend/`.
+- Renamed window size and title methods across examples and backend.
+- Updated `Window().GetSize()` return types from `uint32_t` to `int`.
+- Improved constructor parameter naming on `Vector2`, `Vector3` and `Color` to resolve `-Werror` and `-Wshadow` warnings.
+
+### Fixed
+
+- Ensured `pch.hpp` is included first in `BackendFactory.cpp`.
+- Guarded `NOMINMAX` definition in `pch.hpp`.
+- Removed unused second parameter from `RS_CORE_ASSERT_TRUE` in scene module.
+- Fixed `Application` destructor behavior.
+
 ## [0.4.0] - 2026-04-08
 
 ### Added
