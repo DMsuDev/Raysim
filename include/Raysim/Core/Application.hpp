@@ -120,9 +120,6 @@ public:
     /// Replace all scenes with a single new scene.
     void SetScene(Scope<Scene> newScene);
 
-    /// Get reference to the application window
-    Window& GetWindow() { return *m_Window; }
-
     /// Request application shutdown
     /// The application will finish the current frame before exiting
     void Close();
@@ -145,7 +142,7 @@ private:
 
     ApplicationConfig   m_Configuration;  // Application configuration
     Scope<Window>       m_Window;         // The main window
-    Shared<RendererAPI> m_Renderer;      // Renderer backend
+    Shared<RendererAPI> m_Renderer;       // Renderer backend
     Scope<Input>        m_Input;          // Input backend
 
     Scope<RenderCommand> m_RenderCommand;
