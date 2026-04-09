@@ -115,6 +115,17 @@ protected:
     /// @return The engine context.
     const EngineContext& GetContext() const { return m_Context; }
 
+// ============================================================================
+// Direct access to subsystems (convenience methods)
+// ============================================================================
+
+    /// @brief Get the input subsystem from the engine context.
+    inline Input& Input()            { return *GetContext().InputSystem; }
+    /// @brief Get the window subsystem from the engine context.
+    inline Window& Window()          { return *GetContext().MainWindow; }
+    /// @brief Get the renderer subsystem from the engine context.
+    inline RenderCommand& Renderer() { return *GetContext().Renderer; }
+
 private:
     void Setup(EngineContext& ctx);  // Called once before the main loop starts
     void Run();                      // Dispatches lifecycle callbacks in the correct order
