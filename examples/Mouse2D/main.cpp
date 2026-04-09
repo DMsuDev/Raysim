@@ -6,8 +6,8 @@ using namespace RS;
 class MouseDetection : public Scene {
 
     // Convenience accessors
-    int GetWidth()  { return Window().GetWidth(); }
-    int GetHeight() { return Window().GetHeight(); }
+    int GetWidth()  { return GetWindow().GetWidth(); }
+    int GetHeight() { return GetWindow().GetHeight(); }
 
 private:
     Vector2 mousePos{0.0f, 0.0f};
@@ -22,23 +22,23 @@ private:
 public:
 
     void OnStart() override {
-        Window().SetSize(1000, 600);
-        Window().SetTitle("Raysim - Mouse Detection Demo");
+        GetWindow().SetSize(1000, 600);
+        GetWindow().SetTitle("Raysim - Mouse Detection Demo");
         FontManager::LoadFont("assets/fonts/OpenSans-Regular.ttf");
         Time::SetTargetFPS(60);
     }
 
     void OnUpdate(float dt) override {
-        mousePos = Input().GetMousePosition();
+        mousePos = GetInput().GetMousePosition();
         mouseSmoothedPos = Math::Lerp(mouseSmoothedPos, mousePos, squareSpeed * dt);
 
-        leftDown_   = Input().IsMouseButtonDown(MouseButton::Left);
-        rightDown_  = Input().IsMouseButtonDown(MouseButton::Right);
-        middleDown_ = Input().IsMouseButtonDown(MouseButton::Middle);
+        leftDown_   = GetInput().IsMouseButtonDown(MouseButton::Left);
+        rightDown_  = GetInput().IsMouseButtonDown(MouseButton::Right);
+        middleDown_ = GetInput().IsMouseButtonDown(MouseButton::Middle);
     }
 
     void OnDraw(float /*alpha*/) override {
-        Renderer().ClearScreen(Colors::DarkBlue);
+        GetRenderer().ClearScreen(Colors::DarkBlue);
 
         float w = static_cast<float>(GetWidth());
         float h = static_cast<float>(GetHeight());
