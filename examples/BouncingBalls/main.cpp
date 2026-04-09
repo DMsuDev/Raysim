@@ -88,8 +88,8 @@ private:
         if (ball.position.x - ball.radius < 0) {
             ball.position.x  = ball.radius;
             ball.velocity.x *= -BALL_DAMPING;
-        } else if (ball.position.x + ball.radius > Window().GetWidth()) {
-            ball.position.x  = Window().GetWidth() - ball.radius;
+        } else if (ball.position.x + ball.radius > GetWindow().GetWidth()) {
+            ball.position.x  = GetWindow().GetWidth() - ball.radius;
             ball.velocity.x *= -BALL_DAMPING;
         }
 
@@ -97,8 +97,8 @@ private:
         if (ball.position.y - ball.radius < 0) {
             ball.position.y  = ball.radius;
             ball.velocity.y *= -BALL_DAMPING;
-        } else if (ball.position.y + ball.radius > Window().GetHeight()) {
-            ball.position.y  = Window().GetHeight() - ball.radius;
+        } else if (ball.position.y + ball.radius > GetWindow().GetHeight()) {
+            ball.position.y  = GetWindow().GetHeight() - ball.radius;
             ball.velocity.y *= -BALL_DAMPING;
 
             if (ball.velocity.Length() < STOP_THRESHOLD) {
@@ -153,8 +153,8 @@ private:
 #pragma region Drawing
 
     void DrawBackground() {
-        Vector2 center{ Window().GetWidth() * 0.5f, Window().GetHeight() * 0.45f };
-        float   maxR = Math::Max(Window().GetWidth(), Window().GetHeight()) * 0.95f;
+        Vector2 center{ GetWindow().GetWidth() * 0.5f, GetWindow().GetHeight() * 0.45f };
+        float   maxR = Math::Max(GetWindow().GetWidth(), GetWindow().GetHeight()) * 0.95f;
         Color   base{18, 24, 38};
 
         const int STEPS = 28;
@@ -220,8 +220,8 @@ private:
     void DrawStats() {
         float t = Time::GetTime();
 
-        float w = static_cast<float>(Window().GetWidth());
-        float h = static_cast<float>(Window().GetHeight());
+        float w = static_cast<float>(GetWindow().GetWidth());
+        float h = static_cast<float>(GetWindow().GetHeight());
 
         DrawChip(18,         20,       "Balls: "   + std::to_string(static_cast<int>(balls_.size())),                     {70,  130, 180, 180}, t);
         DrawChip(w - 180.0f, 20,       "FPS: "     + std::to_string(static_cast<int>(Time::GetSmoothedFPS())), {140, 90,  200, 180}, t, 4.0f);
@@ -275,8 +275,8 @@ public:
 #pragma region Setup
 
     void OnStart() override {
-        Window().SetSize(1000, 700);
-        Window().SetTitle("Raysim - Bouncing Balls Physics");
+        GetWindow().SetSize(1000, 700);
+        GetWindow().SetTitle("Raysim - Bouncing Balls Physics");
         FontManager::LoadFont("assets/fonts/OpenSans-Regular.ttf");
         SpawnRandomBalls(8);
         Time::SetTargetFPS(60);
@@ -287,17 +287,17 @@ public:
 #pragma region Update and FixedUpdate
 
     void OnUpdate(float dt) override {
-        mousePos_        = Input().GetMousePosition();
-        rightMouseDown_  = Input().IsMouseButtonDown(MouseButton::Right);
-        middleMouseDown_ = Input().IsMouseButtonDown(MouseButton::Middle);
+        mousePos_        = GetInput().GetMousePosition();
+        rightMouseDown_  = GetInput().IsMouseButtonDown(MouseButton::Right);
+        middleMouseDown_ = GetInput().IsMouseButtonDown(MouseButton::Middle);
 
         //--- Toggle flags ------------------------------------------------
-        if (Input().IsKeyPressed(KeyCode::G)) useGravity_        = !useGravity_;
-        if (Input().IsKeyPressed(KeyCode::V)) showVelocityLines_ = !showVelocityLines_;
-        if (Input().IsKeyPressed(KeyCode::S)) showStats_         = !showStats_;
+        if (GetInput().IsKeyPressed(KeyCode::G)) useGravity_        = !useGravity_;
+        if (GetInput().IsKeyPressed(KeyCode::V)) showVelocityLines_ = !showVelocityLines_;
+        if (GetInput().IsKeyPressed(KeyCode::S)) showStats_         = !showStats_;
 
         //--- Spawn -------------------------------------------------------
-        if (Input().IsMouseButtonPressed(MouseButton::Left)) SpawnAtMouse();
+        if (GetInput().IsMouseButtonPressed(MouseButton::Left)) SpawnAtMouse();
     }
 
     void OnFixedUpdate(float dt) override {

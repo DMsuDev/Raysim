@@ -89,7 +89,7 @@ protected:
         GetContext().Window->SetTitle("My Scene");
 
         // You can also use the convenience method for direct access to the Window subsystem:
-        Window().SetTitle("My Scene");
+        GetWindow().SetTitle("My Scene");
     }
 };
 ```
@@ -120,7 +120,7 @@ so movement stays frame-rate independent.
 
 ```cpp
 void OnUpdate(float dt) override {
-    if (Input().IsKeyPressed(Key::Space)) SetPaused(!IsPaused());
+    if (GetInput().IsKeyPressed(Key::Space)) SetPaused(!IsPaused());
     position += velocity * dt;
 }
 ```
@@ -155,7 +155,7 @@ frame rate. Do not mutate state inside `OnDraw`.
 
 ```cpp
 void OnDraw(float alpha) override {
-    Renderer().Clear(Colors::DarkBlue);
+    GetRenderer().ClearScreen(Colors::DarkBlue);
     Vector2 renderPos = prevPosition + (position - prevPosition) * alpha;
     Shapes::DrawCircle(renderPos.x, renderPos.y, 20.0f, Colors::RayWhite);
 }
@@ -312,23 +312,23 @@ class MyScene : public Scene {
     Vector2 velocity = {150, 100};
 
     void OnAttach() override {
-        Window().SetTitle("My First Scene");
-        Window().SetSize(800, 600);
+        GetWindow().SetTitle("My First Scene");
+        GetWindow().SetSize(800, 600);
         Time::SetTargetFPS(60);
     }
 
     void OnFixedUpdate(float fixedDt) override {
         position += velocity * fixedDt;
 
-        float width  = static_cast<float>(Window().GetWidth());
-        float height = static_cast<float>(Window().GetHeight());
+        float width  = static_cast<float>(GetWindow().GetWidth());
+        float height = static_cast<float>(GetWindow().GetHeight());
 
         if (position.x < 20 || position.x > width - 20)  velocity.x *= -1;
         if (position.y < 20 || position.y > height - 20) velocity.y *= -1;
     }
 
     void OnDraw(float /*alpha*/) override {
-        Renderer().ClearScreen(Colors::DarkBlue);
+        GetRenderer().ClearScreen(Colors::DarkBlue);
         Shapes::DrawCircle(position.x, position.y, 20.0f, Colors::RayWhite);
     }
 };

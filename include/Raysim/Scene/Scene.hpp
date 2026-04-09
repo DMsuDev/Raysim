@@ -120,11 +120,11 @@ protected:
 // ============================================================================
 
     /// @brief Get the input subsystem from the engine context.
-    inline Input& Input()            { return *GetContext().InputSystem; }
+    inline Input& GetInput()            { return *GetContext().InputSystem; }
     /// @brief Get the window subsystem from the engine context.
-    inline Window& Window()          { return *GetContext().MainWindow; }
+    inline Window& GetWindow()          { return *GetContext().MainWindow; }
     /// @brief Get the renderer subsystem from the engine context.
-    inline RenderCommand& Renderer() { return *GetContext().Renderer; }
+    inline RenderCommand& GetRenderer() { return *GetContext().Renderer; }
 
 private:
     void Setup(EngineContext& ctx);  // Called once before the main loop starts
