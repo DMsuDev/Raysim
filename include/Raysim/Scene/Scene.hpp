@@ -4,7 +4,34 @@
 
 namespace RS {
 
-class SceneManager; // Forward declaration to avoid circular dependency
+class SceneManager; // Forward declaration
+
+// ============================================================
+// Type ID system
+// ===========================================================
+
+using SceneID = uint32_t;
+
+inline SceneID GenerateSceneID() {
+    static SceneID counter = 1;
+    return counter++;
+}
+
+template<typename T>
+SceneID GetSceneTypeID() {
+    static SceneID id = GenerateSceneID();
+    return id;
+}
+
+// ============================================================
+// MACRO for defining scene types
+// ===========================================================================
+
+#define RS_SCENE(type) \
+public: \
+    static RS::SceneID StaticID() noexcept { return RS::GetSceneTypeID<type>(); } \
+    static const char* StaticName() noexcept { return #type; } \
+    type() : Scene(StaticName(), StaticID()) {}
 
 /**
  * @class Scene
@@ -16,19 +43,10 @@ class SceneManager; // Forward declaration to avoid circular dependency
  */
 class Scene
 {
-    friend class Application;
+    friend class SceneManager; // Allow SceneManager to call internal lifecycle methods
+    friend class Application;  // Allow Application to call internal lifecycle methods
 
 public:
-    Scene() = default;
-
-    /**
-     * @brief Construct a named scene.
-     * @param name  Display/debug name for the scene.
-     * @param id    Unique numeric identifier (defaults to 0).
-     */
-    Scene(const std::string& name, uint16_t id = 0)
-        : m_Name(name), m_SceneID(id) {}
-
     virtual ~Scene() = default;
 
 // ===========================================================================
@@ -58,27 +76,44 @@ public:
 
     /// @brief Check if the scene is currently running.
     /// @return True if the scene is running, false otherwise.
-    bool IsRunning() const { return m_IsRunning; }
+    bool IsRunning() const noexcept { return m_IsRunning; }
 
     /// @brief Check if the scene is currently paused.
     /// @return True if the scene is paused, false otherwise.
-    bool IsPaused() const { return m_IsPaused; }
+    bool IsPaused() const noexcept { return m_IsPaused; }
 
     /// @brief Pause or resume the scene.
     /// @param paused True to pause the scene, false to resume.
-    void SetPaused(bool paused) { m_IsPaused = paused; }
+    void SetPaused(bool paused) noexcept { m_IsPaused = paused; }
 
     /// @brief Get the unique identifier for this scene.
     /// @return The scene's unique identifier.
-    uint16_t GetSceneID() const { return m_SceneID; }
+    SceneID GetSceneID() const noexcept { return m_SceneID; }
 
     /// @brief Get the name of the scene.
     /// @return The scene's name.
-    const std::string& GetName() const { return m_Name; }
+    const std::string& GetName() const noexcept { return m_Name; }
+
+    /// @brief Check if the scene has a valid ID (non-zero).
+    bool IsValid() const noexcept { return m_SceneID != 0; }
+
+    /// @brief Stop the scene. It will no longer be updated or drawn.
+    void Stop() noexcept { m_IsRunning = false; }
 
 protected:
+
+// ============================================================
+// Protected constructor
+// ============================================================
+
+    Scene()
+        : m_Name("UnnamedScene"), m_SceneID(0) {}
+
+    Scene(const char* name, SceneID id)
+        : m_Name(name), m_SceneID(id) {}
+
 // ===========================================================================
-// Lifecycle methods
+// Internal Lifecycle methods
 // ===========================================================================
 
     /// @brief Called each time the scene is started.
@@ -113,31 +148,33 @@ protected:
 
     /// @brief Get the engine context bound to this scene.
     /// @return The engine context.
-    const EngineContext& GetContext() const { return m_Context; }
+    const EngineContext& GetContext() const { return *m_Context; }
 
 // ============================================================================
-// Direct access to subsystems (convenience methods)
+// Direct access to subsystems
 // ============================================================================
 
     /// @brief Get the input subsystem from the engine context.
-    inline Input& GetInput()            { return *GetContext().InputSystem; }
+    inline Input& GetInput() noexcept { return *m_Context->InputSystem; }
     /// @brief Get the window subsystem from the engine context.
-    inline Window& GetWindow()          { return *GetContext().MainWindow; }
+    inline Window& GetWindow() noexcept { return *m_Context->MainWindow; }
     /// @brief Get the renderer subsystem from the engine context.
-    inline RenderCommand& GetRenderer() { return *GetContext().Renderer; }
+    inline RenderCommand& GetRenderer() noexcept { return *m_Context->Renderer; }
 
 private:
+
+// ============================================================
+// Internal engine hooks
+// ============================================================
+
     void Setup(EngineContext& ctx);  // Called once before the main loop starts
     void Run();                      // Dispatches lifecycle callbacks in the correct order
 
-    friend class SceneManager;    // Allow SceneManager to call private Run/Shutdown methods
-    friend class Application;     // Allow Application to bind EngineContext before pushing
-
 private:
-    EngineContext m_Context;      // Engine subsystems available to this scene
+    EngineContext* m_Context;     // Engine subsystems available to this scene
 
-    std::string   m_Name;         // Name of the scene (for lookup and debugging)
-    uint16_t      m_SceneID;      // Unique identifier for this scene
+    std::string  m_Name;         // Name of the scene (for lookup and debugging)
+    SceneID      m_SceneID;      // Unique identifier for this scene
 
     bool m_Initialized = false;   // Whether the scene has been attached to the manager at least once (used to call OnAttach)
     bool m_IsRunning = false;     // Current running state of the scene

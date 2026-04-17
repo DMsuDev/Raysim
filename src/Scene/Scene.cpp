@@ -17,8 +17,7 @@ void Scene::Setup(EngineContext& ctx)
 {
     RS_CORE_INFO("Setting up scene '{}' (ID {})", m_Name, m_SceneID);
 
-    Time::Reset(); // Ensure time starts at zero when the main loop begins
-    m_Context = ctx; // Bind the engine context to this scene
+    m_Context = &ctx; // Bind the engine context to this scene
 
     m_IsRunning = true;
     m_IsPaused = false;
@@ -38,30 +37,33 @@ void Scene::Setup(EngineContext& ctx)
 
 void Scene::Run()
 {
+    if (!m_IsRunning)
+        return;
+
     Time::BeginFrame();
 
     if (!m_IsPaused)
     {
         // Fixed timestep updates
         uint32_t stepsTaken = 0;
-        while (Time::ShouldFixedStep() && stepsTaken < m_Context.Config->MaxFixedSteps)
+        while (Time::ShouldFixedStep() && stepsTaken < GetContext().Config->MaxFixedSteps)
         {
             OnFixedUpdate(Time::GetFixedDeltaTime());
             ++stepsTaken;
         }
 
-        if (stepsTaken == m_Context.Config->MaxFixedSteps)
+        if (stepsTaken == GetContext().Config->MaxFixedSteps)
         {
-            RS_CORE_WARN("Frame drop detected! Fixed steps clamped to {}", m_Context.Config->MaxFixedSteps);
+            RS_CORE_WARN("Frame drop detected! Fixed steps clamped to {}", GetContext().Config->MaxFixedSteps);
         }
 
         const float dt = Time::GetDeltaTime();
         OnUpdate(dt);
     }
 
-    m_Context.Renderer->BeginFrame();
+    GetContext().Renderer->BeginFrame();
     OnDraw(Time::GetInterpolationAlpha());
-    m_Context.Renderer->EndFrame();
+    GetContext().Renderer->EndFrame();
 
     Time::EndFrame();
 }

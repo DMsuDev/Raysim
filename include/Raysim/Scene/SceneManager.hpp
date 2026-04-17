@@ -117,6 +117,10 @@ private:
     /// @param pause True to pause, false to resume.
     void SetPauseState(bool pause);
 
+    /// @brief Internal method to clean up a scene before removal.
+    /// @param scene Reference to the scene to clean up (calls OnDetach and stops it).
+    void CleanupScene(Scene& scene);
+
     /// @brief Push a new scene onto the stack.
     /// @param scene Owning pointer to the scene. Must not be null.
     /// @return Reference to the newly pushed scene.

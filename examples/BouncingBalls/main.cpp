@@ -39,6 +39,8 @@ struct Ball {
 //==============================================================================
 
 class BouncingBalls : public Scene {
+    RS_SCENE(BouncingBalls)
+
 private:
 
 #pragma region State

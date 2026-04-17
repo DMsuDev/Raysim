@@ -50,6 +50,7 @@ static const std::vector<LissajousPreset> PRESETS = {
 };
 
 class LissajousSimulation : public Scene {
+    RS_SCENE(LissajousSimulation)
 
 private:
 #pragma region Parameters and state variables
