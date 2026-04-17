@@ -4,6 +4,7 @@
 using namespace RS;
 
 class MouseDetection : public Scene {
+    RS_SCENE(MouseDetection)
 
     // Convenience accessors
     int GetWidth()  { return GetWindow().GetWidth(); }

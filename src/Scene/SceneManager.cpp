@@ -29,7 +29,10 @@ void SceneManager::SetPauseState(bool pause)
         scene->SetPaused(pause);
 
         if (pause)
+        {
+            scene->Stop();
             scene->OnPause();
+        }
         else
             scene->OnResume();
     }
@@ -41,6 +44,17 @@ Scene& SceneManager::PushScene(Scope<Scene> scene)
 
     m_SceneStack.push_back(std::move(scene));
     return *m_SceneStack.back();
+}
+
+void SceneManager::CleanupScene(Scene& scene)
+{
+    RS_CORE_INFO("Cleaning up scene '{}' (ID {})", scene.GetName(), scene.GetSceneID());
+
+    scene.Stop();
+    scene.OnDetach();
+
+    // Remove the scene from the stack (destroying it)
+    m_SceneStack.pop_back();
 }
 
 // ===================================================================
@@ -123,6 +137,11 @@ void SceneManager::AddScene(Scope<Scene> scene)
 {
     RS_CORE_ASSERT_TRUE(scene);
 
+    if (scene->GetSceneID() == 0)
+        RS_CORE_WARN("Scene '{}' has no valid ID. Did you forget RS_SCENE?", scene->GetName());
+
+    RS_CORE_INFO("Pushing scene '{}' (ID {}) on top of stack", scene->GetName(), scene->GetSceneID());
+
     PauseCurrentScene();
 
     Scene& sceneRef = PushScene(std::move(scene));
@@ -134,12 +153,7 @@ void SceneManager::RemoveScene()
     if (m_SceneStack.empty())
         return;
 
-    auto& current = GetCurrentScene();
-    RS_CORE_INFO("Popping scene '{}' (ID {})", current.GetName(), current.GetSceneID());
-
-    current.OnDetach();
-    m_SceneStack.pop_back();
-
+    CleanupScene(GetCurrentScene());
     ResumeCurrentScene();
 }
 
@@ -147,14 +161,13 @@ void SceneManager::SetScene(Scope<Scene> newScene)
 {
     RS_CORE_ASSERT_TRUE(newScene);
 
+    if (newScene->GetSceneID() == 0)
+        RS_CORE_WARN("Scene '{}' has no valid ID. Did you forget RS_SCENE?", newScene->GetName());
+
     // Detach all existing scenes
     while (!m_SceneStack.empty())
     {
-        Scene& current = GetCurrentScene();
-        RS_CORE_INFO("Scene '{}' (ID {}) detached", current.GetName(), current.GetSceneID());
-
-        current.OnDetach();
-        m_SceneStack.pop_back();
+        CleanupScene(GetCurrentScene());
     }
 
     Scene& sceneRef = PushScene(std::move(newScene));

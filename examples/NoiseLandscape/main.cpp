@@ -29,6 +29,8 @@ using namespace RS;
 //==============================================================================
 
 class NoiseLandscape : public Scene {
+    RS_SCENE(NoiseLandscape)
+
 private:
 
 #pragma region State
