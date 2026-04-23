@@ -8,20 +8,11 @@
 namespace RS {
 
 // ============================================================================
-// Lifecycle
+// Construction & Destruction
 // ============================================================================
 
 RaylibWindow::RaylibWindow(const WindowProps& props)
-{
-    this->Init(props);
-}
-
-RaylibWindow::~RaylibWindow()
-{
-    this->Shutdown();
-}
-
-void RaylibWindow::Init(const WindowProps& props)
+    : Window(props)
 {
     if (props.Width == 0 || props.Height == 0) {
         RS_CORE_ERROR("Invalid window size: {}x{}. Width and height must be greater than 0.", props.Width, props.Height);
@@ -40,6 +31,11 @@ void RaylibWindow::Init(const WindowProps& props)
     RS_CORE_DEBUG("RaylibWindow ready: title='{}', {}x{}", m_Data.Title, m_Data.Width, m_Data.Height);
 }
 
+RaylibWindow::~RaylibWindow()
+{
+    this->Shutdown();
+}
+
 void RaylibWindow::Shutdown()
 {
     RS_CORE_INFO("Shutting down RaylibWindow");
@@ -51,16 +47,38 @@ void RaylibWindow::Shutdown()
     else RS_CORE_WARN("Attempted to close RaylibWindow, but it was not ready");
 }
 
-bool RaylibWindow::ShouldClose() const
+bool RaylibWindow::ImplShouldClose() const
 {
     return ::WindowShouldClose();
+}
+
+// ============================================================================
+// Lifecycle
+// ============================================================================
+
+void RaylibWindow::ImplPollEvents()
+{
+    LogOnceRegistry::LogOnce(
+        "EventPolling",
+        LogLevel::Warn,
+        "Event polling is handled internally by Raylib, so this will be ignored"
+    );
+}
+
+void RaylibWindow::ImplSwapBuffers()
+{
+    LogOnceRegistry::LogOnce(
+        "BufferSwapping",
+        LogLevel::Warn,
+        "Buffer swapping is handled internally by Raylib, so this will be ignored"
+    );
 }
 
 // ============================================================================
 // Size
 // ============================================================================
 
-void RaylibWindow::SetSize(int width, int height)
+void RaylibWindow::ImplSetSize(int width, int height)
 {
     RS_CORE_INFO("Setting window size to {}x{}", width, height);
     RS_ASSERT(width > 0 && height > 0, "Window width and height must be greater than 0");
@@ -80,21 +98,16 @@ void RaylibWindow::SetSize(int width, int height)
     }
 }
 
-void RaylibWindow::SetSize(const Vector2& size)
+Vector2Int RaylibWindow::ImplGetSize() const
 {
-    this->SetSize(static_cast<int>(size.x), static_cast<int>(size.y));
-}
-
-Vector2 RaylibWindow::GetSize() const
-{
-    return Vector2{static_cast<float>(m_Data.Width), static_cast<float>(m_Data.Height)};
+    return Vector2Int{m_Data.Width, m_Data.Height};
 }
 
 // ============================================================================
 // Title
 // ============================================================================
 
-void RaylibWindow::SetTitle(const std::string& title)
+void RaylibWindow::ImplSetTitle(const std::string& title)
 {
     RS_CORE_INFO("Setting window title to '{}'", title);
     RS_ASSERT(!title.empty(), "Window title cannot be empty");
@@ -112,7 +125,7 @@ void RaylibWindow::SetTitle(const std::string& title)
 // Fullscreen
 // ============================================================================
 
-void RaylibWindow::SetFullscreen(bool fullscreen)
+void RaylibWindow::ImplSetFullscreen(bool fullscreen)
 {
     if (!::IsWindowReady()) return;
 
@@ -127,13 +140,13 @@ void RaylibWindow::SetFullscreen(bool fullscreen)
         m_Data.PrevWidth  = m_Data.Width;
         m_Data.PrevHeight = m_Data.Height;
 
-        this->SetSize(::GetMonitorWidth(0), ::GetMonitorHeight(0));
+        SetSize(::GetMonitorWidth(0), ::GetMonitorHeight(0));
 
         ::ToggleFullscreen();
     }
     else
     {
-        this->SetSize(m_Data.PrevWidth, m_Data.PrevHeight);
+        SetSize(m_Data.PrevWidth, m_Data.PrevHeight);
 
         // Raylib does not support programmatically exiting fullscreen mode,
         // so we simply toggle it again to return to windowed mode.
@@ -143,23 +156,23 @@ void RaylibWindow::SetFullscreen(bool fullscreen)
     RS_CORE_INFO("Changed window mode to {} ({}x{})", m_Data.Fullscreen ? "fullscreen" : "windowed", m_Data.Width, m_Data.Height);
 }
 
-void RaylibWindow::SetBorderlessFullscreen(bool /*enabled*/)
-{
-    RS_CORE_WARN("Borderless fullscreen is not implemented in RaylibWindow, so this will be ignored");
-}
-
-bool RaylibWindow::IsMinimized() const
+bool RaylibWindow::ImplIsMinimized() const
 {
     return ::IsWindowState(FLAG_WINDOW_MINIMIZED);
 }
 
 // ============================================================================
-// VSync
+// Vsync
 // ============================================================================
 
-void RaylibWindow::SetVSync(bool /*enabled*/)
+void RaylibWindow::ImplSetVSync(bool enabled)
 {
-    RS_CORE_WARN("V-Sync control is not implemented yet, so this will be ignored");
+    m_Data.VSync = enabled;
+    LogOnceRegistry::LogOnce(
+        "VSyncControl",
+        LogLevel::Warn,
+        "V-Sync control is not implemented yet, so this will be ignored"
+    );
 }
 
 } // namespace RS
