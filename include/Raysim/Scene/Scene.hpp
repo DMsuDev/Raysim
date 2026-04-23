@@ -31,7 +31,7 @@ SceneID GetSceneTypeID() {
 public: \
     static RS::SceneID StaticID() noexcept { return RS::GetSceneTypeID<type>(); } \
     static const char* StaticName() noexcept { return #type; } \
-    type() : Scene(StaticName(), StaticID()) {}
+    type(RS::EngineContext* ctx) : Scene(ctx) {} \
 
 /**
  * @class Scene
@@ -43,11 +43,14 @@ public: \
  */
 class Scene
 {
-    friend class SceneManager; // Allow SceneManager to call internal lifecycle methods
-    friend class Application;  // Allow Application to call internal lifecycle methods
+private:
+    // Key pattern: Only the SceneManager can create and manage scenes.
+    // The Key struct is an opaque token that prevents external code from calling the protected constructor.
+    struct Key { friend class SceneManager; private: Key() {} };
 
 public:
     virtual ~Scene() = default;
+    Scene(EngineContext* context) : m_Context(context) {}
 
 // ===========================================================================
 // Operators
@@ -59,7 +62,79 @@ public:
     Scene& operator=(Scene&&)      = default;
 
 // ===========================================================================
-// Lifecycle callbacks (override in derived scenes)
+// Non-virtual public interface (NVI)
+// ===========================================================================
+
+    void Start(Key)
+    {
+        if (m_State == SceneState::Uninitialized)
+        {
+            OnStart();
+            m_State = SceneState::Running;
+        }
+    }
+
+    void Update(float dt, Key)
+    {
+        if (m_State == SceneState::Running)
+            OnUpdate(dt);
+    }
+
+    void FixedUpdate(float dt, Key)
+    {
+        if (m_State == SceneState::Running)
+            OnFixedUpdate(dt);
+    }
+
+    void Draw(float alpha, Key)
+    {
+        // Can draw even if paused, but not if uninitialized or stopped
+        if (m_State != SceneState::Uninitialized)
+            OnDraw(alpha);
+    }
+
+    void Pause(Key)
+    {
+        if (m_State == SceneState::Running)
+        {
+            m_State = SceneState::Paused;
+            OnPause();
+        }
+    }
+
+    void Resume(Key)
+    {
+        if (m_State == SceneState::Paused)
+        {
+            m_State = SceneState::Running;
+            OnResume();
+        }
+    }
+
+    void Stop(Key)
+    {
+        if (m_State != SceneState::Uninitialized)
+        {
+            OnDetach();
+            m_State = SceneState::Uninitialized;
+        }
+    }
+
+// ===========================================================================
+// Public Information Accessors
+// ===========================================================================
+
+    bool IsRunning() const noexcept { return m_State == SceneState::Running; }
+    bool IsPaused() const noexcept { return m_State == SceneState::Paused; }
+
+    /// @brief Get the unique identifier for this scene.
+    SceneID GetSceneID() const noexcept { return m_Config.ID; }
+    const std::string& GetName() const noexcept { return m_Config.Name; }
+
+protected:
+
+// ===========================================================================
+// Lifecycle methods
 // ===========================================================================
 
     /// @brief Called once when the scene is first attached to the SceneManager.
@@ -69,52 +144,6 @@ public:
     /// @brief Called when the scene is removed or replaced.
     /// Clean up resources, detach layers, etc.
     virtual void OnDetach() {}
-
-// ===========================================================================
-// Scene control
-// ===========================================================================
-
-    /// @brief Check if the scene is currently running.
-    /// @return True if the scene is running, false otherwise.
-    bool IsRunning() const noexcept { return m_IsRunning; }
-
-    /// @brief Check if the scene is currently paused.
-    /// @return True if the scene is paused, false otherwise.
-    bool IsPaused() const noexcept { return m_IsPaused; }
-
-    /// @brief Pause or resume the scene.
-    /// @param paused True to pause the scene, false to resume.
-    void SetPaused(bool paused) noexcept { m_IsPaused = paused; }
-
-    /// @brief Get the unique identifier for this scene.
-    /// @return The scene's unique identifier.
-    SceneID GetSceneID() const noexcept { return m_SceneID; }
-
-    /// @brief Get the name of the scene.
-    /// @return The scene's name.
-    const std::string& GetName() const noexcept { return m_Name; }
-
-    /// @brief Check if the scene has a valid ID (non-zero).
-    bool IsValid() const noexcept { return m_SceneID != 0; }
-
-    /// @brief Stop the scene. It will no longer be updated or drawn.
-    void Stop() noexcept { m_IsRunning = false; }
-
-protected:
-
-// ============================================================
-// Protected constructor
-// ============================================================
-
-    Scene()
-        : m_Name("UnnamedScene"), m_SceneID(0) {}
-
-    Scene(const char* name, SceneID id)
-        : m_Name(name), m_SceneID(id) {}
-
-// ===========================================================================
-// Internal Lifecycle methods
-// ===========================================================================
 
     /// @brief Called each time the scene is started.
     /// Use it to initialize resources, set up the scene, etc.
@@ -142,14 +171,6 @@ protected:
     /// Use it to resume animations, restart timers, etc.
     virtual void OnResume() { }
 
-// ===========================================================================
-// Engine context access
-// ===========================================================================
-
-    /// @brief Get the engine context bound to this scene.
-    /// @return The engine context.
-    const EngineContext& GetContext() const { return *m_Context; }
-
 // ============================================================================
 // Direct access to subsystems
 // ============================================================================
@@ -163,22 +184,24 @@ protected:
 
 private:
 
-// ============================================================
-// Internal engine hooks
-// ============================================================
+    struct SceneConfig
+    {
+        // Name of the scene (for lookup and debugging)
+        std::string Name = "UnnamedScene";
+        SceneID ID = 0;
+    };
+    enum class SceneState
+    {
+        Uninitialized,
+        Running,
+        Paused,
+    };
 
-    void Setup(EngineContext& ctx);  // Called once before the main loop starts
-    void Run();                      // Dispatches lifecycle callbacks in the correct order
+    EngineContext* m_Context = nullptr;
+    SceneState     m_State   = SceneState::Uninitialized;
+    SceneConfig    m_Config;
 
-private:
-    EngineContext* m_Context;     // Engine subsystems available to this scene
-
-    std::string  m_Name;         // Name of the scene (for lookup and debugging)
-    SceneID      m_SceneID;      // Unique identifier for this scene
-
-    bool m_Initialized = false;   // Whether the scene has been attached to the manager at least once (used to call OnAttach)
-    bool m_IsRunning = false;     // Current running state of the scene
-    bool m_IsPaused = false;      // Current paused state of the scene
+    friend class SceneManager;
 };
 
 } // namespace RS
