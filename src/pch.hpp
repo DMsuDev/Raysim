@@ -27,6 +27,4 @@
 
 // Useful includes of Raysim
 
-#include "Raysim/Core/Log.hpp"
-#include "Raysim/Core/Assert.hpp"
-#include "Raysim/Core/Memory.hpp"
+#include "Raysim/Core/Base.hpp"

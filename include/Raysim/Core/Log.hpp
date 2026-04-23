@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "Memory.hpp"
+#include "Raysim/Core/Base.hpp"
 #include <unordered_set>
 #include <unordered_map>
 #include <chrono>

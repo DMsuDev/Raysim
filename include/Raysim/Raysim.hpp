@@ -23,19 +23,21 @@
 
 // Main headers for the Raysim framework
 
+#include "Raysim/Core/Base.hpp"
+
 #include "Raysim/Graphics/Shapes.hpp"
 #include "Raysim/Graphics/Texts.hpp"
 #include "Raysim/Graphics/Color.hpp"
 
 #include "Raysim/Math/Math.hpp"
 #include "Raysim/Math/Vector2.hpp"
+#include "Raysim/Math/Vector2Int.hpp"
 #include "Raysim/Math/Vector3.hpp"
+#include "Raysim/Math/Vector3Int.hpp"
 #include "Raysim/Math/Random.hpp"
 
 #include "Raysim/Input/KeyCodes.hpp"
 
-#include "Raysim/Core/Log.hpp"
-#include "Raysim/Core/Assert.hpp"
 #include "Raysim/Core/ApplicationConfig.hpp"
 #include "Raysim/Core/Application.hpp"
 

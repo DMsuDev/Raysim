@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Raysim/Core/Memory.hpp"
+#include "Raysim/Core/Base.hpp"
 
 namespace RS {
 

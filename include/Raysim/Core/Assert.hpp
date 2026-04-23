@@ -16,41 +16,6 @@
 #include "Log.hpp"
 
 // ============================================================================
-// Base Utilities
-// ============================================================================
-
-/// @def RS_EXPAND_MACRO(x)
-/// @brief Forces expansion of a macro argument before further processing.
-/// @details Required by the C++17 argument-counting trick; the MSVC
-///          preprocessor would otherwise treat the comma-separated list
-///          as a single token.
-#define RS_EXPAND_MACRO(x) x
-
-/// @def RS_STRINGIFY_MACRO(x)
-/// @brief Converts a macro argument to a string literal.
-/// @details Used to embed the textual representation of an expression
-///          in assertion failure messages (e.g. `"ptr != nullptr"`).
-#define RS_STRINGIFY_MACRO(x) #x
-
-// Define platform-specific debug break
-// In debug builds, this will trigger a breakpoint in the debugger
-// when an assertion fails.
-#ifdef RS_BUILD_DEBUG
-	#ifdef _WIN32
-		#define RS_DEBUGBREAK() __debugbreak()
-	#elif defined(__linux__)
-		#include <signal.h>
-        #define RS_DEBUGBREAK() __builtin_trap()
-	#else
-		#error "Platform doesn't support debugbreak yet!"
-	#endif
-	// Enable assertions only in debug builds
-    #define RS_ENABLE_ASSERTS
-#else
-	#define RS_DEBUGBREAK()
-#endif
-
-// ============================================================================
 // Source Location Support
 // ============================================================================
 
@@ -277,70 +242,6 @@
         RS_STRINGIFY_MACRO(val), RS_STRINGIFY_MACRO(min_val), RS_STRINGIFY_MACRO(val), RS_STRINGIFY_MACRO(max_val));
 
 /// @}
-/// @name Boolean Assertions
-/// @{
-
-/// @def RS_CORE_ASSERT_TRUE(condition)
-/// @brief Asserts that @p condition evaluates to `true` (core logger).
-/// @param condition  Boolean expression expected to be true.
-#define RS_CORE_ASSERT_TRUE(condition) \
-    RS_CORE_ASSERT((condition), "Expected true but condition is false: {}", RS_STRINGIFY_MACRO(condition))
-
-/// @def RS_ASSERT_TRUE(condition)
-/// @brief Asserts that @p condition evaluates to `true` (client logger).
-/// @param condition  Boolean expression expected to be true.
-#define RS_ASSERT_TRUE(condition) \
-    RS_ASSERT((condition), "Expected true but condition is false: {}", RS_STRINGIFY_MACRO(condition))
-
-/// @def RS_CORE_ASSERT_FALSE(condition)
-/// @brief Asserts that @p condition evaluates to `false` (core logger).
-/// @param condition  Boolean expression expected to be false.
-#define RS_CORE_ASSERT_FALSE(condition) \
-    RS_CORE_ASSERT(!(condition), "Expected false but condition is true: {}", RS_STRINGIFY_MACRO(condition))
-
-/// @def RS_ASSERT_FALSE(condition)
-/// @brief Asserts that @p condition evaluates to `false` (client logger).
-/// @param condition  Boolean expression expected to be false.
-#define RS_ASSERT_FALSE(condition) \
-    RS_ASSERT(!(condition), "Expected false but condition is true: {}", RS_STRINGIFY_MACRO(condition))
-
-/// @}
-/// @name Equality Assertions
-/// @{
-
-/// @def RS_CORE_ASSERT_EQUAL(actual, expected)
-/// @brief Asserts that @p actual equals @p expected (core logger).
-/// @param actual    Value produced by the code under test.
-/// @param expected  Value that @p actual must match.
-#define RS_CORE_ASSERT_EQUAL(actual, expected) \
-    RS_CORE_ASSERT((actual) == (expected), \
-        "Values not equal - actual: {}, expected: {}", (actual), (expected))
-
-/// @def RS_ASSERT_EQUAL(actual, expected)
-/// @brief Asserts that @p actual equals @p expected (client logger).
-/// @param actual    Value produced by the code under test.
-/// @param expected  Value that @p actual must match.
-#define RS_ASSERT_EQUAL(actual, expected) \
-    RS_ASSERT((actual) == (expected), \
-        "Values not equal - actual: {}, expected: {}", (actual), (expected))
-
-/// @def RS_CORE_ASSERT_NOT_EQUAL(actual, unexpected)
-/// @brief Asserts that @p actual does **not** equal @p unexpected (core logger).
-/// @param actual      Value produced by the code under test.
-/// @param unexpected  Value that @p actual must differ from.
-#define RS_CORE_ASSERT_NOT_EQUAL(actual, unexpected) \
-    RS_CORE_ASSERT((actual) != (unexpected), \
-        "Values should not be equal: {}", (actual))
-
-/// @def RS_ASSERT_NOT_EQUAL(actual, unexpected)
-/// @brief Asserts that @p actual does **not** equal @p unexpected (client logger).
-/// @param actual      Value produced by the code under test.
-/// @param unexpected  Value that @p actual must differ from.
-#define RS_ASSERT_NOT_EQUAL(actual, unexpected) \
-    RS_ASSERT((actual) != (unexpected), \
-        "Values should not be equal: {}", (actual))
-
-/// @}
 /// @name Exception Validation
 /// @{
 
@@ -400,19 +301,11 @@
 #define RS_CORE_ASSERT(...)              ((void)0)
 #define RS_CORE_ASSERT_NOT_NULL(...)     ((void)0)
 #define RS_CORE_ASSERT_IN_RANGE(...)     ((void)0)
-#define RS_CORE_ASSERT_TRUE(...)         ((void)0)
-#define RS_CORE_ASSERT_FALSE(...)        ((void)0)
-#define RS_CORE_ASSERT_EQUAL(...)        ((void)0)
-#define RS_CORE_ASSERT_NOT_EQUAL(...)    ((void)0)
 #define RS_CORE_ASSERT_THROW(...)        ((void)0)
 
 #define RS_ASSERT(...)                   ((void)0)
 #define RS_ASSERT_NOT_NULL(...)          ((void)0)
 #define RS_ASSERT_IN_RANGE(...)          ((void)0)
-#define RS_ASSERT_TRUE(...)              ((void)0)
-#define RS_ASSERT_FALSE(...)             ((void)0)
-#define RS_ASSERT_EQUAL(...)             ((void)0)
-#define RS_ASSERT_NOT_EQUAL(...)         ((void)0)
 #define RS_ASSERT_THROW(...)             ((void)0)
 
 /// @endcond

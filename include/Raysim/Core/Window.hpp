@@ -3,7 +3,7 @@
 #include <string>
 #include <functional>
 
-#include "Raysim/Core/Memory.hpp"
+#include "Raysim/Core/Base.hpp"
 #include "Raysim/Math/Vector2Int.hpp"
 
 namespace RS {
