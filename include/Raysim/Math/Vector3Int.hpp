@@ -40,15 +40,15 @@ struct Vector3Int {
 
     constexpr Vector3Int operator+(const Vector3Int& o) const noexcept { return {x + o.x, y + o.y, z + o.z}; }
     constexpr Vector3Int operator-(const Vector3Int& o) const noexcept { return {x - o.x, y - o.y, z - o.z}; }
-    constexpr Vector3Int operator*(int s)          const noexcept { return {x * s, y * s, z * s}; }
-    constexpr Vector3Int operator/(int s)          const noexcept { return (s != 0) ? Vector3Int{x / s, y / s, z / s} : Vector3Int{}; }
+    constexpr Vector3Int operator*(int s)               const noexcept { return {x * s, y * s, z * s}; }
+    constexpr Vector3Int operator/(int s)               const noexcept { return (s != 0) ? Vector3Int{x / s, y / s, z / s} : Vector3Int{}; }
 
     constexpr Vector3Int operator-() const noexcept { return {-x, -y, -z}; }
 
     constexpr Vector3Int& operator+=(const Vector3Int& o) noexcept { x += o.x; y += o.y; z += o.z; return *this; }
     constexpr Vector3Int& operator-=(const Vector3Int& o) noexcept { x -= o.x; y -= o.y; z -= o.z; return *this; }
-    constexpr Vector3Int& operator*=(int s) noexcept          { x *= s; y *= s; z *= s; return *this; }
-    constexpr Vector3Int& operator/=(int s) noexcept          { if (s != 0) { x /= s; y /= s; z /= s; } return *this; }
+    constexpr Vector3Int& operator*=(int s) noexcept               { x *= s; y *= s; z *= s; return *this; }
+    constexpr Vector3Int& operator/=(int s) noexcept               { if (s != 0) { x /= s; y /= s; z /= s; } return *this; }
 
     constexpr bool operator==(const Vector3Int& o) const noexcept { return x == o.x && y == o.y && z == o.z; }
     constexpr bool operator!=(const Vector3Int& o) const noexcept { return !(*this == o); }
@@ -79,7 +79,7 @@ struct Vector3Int {
      * @brief Calculate squared magnitude (faster, avoids sqrt)
      * @return Squared length
      */
-    constexpr int64_t  LengthSquared() const noexcept { return int64_t(x)*x + int64_t(y)*y + int64_t(z)*z; }
+    constexpr int64_t LengthSquared() const noexcept { return static_cast<int64_t>(x)*x + static_cast<int64_t>(y)*y + static_cast<int64_t>(z)*z; }
 
     /**
      * @brief Dot product (scalar result)
@@ -118,14 +118,14 @@ struct Vector3Int {
      * @param b Second point
      * @return Squared distance between a and b
      */
-    static int64_t  DistanceSquared(const Vector3Int& a, const Vector3Int& b) noexcept { return (b - a).LengthSquared(); }
+    static int64_t DistanceSquared(const Vector3Int& a, const Vector3Int& b) noexcept { return (b - a).LengthSquared(); }
 
 //==============================================================================
 // Common vectors
 //==============================================================================
 
-    static constexpr Vector3Int Zero() noexcept  { return {0, 0, 0}; }
-    static constexpr Vector3Int One() noexcept   { return {1, 1, 1}; }
+    static constexpr Vector3Int Zero()  noexcept { return {0, 0, 0}; }
+    static constexpr Vector3Int One()   noexcept { return {1, 1, 1}; }
     static constexpr Vector3Int UnitX() noexcept { return {1, 0, 0}; }
     static constexpr Vector3Int UnitY() noexcept { return {0, 1, 0}; }
     static constexpr Vector3Int UnitZ() noexcept { return {0, 0, 1}; }
