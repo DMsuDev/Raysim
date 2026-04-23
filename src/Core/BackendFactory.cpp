@@ -1,12 +1,10 @@
-#include "../pch.hpp"
+#include "pch.hpp"
 
 #include "Raysim/Core/BackendFactory.hpp"
 
 #include "Backend/Raylib/RaylibRendererAPI.hpp"
 #include "Backend/Raylib/RaylibWindow.hpp"
 #include "Backend/Raylib/RaylibInput.hpp"
-
-#include "Raysim/Core/Assert.hpp"
 
 namespace RS {
 
