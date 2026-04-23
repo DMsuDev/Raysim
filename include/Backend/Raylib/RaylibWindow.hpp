@@ -19,47 +19,46 @@ public:
     RaylibWindow(const WindowProps& props);
     ~RaylibWindow() override;
 
-    /// Raylib handles window updates internally, so this is a no-op.
-    void OnUpdate() override { }
+    // Raylib handles event polling and buffer swapping internally, so these are no-ops.
+    void ImplPollEvents() override;
+    void ImplSwapBuffers() override;
 
-    bool ShouldClose() const override;
+    bool ImplShouldClose() const override;
 
     // -- Size ----------------------------------------------------------------
 
-    void SetSize(int width, int height) override;
-    void SetSize(const Vector2& size) override;
+    void ImplSetSize(int width, int height) override;
 
-    Vector2  GetSize()   const override;
-    int GetWidth()  const override { return m_Data.Width; }
-    int GetHeight() const override { return m_Data.Height; }
+    Vector2Int ImplGetSize() const override;
 
     // -- Title ---------------------------------------------------------------
 
-    void SetTitle(const std::string& title) override;
-    const std::string& GetTitle() const override { return m_Data.Title; }
+    void ImplSetTitle(const std::string& title) override;
 
     // -- Fullscreen ----------------------------------------------------------
 
-    void SetFullscreen(bool fullscreen) override;
-    bool IsFullscreen() const override { return m_Data.Fullscreen; }
+    void ImplSetFullscreen(bool fullscreen) override;
+    bool ImplIsFullscreen() const override { return m_Data.Fullscreen; }
 
-    void SetBorderlessFullscreen(bool enabled) override;
-    bool IsBorderlessFullscreen() const override { return m_Data.BorderlessFullscreen; }
+    bool ImplIsMinimized() const override;
 
-    bool IsMinimized() const override;
+    void ImplGetFramebufferSize(int& width, int& height) const override
+    {
+        width = m_Data.Width;
+        height = m_Data.Height;
+    }
 
     // -- VSync ---------------------------------------------------------------
 
-    void SetVSync(bool enabled) override;
-    bool IsVSync() const override { return m_Data.VSync; }
+    void ImplSetVSync(bool enabled) override;
+    bool ImplIsVSync() const override { return m_Data.VSync; }
 
     // -- Native handle ----------------------------------------------
 
     /// Raylib does not expose a native window handle, so this returns nullptr.
-    void* GetNativeWindow() const override { return nullptr; }
+    void* ImplGetNativeWindow() const override { return nullptr; }
 
 private:
-    void Init(const WindowProps& props);
     void Shutdown();
 
 private:
