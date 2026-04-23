@@ -39,15 +39,15 @@ struct Vector2Int {
 
     constexpr Vector2Int operator+(const Vector2Int& o) const noexcept { return {x + o.x, y + o.y}; }
     constexpr Vector2Int operator-(const Vector2Int& o) const noexcept { return {x - o.x, y - o.y}; }
-    constexpr Vector2Int operator*(int s)          const noexcept { return {x * s, y * s}; }
-    constexpr Vector2Int operator/(int s)          const noexcept { return (s != 0) ? Vector2Int{x / s, y / s} : Vector2Int{}; }
+    constexpr Vector2Int operator*(int s)               const noexcept { return {x * s, y * s}; }
+    constexpr Vector2Int operator/(int s)               const noexcept { return (s != 0) ? Vector2Int{x / s, y / s} : Vector2Int{}; }
 
     constexpr Vector2Int operator-() const noexcept { return {-x, -y}; }
 
     constexpr Vector2Int& operator+=(const Vector2Int& o) noexcept { x += o.x; y += o.y; return *this; }
     constexpr Vector2Int& operator-=(const Vector2Int& o) noexcept { x -= o.x; y -= o.y; return *this; }
-    constexpr Vector2Int& operator*=(int s) noexcept { x *= s; y *= s; return *this; }
-    constexpr Vector2Int& operator/=(int s) noexcept { if (s != 0) { x /= s; y /= s; } return *this; }
+    constexpr Vector2Int& operator*=(int s)               noexcept { x *= s; y *= s; return *this; }
+    constexpr Vector2Int& operator/=(int s)               noexcept { if (s != 0) { x /= s; y /= s; } return *this; }
 
     constexpr bool operator==(const Vector2Int& o) const noexcept { return x == o.x && y == o.y; }
     constexpr bool operator!=(const Vector2Int& o) const noexcept { return !(*this == o); }
@@ -74,25 +74,25 @@ struct Vector2Int {
      * @brief Calculate vector magnitude (length)
      * @return Euclidean length of the vector
      */
-    float Length() const noexcept { return std::hypot(x, y); }
+    float Length() const noexcept { return std::sqrt(static_cast<float>(LengthSquared())); }
     /**
      * @brief Calculate squared magnitude (faster, avoids sqrt)
      * @return Squared length of the vector
      */
-    constexpr int64_t LengthSquared() const noexcept { return int64_t(x) * x + int64_t(y) * y; }
+    constexpr int64_t LengthSquared() const noexcept { return static_cast<int64_t>(x) * x + static_cast<int64_t>(y) * y; }
 
     /**
      * @brief Dot product (scalar result)
      * @param rhs Right-hand vector
      * @return Dot product of this and rhs
      */
-    constexpr int64_t Dot(const Vector2Int& rhs) const noexcept { return int64_t(x) * rhs.x + int64_t(y) * rhs.y; }
+    constexpr int64_t Dot(const Vector2Int& rhs) const noexcept { return static_cast<int64_t>(x) * rhs.x + static_cast<int64_t>(y) * rhs.y; }
     /**
      * @brief 2D cross product (scalar result)
      * @param rhs Right-hand vector
      * @return Scalar z of the 3D cross product (this x rhs)
      */
-    constexpr int64_t Cross(const Vector2Int& rhs) const noexcept { return int64_t(x) * rhs.y - int64_t(y) * rhs.x; }
+    constexpr int64_t Cross(const Vector2Int& rhs) const noexcept { return static_cast<int64_t>(x) * rhs.y - static_cast<int64_t>(y) * rhs.x; }
 
 //==============================================================================
 // Static utilities
@@ -117,8 +117,8 @@ struct Vector2Int {
 // Common vectors
 //==============================================================================
 
-    static constexpr Vector2Int Zero() noexcept  { return {0, 0}; }
-    static constexpr Vector2Int One() noexcept   { return {1, 1}; }
+    static constexpr Vector2Int Zero()  noexcept { return {0, 0}; }
+    static constexpr Vector2Int One()   noexcept { return {1, 1}; }
     static constexpr Vector2Int UnitX() noexcept { return {1, 0}; }
     static constexpr Vector2Int UnitY() noexcept { return {0, 1}; }
 };
