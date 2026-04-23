@@ -64,8 +64,8 @@ void Application::Run()
 
     while (m_Running && !m_Window->ShouldClose())
     {
-        // Poll input events and swap back buffer
-        m_Window->OnUpdate();
+        m_Window->PollEvents();
+
         m_Minimized = m_Window->IsMinimized();
 
         if (!m_Minimized)
@@ -119,6 +119,8 @@ void Application::Run()
             // Skip updating and rendering to save CPU/GPU resources
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
+
+        m_Window->SwapBuffers();
     }
 }
 
