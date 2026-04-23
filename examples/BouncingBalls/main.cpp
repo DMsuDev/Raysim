@@ -351,6 +351,7 @@ RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
     config.Window.Height = 600;
 
     auto* app = new RS::Application(config);
-    app->AddScene(RS::CreateScope<BouncingBalls>());
+    app->RegisterScene<BouncingBalls>();
+    app->SetInitialScene<BouncingBalls>();
     return app;
 }

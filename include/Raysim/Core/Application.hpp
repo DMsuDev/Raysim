@@ -105,20 +105,60 @@ public:
     /// Virtual destructor for proper cleanup in derived classes
     virtual ~Application() noexcept;
 
+// ===========================================================================
+// Operators
+// ===========================================================================
+
     Application(const Application&)            = delete;
     Application& operator=(const Application&) = delete;
     Application(Application&&)                 = default;
     Application& operator=(Application&&)      = default;
 
+public:
+
+// ============================================================================
+// Scene management
+// ============================================================================
+
+    /// Register a new scene type with the SceneManager. This allows you to switch to this scene later by name or ID.
+    template<typename T>
+    void RegisterScene()
+    {
+        if (m_SceneManager) {
+            m_SceneManager->RegisterScene<T>();
+        } else {
+            RS_CORE_ERROR("Cannot add scene: SceneManager is not initialized");
+        }
+    }
+
+    /// Change to a different scene by specifying its type. The scene must have been registered previously.
+    template<typename T, typename... Args>
+    void ChangeScene(Args&&... args)
+    {
+        if (m_SceneManager) {
+            m_SceneManager->ChangeScene<T>(std::forward<Args>(args)...);
+        } else {
+            RS_CORE_ERROR("Cannot change scene: SceneManager is not initialized");
+        }
+    }
+
+    /// Set the initial scene to start with. This is a convenience method that simply changes to the specified scene at startup.
+    template<typename T>
+    void SetInitialScene()
+    {
+        if (m_SceneManager) {
+            m_SceneManager->ChangeScene<T>();
+        } else {
+            RS_CORE_ERROR("Cannot set initial scene: SceneManager is not initialized");
+        }
+    }
+
+// ===========================================================================
+// Main loop
+// ===========================================================================
+
     /// Start the main application loop. This will run until the window is closed or Quit() is called.
     void Run();
-
-    /// Add a scene to the SceneManager.
-    /// The scene becomes active immediately if no other scenes are active.
-    void AddScene(Scope<Scene> scene);
-
-    /// Replace all scenes with a single new scene.
-    void SetScene(Scope<Scene> newScene);
 
     /// Request application shutdown
     /// The application will finish the current frame before exiting

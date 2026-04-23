@@ -147,6 +147,7 @@ RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
     config.Window.Height = 600;
 
     auto* app = new RS::Application(config);
-    app->AddScene(RS::CreateScope<NoiseLandscape>());
+    app->RegisterScene<NoiseLandscape>();
+    app->SetInitialScene<NoiseLandscape>();
     return app;
 }
