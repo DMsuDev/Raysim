@@ -4,14 +4,16 @@
 #include <functional>
 
 #include "Raysim/Core/Memory.hpp"
-#include "Raysim/Math/Vector2.hpp"
+#include "Raysim/Math/Vector2Int.hpp"
 
 namespace RS {
 
-/// @struct WindowProps
-/// @brief Configuration properties for creating a window.
+/**
+ * @struct WindowProps
+ * @brief Configuration properties for creating a window.
+ */
 struct WindowProps {
-    std::string Title  = "Raysim App";  ///< The title of the window.
+    std::string Title  = "Raysim App";   ///< The title of the window.
     int         Width  = 1600;          ///< The width of the window in pixels.
     int         Height = 900;           ///< The height of the window in pixels.
 
@@ -32,11 +34,78 @@ class Window
 public:
     virtual ~Window() = default;
 
-    /// @brief Updates the window (swaps buffers and other per-frame operations).
-    virtual void OnUpdate() = 0;
+// ===========================================================
+// Non-virtual interface (NVI)
+// ===========================================================
+
+    void PollEvents() { ImplPollEvents(); }
+    void SwapBuffers() { ImplSwapBuffers(); }
+
+    [[nodiscard]] bool ShouldClose() const noexcept { return ImplShouldClose(); }
+
+    void SetSize(int width, int height) { ImplSetSize(width, height); }
+    void SetSize(const Vector2Int& size) { ImplSetSize(size.x, size.y); }
+
+    Vector2Int GetSize() const { return ImplGetSize(); }
+    int GetWidth() const { return ImplGetSize().x; }
+    int GetHeight() const { return ImplGetSize().y; }
+
+    void GetFramebufferSize(int& width, int& height) const { ImplGetFramebufferSize(width, height); }
+
+    void SetFullscreen(bool fullscreen) { ImplSetFullscreen(fullscreen); }
+    [[nodiscard]] bool IsFullscreen() const noexcept { return ImplIsFullscreen(); }
+
+    void SetVSync(bool enabled) { ImplSetVSync(enabled); }
+    [[nodiscard]] bool IsVSync() const noexcept { return ImplIsVSync(); }
+
+    [[nodiscard]] bool IsMinimized() const noexcept { return ImplIsMinimized(); }
+
+    void SetTitle(const std::string& title)
+    {
+        m_Title = title;
+        ImplSetTitle(title);
+    }
+
+    [[nodiscard]] const std::string& GetTitle() const noexcept { return m_Title; }
+
+    void* GetNativeWindow() const noexcept { return ImplGetNativeWindow(); }
+
+    template<typename T>
+    T* GetNativeWindow() const noexcept
+    {
+        return static_cast<T*>(ImplGetNativeWindow());
+    }
+
+    [[nodiscard]] float GetAspectRatio() const noexcept
+    {
+        auto size = ImplGetSize();
+        return size.y != 0 ? static_cast<float>(size.x) / static_cast<float>(size.y) : 0.0f;
+    }
+
+protected:
+
+// ===========================================================
+// Constructor
+// ===========================================================
+
+   explicit Window(const WindowProps& props)
+        : m_Title(props.Title)
+    {
+        // The actual window creation logic will be implemented in the derived class.
+    }
+
+// ===========================================================
+// Window Lifecycle
+// ===========================================================
+
+    /// @brief Updates the event loop and processes any pending events (e.g., input, window messages).
+    virtual void ImplPollEvents() = 0;
+
+    /// @brief Swaps the front and back buffers, presenting the rendered frame to the screen.
+    virtual void ImplSwapBuffers() = 0;
 
     /// @brief Checks if the window should close (e.g., if the user has requested to close it).
-    virtual bool ShouldClose() const = 0;
+    virtual bool ImplShouldClose() const = 0;
 
 // ===========================================================
 // Window size properties
@@ -45,27 +114,10 @@ public:
     /// @brief Sets the size of the window.
     /// @param width The new width of the window.
     /// @param height The new height of the window.
-    virtual void SetSize(int width, int height) = 0;
+    virtual void ImplSetSize(int width, int height) = 0;
 
-    /// @brief Sets the size of the window using a Vector2.
-    /// @param size A Vector2 containing the new width (x) and height (y) of the window.
-    virtual void SetSize(const Vector2& size) = 0;
-
-    /// @brief Retrieves the size of the window as a Vector2 (width, height).
-    virtual Vector2  GetSize() const = 0;
-
-    /// @brief Retrieves the width of the window.
-    virtual int GetWidth() const = 0;
-
-    /// @brief Retrieves the height of the window.
-    virtual int GetHeight() const = 0;
-
-    /// @brief Calculates the aspect ratio of the window.
-    /// @return The aspect ratio (width / height) of the window.
-    float GetAspectRatio() const
-    {
-        return static_cast<float>(GetWidth()) / static_cast<float>(GetHeight());
-    }
+    /// @brief Retrieves the size of the window as a Vec2Int (width, height).
+    virtual Vector2Int ImplGetSize()   const = 0;
 
 // ===========================================================
 // Window mode properties
@@ -73,55 +125,46 @@ public:
 
     /// @brief Sets the window to fullscreen mode.
     /// @param fullscreen True to enable fullscreen, false to disable.
-    virtual void SetFullscreen(bool fullscreen) = 0;
+    virtual void ImplSetFullscreen(bool fullscreen) = 0;
 
-    /// @brief Checks if the window is currently in fullscreen mode.
-    virtual bool IsFullscreen() const = 0;
+    virtual bool ImplIsFullscreen() const = 0;
 
-    /// @brief Sets the window to borderless fullscreen mode.
-    /// @param enabled True to enable borderless fullscreen, false to disable.
-    virtual void SetBorderlessFullscreen(bool enabled) = 0;
+    virtual bool ImplIsMinimized() const = 0;
 
-    /// @brief Checks if borderless fullscreen mode is enabled.
-    virtual bool IsBorderlessFullscreen() const = 0;
+// ===========================================================
+// Frame Buffering
+// ===========================================================
 
-    /// @brief Checks if the window is currently minimized.
-    virtual bool IsMinimized() const  = 0;
+    virtual void ImplGetFramebufferSize(int& width, int& height) const = 0;
 
-// ====================================================================
-// V-Sync
-// ====================================================================
+// ===========================================================
+// VSync
+// ===========================================================
 
-    /**
-     * @brief Enable or disable vertical synchronisation (V-Sync).
-     *
-     * When enabled, the presented image is synchronised to the display
-     * refresh rate, preventing screen tearing at the cost of input latency.
-     *
-     * @param enabled `true` to enable V-Sync; `false` to disable it.
-     */
-    virtual void SetVSync(bool enabled) = 0;
+    /// @brief Enables or disables vertical synchronization (VSync).
+    /// @param enabled True to enable VSync, false to disable.
+    virtual void ImplSetVSync(bool enabled) = 0;
 
-    /// @brief Checks if vertical synchronization (V-Sync) is enabled.
-    virtual bool IsVSync() const = 0;
+    /// @brief Checks if vertical synchronization (VSync) is enabled.
+    virtual bool ImplIsVSync() const = 0;
 
 // ===========================================================
 // Window title
 // ===========================================================
 
     /// @brief Sets the title of the window.
-    virtual void SetTitle(const std::string& title) = 0;
-
-    /// @brief Retrieves the title of the window.
-    virtual const std::string& GetTitle() const = 0;
+    virtual void ImplSetTitle(const std::string& title) = 0;
 
 // ===========================================================
 // Native handle
 // ===========================================================
 
-    /// @brief Retrieves the underlying native window handle.
+    /// @brief Retrieves the underlying native window handle (e.g GLFWwindow*, HWND).
     /// @return A platform-specific pointer (e.g., GLFWwindow*, HWND, etc.).
-    virtual void* GetNativeWindow() const = 0;
+    virtual void* ImplGetNativeWindow() const = 0;
+
+private:
+    std::string m_Title;
 };
 
 } // namespace RS
