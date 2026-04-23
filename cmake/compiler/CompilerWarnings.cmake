@@ -67,9 +67,6 @@ function(set_project_warnings project_name)
     /w14905       # Wide string cast to narrow string
     /w14906       # Narrow string cast to wide string
     /w14928       # Illegal copy initialization (multiple conversions)
-    # Standard conformance and modern C++ features
-    /permissive-        # Enforce standard C++ compliance
-    /Zc:preprocessor    # Conformant preprocessor (__VA_OPT__, etc.)
   )
 
   if(RS_WARNINGS_AS_ERRORS)

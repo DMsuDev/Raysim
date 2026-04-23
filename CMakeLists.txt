@@ -31,8 +31,10 @@ include(StandardSettings)
 # Utilities for installation, packaging, etc
 include(Utils)
 
-# Compiler warnings configuration
-include(CompilerWarnings)
+# Compiler configuration
+include(compiler/CompilerWarnings)
+include(compiler/CompilerOptimization)
+include(compiler/CompilerOptions)
 
 # Sanitizers for runtime error detection
 include(Sanitizers)
