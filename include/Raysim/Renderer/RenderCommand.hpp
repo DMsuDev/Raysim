@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Raysim/Core/Memory.hpp"
-#include "Raysim/Core/Assert.hpp"
 #include "Raysim/Renderer/RendererAPI.hpp"
 
 namespace RS

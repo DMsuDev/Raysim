@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Raysim/Core/Memory.hpp"
-#include "Raysim/Core/EngineContext.hpp"
+#include "Raysim/Core/Base.hpp"
+
 #include "Raysim/Scene/Scene.hpp"
 
 #include <unordered_map>
