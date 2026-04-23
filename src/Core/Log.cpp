@@ -7,11 +7,57 @@
 namespace RS {
 
 //==============================================================================
+// Helpers
+//==============================================================================
+
+inline spdlog::level::level_enum ToSpd(LogLevel level)
+{
+    switch (level)
+    {
+        case LogLevel::Trace:    return spdlog::level::trace;
+        case LogLevel::Debug:    return spdlog::level::debug;
+        case LogLevel::Info:     return spdlog::level::info;
+        case LogLevel::Warn:     return spdlog::level::warn;
+        case LogLevel::Error:    return spdlog::level::err;
+        case LogLevel::Critical: return spdlog::level::critical;
+        default:                 return spdlog::level::info;
+    }
+}
+
+void LogWithLevel(LogLevel level, const std::string& msg) {
+    switch (level) {
+        case LogLevel::Trace:    RS_CORE_TRACE(msg); break;
+        case LogLevel::Debug:    RS_CORE_DEBUG(msg); break;
+        case LogLevel::Info:     RS_CORE_INFO(msg); break;
+        case LogLevel::Warn:     RS_CORE_WARN(msg); break;
+        case LogLevel::Error:    RS_CORE_ERROR(msg); break;
+        case LogLevel::Critical: RS_CORE_CRITICAL(msg); break;
+        default:                 RS_CORE_INFO(msg); break;
+    }
+}
+
+//==============================================================================
 // Static state
 //==============================================================================
 
 Shared<spdlog::logger> Log::s_CoreLogger   = nullptr;
 Shared<spdlog::logger> Log::s_ClientLogger = nullptr;
+
+//==============================================================================
+// Log Registry
+//==============================================================================
+
+void LogOnceRegistry::LogOnce(const std::string& key, LogLevel level, const std::string& msg) {
+    if (ShouldLog(key)) {
+        LogWithLevel(level, msg);
+    }
+}
+
+void LogTTLRegistry::Log(const std::string& key, double ttlSeconds, LogLevel level, const std::string& msg) {
+    if (ShouldLog(key, ttlSeconds)) {
+        LogWithLevel(level, msg);
+    }
+}
 
 //==============================================================================
 // Initialization
@@ -91,27 +137,27 @@ void Log::Shutdown()
 // Global configuration
 //==============================================================================
 
-void Log::SetLevel(spdlog::level::level_enum level)
+void Log::SetLevel(LogLevel level)
 {
     RS_CORE_ASSERT(IsInitialized(), "Log not initialized. Call Log::Init() first.");
-    s_CoreLogger->set_level(level);
-    s_ClientLogger->set_level(level);
+    s_CoreLogger->set_level(ToSpd(level));
+    s_ClientLogger->set_level(ToSpd(level));
 }
 
-void Log::SetConsoleLevel(spdlog::level::level_enum level)
+void Log::SetConsoleLevel(LogLevel level)
 {
     RS_CORE_ASSERT(IsInitialized(), "Log not initialized. Call Log::Init() first.");
     // Console sink is at index 0 in both loggers (they share sinks)
     if (!s_CoreLogger->sinks().empty())
-        s_CoreLogger->sinks()[0]->set_level(level);
+        s_CoreLogger->sinks()[0]->set_level(ToSpd(level));
 }
 
-void Log::SetFileLevel(spdlog::level::level_enum level)
+void Log::SetFileLevel(LogLevel level)
 {
     RS_CORE_ASSERT(IsInitialized(), "Log not initialized. Call Log::Init() first.");
     // File sink is at index 1 in both loggers (they share sinks)
     if (s_CoreLogger->sinks().size() > 1)
-        s_CoreLogger->sinks()[1]->set_level(level);
+        s_CoreLogger->sinks()[1]->set_level(ToSpd(level));
 }
 
 void Log::Flush()
@@ -139,10 +185,10 @@ void Log::SetClientName(const std::string& name)
     s_ClientLogger = newLogger;
 }
 
-void Log::SetClientLevel(spdlog::level::level_enum level)
+void Log::SetClientLevel(LogLevel level)
 {
     RS_CORE_ASSERT(IsInitialized(), "Log not initialized. Call Log::Init() first.");
-    s_ClientLogger->set_level(level);
+    s_ClientLogger->set_level(ToSpd(level));
 }
 
 } // namespace RS
