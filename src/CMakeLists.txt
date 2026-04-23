@@ -9,6 +9,9 @@ add_library(Raysim::Raysim ALIAS Raysim)
 # ============================================================
 
 set_project_warnings(Raysim)
+set_project_options(Raysim)
+set_project_optimization(Raysim)
+
 enable_coverage(Raysim)
 enable_sanitizers(Raysim)
 
@@ -61,6 +64,7 @@ target_include_directories(Raysim
         $<INSTALL_INTERFACE:include>
 
     PRIVATE
+        ${CMAKE_SOURCE_DIR}/src
         ${IMGUI_DIR}
         ${IMGUI_DIR}/backends
 )
