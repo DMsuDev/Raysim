@@ -19,10 +19,10 @@ namespace RS {
  */
 struct EngineContext
 {
-    ApplicationConfig* Config    = nullptr;  ///< Configuration settings (from Application)
-    RenderCommand*     Renderer  = nullptr;  ///< Command dispatcher for rendering
-    Window*            MainWindow = nullptr;  ///< Main window (from BackendFactory)
-    Input*             InputSystem = nullptr;  ///< Input polling (from BackendFactory)
+    ApplicationConfig* Config      = nullptr;  ///< Configuration settings
+    RenderCommand*     Renderer    = nullptr;  ///< Command dispatcher for rendering
+    Window*            MainWindow  = nullptr;  ///< Main window
+    Input*             InputSystem = nullptr;  ///< Input polling
 };
 
 } // namespace RS
