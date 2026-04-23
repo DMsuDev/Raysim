@@ -2,13 +2,19 @@
 # Pre-commit hooks configuration for C++ / CMake project
 # https://pre-commit.com
 #
-# Install:  pre-commit install
+# Install:  pre-commit install # (runs every time you commit in git)
 # Run all:  pre-commit run --all-files
 # Update:   pre-commit autoupdate
 # =============================================================================
 
 default_language_version:
   python: python3
+
+ci:
+  autofix_commit_msg: "style: auto fixes from pre-commit"
+  autoupdate_commit_msg: "chore: autoupdate pre-commit hooks"
+  autoupdate_schedule: weekly
+  submodules: false
 
 repos:
   # ─── General file hygiene ──────────────────────────────────────────────
@@ -17,7 +23,6 @@ repos:
     hooks:
       - id: trailing-whitespace # Remove trailing whitespace
         args: [--markdown-linebreak-ext=md]
-        exclude: ^(build/|_deps/|third_party/)
       - id: end-of-file-fixer # Ensure files end with newline
       - id: check-yaml # Validate YAML syntax
       - id: check-json # Validate JSON syntax
@@ -27,7 +32,6 @@ repos:
         args: [--maxkb=1024]
       - id: mixed-line-ending # Detect mixed line endings
         args: [--fix=auto]
-        exclude: ^(build/|_deps/|third_party/)
       - id: check-case-conflict # Check for files that would conflict on case-insensitive FS
       - id: fix-byte-order-marker # Remove UTF-8 BOM
 
@@ -47,8 +51,8 @@ repos:
     hooks:
       - id: codespell
         name: Lint spelling in source files (with --fix)
-        args: [--skip, "build,_deps,third_party,*.lock,*.json,*.txt,*es.md", --ignore-words-list, "nd,ot,te"]
-        exclude: ^(build/|_deps/|third_party/|.*\.lock|.*\.json|.*\.txt|.*es\.md)
+        args: [--skip, "build,_deps,*.lock,*.json", --ignore-words-list, "nd,ot,te,ThirdParty"]
+        exclude: ^(build/|_deps/|third_party/)
 
   # ─── YAML ────────────────────────────────────────────────────────────
   - repo: https://github.com/google/yamlfmt

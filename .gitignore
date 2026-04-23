@@ -8,62 +8,68 @@ out/
 bin/
 lib/
 
-# CMake build folders (common patterns)
+# CMake build folders
 cmake-build-*/
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
 Makefile
 
+# CMake User presets
+CMakeUserPresets.json
+
 # Ninja
 .ninja_deps
 .ninja_log
 
+# Generated compile commands
+compile_commands.json
+
 # ============================================================
-# CMAKE USER FILES
+# PYTHON
 # ============================================================
 
-CMakeUserPresets.json
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Poetry / pipenv (por si acaso)
+.poetry/
+Pipfile.lock
 
 # ============================================================
 # VCPKG
 # ============================================================
 
-# Installed packages (reproducible via vcpkg.json)
 vcpkg_installed/
 installed/
-
-# Buildtrees & packages
 buildtrees/
 packages/
-
-# User-specific vcpkg config
 vcpkg-user-config.json
 
 # ============================================================
-# VISUAL STUDIO / MSVC / VISUAL STUDIO CODE
+# IDEs / EDITORS
 # ============================================================
 
-.vscode
-.idea
+# VSCode
+.vscode/
+
+# CLion / JetBrains
+.idea/
+
+# Visual Studio
 .vs/
 *.VC.db
 *.VC.opendb
 *.sln.docstates
-
-# User-specific files
 *.user
 *.userosscache
 *.suo
 
-# Build outputs
-Debug/
-Release/
-x64/
-x86/
-
 # ============================================================
-# CLANG / GCC
+# COMPILER OUTPUTS
 # ============================================================
 
 *.o
@@ -109,20 +115,6 @@ tmp/
 temp/
 
 # ============================================================
-# EDITORS / IDEs
-# ============================================================
-
-# VSCode
-.vscode/
-
-# CLion
-.idea/
-
-# Sublime / others
-*.sublime-project
-*.sublime-workspace
-
-# ============================================================
 # OS FILES
 # ============================================================
 
@@ -145,9 +137,10 @@ Desktop.ini
 *.gz
 *.7z
 
-# OPTIONAL: KEEP IMPORTANT CONFIG FILES
+# ============================================================
+# KEEP IMPORTANT CONFIG FILES
+# ============================================================
 
-# Keep presets and config
 !CMakePresets.json
 !vcpkg.json
 !vcpkg-configuration.json
