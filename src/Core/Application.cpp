@@ -27,7 +27,7 @@ Application::Application(const ApplicationConfig& config)
     RebuildContext();
 
     // -- SceneManager ------------------------------------------------------
-    m_SceneManager.emplace(m_EngineContext); // Create the SceneManager in-place
+    m_SceneManager.emplace(m_EngineContext);
 
     RS_CORE_ASSERT(m_SceneManager, "Failed to create SceneManager");
 
@@ -53,28 +53,6 @@ void Application::RebuildContext()
 }
 
 // ============================================================================
-// Scene management
-// ============================================================================
-
-void Application::AddScene(Scope<Scene> scene)
-{
-    if (m_SceneManager) {
-        m_SceneManager->AddScene(std::move(scene));
-    } else {
-        RS_CORE_ERROR("Cannot add scene: SceneManager is not initialized");
-    }
-}
-
-void Application::SetScene(Scope<Scene> newScene)
-{
-    if (m_SceneManager) {
-        m_SceneManager->SetScene(std::move(newScene));
-    } else {
-        RS_CORE_ERROR("Cannot set scene: SceneManager is not initialized");
-    }
-}
-
-// ============================================================================
 // Main loop
 // ============================================================================
 
@@ -95,13 +73,38 @@ void Application::Run()
             if (wasPausedDueToMinimize)
             {
                 // Resume the scene if it was paused due to minimize
-                sm.ResumeCurrentScene();
+                sm.Resume();
                 wasPausedDueToMinimize = false;
             }
 
-            // Run the active scene (timing, fixed update, variable update, draw)
-            auto& scene = sm.GetCurrentScene();
-            scene.Run();
+            Time::BeginFrame();
+
+            if (!Time::IsPaused())
+            {
+                // Fixed timestep updates
+                uint32_t stepsTaken = 0;
+                while (Time::ShouldFixedStep() && stepsTaken < m_Configuration.MaxFixedSteps)
+                {
+                    sm.FixedUpdate(Time::GetFixedDeltaTime());
+                    ++stepsTaken;
+                }
+
+                if (stepsTaken == m_Configuration.MaxFixedSteps)
+                {
+                    RS_CORE_WARN("Frame drop detected! Fixed steps clamped to {}", m_Configuration.MaxFixedSteps);
+                }
+
+                const float dt = Time::GetDeltaTime();
+                sm.Update(dt);
+            }
+
+            m_Renderer->BeginFrame();
+
+            sm.Draw(Time::GetInterpolationAlpha());
+
+            m_Renderer->EndFrame();
+
+            Time::EndFrame();
         }
         else
         {
@@ -109,7 +112,7 @@ void Application::Run()
             {
                 RS_CORE_DEBUG("Window minimized, pausing scene.");
                 printf("Window minimized, pausing scene.\n");
-                sm.PauseCurrentScene();
+                sm.Pause();
                 wasPausedDueToMinimize = true;
             }
 

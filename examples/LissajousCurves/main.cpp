@@ -365,6 +365,7 @@ RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
     config.Window.Height = 600;
 
     auto* app = new RS::Application(config);
-    app->AddScene(RS::CreateScope<LissajousSimulation>());
+    app->RegisterScene<LissajousSimulation>();
+    app->SetInitialScene<LissajousSimulation>();
     return app;
 }
