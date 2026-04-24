@@ -1,8 +1,9 @@
 # Create the library target
 add_library(Raysim)
-
-# Create an alias for the library target to allow for easier linking
 add_library(Raysim::Raysim ALIAS Raysim)
+
+# Group in IDEs
+set_target_properties(Raysim PROPERTIES FOLDER "Raysim")
 
 # ============================================================
 # SETTINGS
@@ -78,7 +79,7 @@ target_link_libraries(Raysim
         imgui
         glfw
         raylib
-        spdlog::spdlog
+        spdlog
     PRIVATE
         glad
         imgui_backends
