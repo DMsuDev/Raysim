@@ -3,7 +3,7 @@
 [![C++](https://img.shields.io/badge/Language-C%2B%2B-00599C?style=flat&logo=cplusplus&logoColor=white)](https://isocpp.org/)
 [![CMake](https://img.shields.io/badge/Build-CMake-064F8C?style=flat&logo=cmake&logoColor=white)](https://cmake.org/)
 ![Status](https://img.shields.io/badge/Status-Early%20Development-yellow?style=flat)
-[![Version](https://img.shields.io/badge/Version-0.4.1-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
+[![Version](https://img.shields.io/badge/Version-0.6.0-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
 
 [English Readme](https://github.com/DMsuDev/Raysim/blob/main/README.md)
 • [Readme Español](https://github.com/DMsuDev/Raysim/blob/main/README.es.md)
@@ -52,15 +52,6 @@ Useful for learning graphics programming, prototyping ideas, or building small g
 | `Mouse2D`         | Mouse tracking and 2D interaction.                                                      |
 | `NoiseLandscape`  | Procedurally generated scrolling terrain using various noise functions.                 |
 
-### Using Makefile
-
-```bash
-make example-bouncing
-make example-lissajous
-make example-mouse
-make example-noise
-```
-
 ### Using CMake Presets
 
 To compile the examples, enable the `RS_BUILD_EXAMPLES` option (already enabled in presets):
@@ -84,11 +75,9 @@ load assets, create entities, and initialise scene state.
 
 ```cpp
 class MyScene : public Scene {
+    RS_SCENE(MyScene) // Macro to generate scene ID and name for lookup
 protected:
     void OnAttach() override {
-        GetContext().Window->SetTitle("My Scene");
-
-        // You can also use the convenience method for direct access to the Window subsystem:
         GetWindow().SetTitle("My Scene");
     }
 };
@@ -120,7 +109,7 @@ so movement stays frame-rate independent.
 
 ```cpp
 void OnUpdate(float dt) override {
-    if (GetInput().IsKeyPressed(Key::Space)) SetPaused(!IsPaused());
+    if (GetInput().IsKeyPressed(KeyCode::Space)) foo();
     position += velocity * dt;
 }
 ```
@@ -183,44 +172,60 @@ void OnResume() override {
 
 </details>
 
-<details>
-<summary>OnDetach</summary>
-
-Called when the scene is removed or replaced. Clean up resources, detach entities, etc.
-
-```cpp
-void OnDetach() override {
-    // Clean up scene resources
-}
-```
-
-</details>
-
 ## Modules
 
 <details>
 <summary>Core</summary>
 
-| File                | Purpose                                                                                                                                                                                      |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Application`       | Base class. Create scenes and register them with `SetScene()` or `AddScene()`. Access backend through `GetContext()`.                                                                        |
-| `ApplicationConfig` | Configure title, resolution, max fixed steps, and log file before the loop starts. All fields have defaults - pass only what you need.                                                       |
-| `Time`              | Static utility. Delta time, fixed timestep, time scale, pause/resume, FPS counters.                                                                                                          |
-| `Log`               | Wraps spdlog. Writes to console and a log file. Use macros `RS_LOG_INFO`, `RS_LOG_WARN`, `RS_LOG_ERROR`.                                                                                     |
-| `FontManager`       | Load a TTF/OTF font once, access it globally for text rendering. You can set a default font using `SetDefaultFont("path/to/font.ttf")` on `OnAttach() override`.                             |
-| `BackendFactory`    | Creates concrete `RendererAPI`, `Window`, and `Input` instances for the selected backend.                                                                                                    |
-| `Scene`             | Base class for scenes. Provides lifecycle callbacks (OnAttach, OnStart, OnUpdate, OnFixedUpdate, OnDraw, OnPause, OnResume, OnDetach). Scenes receive an EngineContext for subsystem access. |
-| `SceneManager`      | Manages a LIFO stack of scenes. Supports push/pop operations, pause/resume, and scene lookup by ID or name.                                                                                  |
+| File                | Purpose                                                                                                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Application`       | Base class. Create scenes and register them with `RegisterScene<T>()` or `ChangeScene<T>()`. Direct access methods are provided for Window, Renderer, and Input.         |
+| `ApplicationConfig` | Configure title, resolution, max fixed steps, and log file before the loop starts. All fields have defaults - pass only what you need.                                   |
+| `Time`              | Static utility. Delta time, fixed timestep, time scale, pause/resume, FPS counters.                                                                                      |
+| `Log`               | Wraps spdlog. Writes to console and a log file. Use macros `RS_LOG_INFO`, `RS_LOG_WARN`, `RS_LOG_ERROR`.                                                                 |
+| `FontManager`       | Load a TTF/OTF font once, access it globally for text rendering. You can set a default font using `SetDefaultFont("path/to/font.ttf")` on `OnAttach() override`.         |
+| `BackendFactory`    | Creates concrete `RendererAPI`, `Window`, and `Input` instances for the selected backend.                                                                                |
+| `Scene`             | Base class for scenes. Provides lifecycle callbacks (OnStart, OnUpdate, OnFixedUpdate, OnDraw, OnPause, OnResume). Scenes receive an EngineContext for subsystem access. |
+| `SceneManager`      | Manages the scenes. Supports push/pop/replace operations and flow control (pause/resume). Lookup by ID or name.                                                          |
 
 </details>
 
 <details>
 <summary>Scene</summary>
 
-| File           | Purpose                                                                                                                                                                                                                                 |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Scene`        | Base class for scenes. Provides lifecycle callbacks (OnStart, OnUpdate, OnFixedUpdate, OnDraw, OnAttach, OnDetach, OnPause, OnResume). Each scene receives an EngineContext for Window, Renderer, and Input access.                     |
-| `SceneManager` | Manages a LIFO stack of scenes. Operations: AddScene (push), RemoveScene (pop), SetScene (replace all). Flow control: PauseCurrentScene, ResumeCurrentScene. Lookup: GetCurrentScene, GetSceneByID, GetSceneByName, GetUnderlyingScene. |
+In version 0.6.0, a new scene system was introduced to enable a more robust and flexible scene-based architecture. The scene system provides a structured way to organize your application code into different scenes (main menu, game, pause screen, etc.) with their own lifecycle and access to engine subsystems.
+
+**How to create a scene?**
+
+To create a scene, inherit from the `Scene` class and use the `RS_SCENE(MyScene)` macro inside the definition to automatically register the scene name and ID:
+
+```cpp
+class MyScene : public Scene {
+    RS_SCENE(MyScene)
+    // ... override methods like OnAttach, OnUpdate, etc.
+};
+```
+
+Then, register the scene in your application using `RegisterScene`:
+
+```cpp
+app->RegisterScene<MyScene>();
+```
+
+You must register the scene before you can use it. This allows you to switch to that scene by name or type at any time.
+To set the initial scene, you can use `SetInitialScene<MyScene>()` or `ChangeScene<MyScene>()` in your `CreateApplication()` function:
+
+```cpp
+RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
+{
+    auto* app = new Application();
+    app->RegisterScene<MyScene>();
+    app->SetInitialScene<MyScene>(); // Sets MyScene as the initial scene
+    return app;
+}
+```
+
+This allows you to switch to that scene by name or type at any time.
 
 </details>
 
@@ -240,12 +245,14 @@ void OnDetach() override {
 <details>
 <summary>Math</summary>
 
-| File      | Purpose                                                                                                                                                                                                                                                                                                     |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Vector2` | 2D vector with arithmetic operators and common utility methods.                                                                                                                                                                                                                                             |
-| `Vector3` | 3D vector, used internally for color/clear operations and general math.                                                                                                                                                                                                                                     |
-| `Math`    | Common math helpers: clamp, lerp, map, wrap, and trigonometric utilities.                                                                                                                                                                                                                                   |
-| `Random`  | Seeded Mersenne Twister RNG. Integer and float ranges, boolean helpers, container sampling, plus coherent noise (Perlin 2D/3D, Simplex, Cellular, Value) and Fractal Brownian Motion. Seed is auto-random on startup; call `Seed()` for deterministic results or `SeedRandom()` to re-randomise at runtime. |
+| File         | Purpose                                                                                                                                                                                                                                                                                                     |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Vector2`    | 2D vector with arithmetic operators and common utility methods.                                                                                                                                                                                                                                             |
+| `Vector2Int` | 2D vector of integers with arithmetic operators and common utility methods.                                                                                                                                                                                                                                 |
+| `Vector3`    | 3D vector, used internally for color/clear operations and general math.                                                                                                                                                                                                                                     |
+| `Vector3Int` | 3D vector of integers with arithmetic operators and common utility methods.                                                                                                                                                                                                                                 |
+| `Math`       | Common math helpers: clamp, lerp, map, wrap, and trigonometric utilities.                                                                                                                                                                                                                                   |
+| `Random`     | Seeded Mersenne Twister RNG. Integer and float ranges, boolean helpers, container sampling, plus coherent noise (Perlin 2D/3D, Simplex, Cellular, Value) and Fractal Brownian Motion. Seed is auto-random on startup; call `Seed()` for deterministic results or `SeedRandom()` to re-randomise at runtime. |
 
 </details>
 
@@ -281,15 +288,6 @@ cmake --preset release            # Configure Release (Ninja)
 cmake --build --preset release    # Build Release
 ```
 
-### Using Makefile
-
-```bash
-make build                     # configure and build (Debug by default)
-make build BUILD_TYPE=Release  # release build
-make rebuild                   # clean then build
-make help                      # list all available targets
-```
-
 ### Manual CMake
 
 ```bash
@@ -299,7 +297,7 @@ cmake --build build --config Release
 
 ## Quick Start
 
-Create a scene by inheriting from `Scene` and override the lifecycle methods. Then register it with your application using `SetScene()` or `AddScene()`.
+Create a scene by inheriting from `Scene` and override the lifecycle methods. Then register it with your application using `RegisterScene<T>()` or `ChangeScene<T>()`, after `SetInitialScene<T>()` to define the initial scene.
 
 ```cpp
 #include "Raysim/Raysim.hpp"
@@ -308,6 +306,9 @@ Create a scene by inheriting from `Scene` and override the lifecycle methods. Th
 using namespace RS;
 
 class MyScene : public Scene {
+    RS_SCENE(MyScene)
+
+private:
     Vector2 position = {400, 300};
     Vector2 velocity = {150, 100};
 
@@ -336,7 +337,8 @@ class MyScene : public Scene {
 RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
 {
     auto* app = new Application();
-    app->AddScene(CreateScope<MyScene>());
+    app->RegisterScene<MyScene>();
+    app->SetInitialScene<MyScene>();
     return app;
 }
 ```

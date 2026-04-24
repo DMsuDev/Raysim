@@ -1,6 +1,6 @@
 {
   "name": "raysim",
-  "version": "0.4.1",
+  "version": "0.6.0",
   "builtin-baseline": "515ffd8c4f08d6472adededd8f06a2f83fba1aa3",
   "description": "A simple C++ framework for 2D graphics, simulations, and interactive applications, inspired by p5.js and Processing.",
   "dependencies": [
