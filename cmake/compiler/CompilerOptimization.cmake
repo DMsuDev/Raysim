@@ -1,62 +1,32 @@
 # ================================================
-# Compiler optimization levels by build type
+# Compiler optimization levels
 # ================================================
 include_guard()
 
-function(set_project_optimization target)
+function(rs_enable_optimizations target)
     if(NOT TARGET ${target})
         message(FATAL_ERROR "Target '${target}' does not exist")
     endif()
 
-    # Debug configuration
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        if(MSVC)
-            target_compile_options(${target} PRIVATE
-                /Od        # Disable optimizations
-                /Zi        # Full debug info
-                /Ob0       # No inline
-            )
-        elseif(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang" OR
-               CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-            target_compile_options(${target} PRIVATE
-                -O0        # No optimization
-                -g3        # Max debug info
-                -fno-omit-frame-pointer
-            )
-        endif()
+    # Compile options
+    target_compile_options(${target} PRIVATE
 
-    # Release configuration
-    elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-        if(MSVC)
-            target_compile_options(${target} PRIVATE
-                /O2        # Optimize for speed
-                /Ob2       # Aggressive inlining
-                /DNDEBUG
-            )
-        elseif(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang" OR
-               CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-            target_compile_options(${target} PRIVATE
-                -O3        # Max optimization
-                -DNDEBUG
-            )
-        endif()
+        # MSVC
+        $<$<AND:$<CONFIG:Debug>,$<CXX_COMPILER_ID:MSVC>>:/Od /Zi /Ob0>
+        $<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:MSVC>>:/O2 /Ob2>
+        $<$<AND:$<CONFIG:RelWithDebInfo>,$<CXX_COMPILER_ID:MSVC>>:/O2 /Zi>
 
-    # RelWithDebInfo configuration
-    elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-        if(MSVC)
-            target_compile_options(${target} PRIVATE
-                /O2
-                /Zi
-                /DNDEBUG
-            )
-        elseif(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang" OR
-               CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-            target_compile_options(${target} PRIVATE
-                -O2
-                -g
-                -DNDEBUG
-            )
-        endif()
+        # GCC / Clang
+        $<$<AND:$<CONFIG:Debug>,$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>>:-O0 -g3 -fno-omit-frame-pointer>
+        $<$<AND:$<CONFIG:Release>,$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>>:-O3>
+        $<$<AND:$<CONFIG:RelWithDebInfo>,$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>>:-O2 -g>
+    )
 
-    endif()
+    # Defines for NDEBUG in Release and RelWithDebInfo
+    target_compile_definitions(${target} PRIVATE
+        $<$<CONFIG:Release,RelWithDebInfo>:NDEBUG>
+    )
+
+    message(STATUS "Optimizations enabled for ${target}")
+
 endfunction()

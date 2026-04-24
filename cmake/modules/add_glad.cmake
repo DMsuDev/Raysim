@@ -19,7 +19,4 @@ target_include_directories(glad
     ${GLAD_DIR}/include
 )
 
-disable_warnings(glad)
-
-# Group glad under "third_party" in IDEs
-set_target_properties(glad PROPERTIES FOLDER "third_party")
+rs_third_party_setup(glad)

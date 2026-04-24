@@ -13,8 +13,5 @@ target_include_directories(spdlog
     ${SPDLOG_DIR}/include
 )
 
-# Disable warnings for consumers
-disable_warnings(spdlog)
-
 # Group in IDEs
 set_target_properties(spdlog PROPERTIES FOLDER "third_party")
