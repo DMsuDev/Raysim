@@ -24,6 +24,7 @@ option(RS_ENABLE_LTO "Enable Link Time Optimization" OFF)
 option(RS_BUILD_EXAMPLES "Build example applications" ON)
 
 # Define RS_BUILD_DEBUG macro automatically in Debug builds
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+# This enables RS_ENABLE_ASSERTS in Assert.hpp
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
 	add_compile_definitions(RS_BUILD_DEBUG)
 endif()
