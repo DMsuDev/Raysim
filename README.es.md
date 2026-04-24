@@ -3,7 +3,7 @@
 [![C++](https://img.shields.io/badge/Language-C%2B%2B-00599C?style=flat&logo=cplusplus&logoColor=white)](https://isocpp.org/)
 [![CMake](https://img.shields.io/badge/Build-CMake-064F8C?style=flat&logo=cmake&logoColor=white)](https://cmake.org/)
 ![Status](https://img.shields.io/badge/Status-Early%20Development-yellow?style=flat)
-[![Version](https://img.shields.io/badge/Version-0.4.1-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
+[![Version](https://img.shields.io/badge/Version-0.6.0-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
 
 [English Readme](https://github.com/DMsuDev/Raysim/blob/main/README.md)
 • [Readme Español](https://github.com/DMsuDev/Raysim/blob/main/README.es.md)
@@ -52,15 +52,6 @@ Inspirado en **p5.js** y **Processing**, ofrece una API simple basada en clases 
 | `Mouse2D`         | Seguimiento del mouse e interacción 2D.                                                 |
 | `NoiseLandscape`  | Terreno con desplazamiento generado proceduralmente usando varias funciones de ruido.   |
 
-### Usando Makefile
-
-```bash
-make example-bouncing
-make example-lissajous
-make example-mouse
-make example-noise
-```
-
 ### Usando CMake Presets
 
 Para compilar los ejemplos, habilita la opción `RS_BUILD_EXAMPLES` (ya habilitada en los presets):
@@ -84,12 +75,9 @@ cargar assets, crear entidades e inicializar el estado de la escena.
 
 ```cpp
 class MyScene : public Scene {
+    RS_SCENE(MyScene) // Macro para generar ID y nombre de escena para lookup
 protected:
     void OnAttach() override {
-        GetContext().Window->SetTitle("Mi Escena");
-
-        // Tambien puedes usar el acceso directo de conveniencia:
-
         GetWindow().SetTitle("Mi Escena");
     }
 };
@@ -121,7 +109,7 @@ para que el movimiento sea independiente del frame rate.
 
 ```cpp
 void OnUpdate(float dt) override {
-    if (GetInput().IsKeyPressed(Key::Space)) SetPaused(!IsPaused());
+    if (GetInput().IsKeyPressed(KeyCode::Space)) foo();
     position += velocity * dt;
 }
 ```
@@ -184,44 +172,60 @@ void OnResume() override {
 
 </details>
 
-<details>
-<summary>OnDetach</summary>
-
-Se llama cuando la escena se elimina o reemplaza. Limpia recursos, desadjunta entidades, etc.
-
-```cpp
-void OnDetach() override {
-    // Limpiar recursos de la escena
-}
-```
-
-</details>
-
 ## Módulos
 
 <details>
 <summary>Core</summary>
 
-| Archivo             | Propósito                                                                                                                                                                                                           |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Application`       | Clase base. Crea escenas y regístralas con `SetScene()` o `AddScene()`. Accede al backend a través de `GetContext()`.                                                                                               |
-| `ApplicationConfig` | Configura título, resolución, máximo de pasos fijos y archivo de log antes de que comience el bucle. Todos los campos tienen valores por defecto - pasa solo lo que necesites.                                      |
-| `Time`              | Utilidad estática. Delta time, paso de tiempo fijo, escala de tiempo, pausa/reanudar, contadores de FPS.                                                                                                            |
-| `Log`               | Envuelve spdlog. Escribe en consola y archivo de log. Usa las macros `RS_LOG_INFO`, `RS_LOG_WARN`, `RS_LOG_ERROR`.                                                                                                  |
-| `FontManager`       | Carga una fuente TTF/OTF una vez, accede globalmente para renderizado de texto. Puedes establecer una fuente por defecto usando `SetDefaultFont("ruta/fuente.ttf")` en `OnAttach() override`.                       |
-| `BackendFactory`    | Crea instancias concretas de `RendererAPI`, `Window` e `Input` para el backend seleccionado.                                                                                                                        |
-| `Scene`             | Clase base para escenas. Proporciona callbacks del ciclo de vida (OnAttach, OnStart, OnUpdate, OnFixedUpdate, OnDraw, OnPause, OnResume, OnDetach). Las escenas reciben un EngineContext para acceso a subsistemas. |
-| `SceneManager`      | Gestiona una pila LIFO de escenas. Soporta operaciones push/pop, pausa/reanudar y búsqueda de escenas por ID o nombre.                                                                                              |
+| Archivo             | Propósito                                                                                                                                                                                       |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Application`       | Clase base. Crea escenas y regístralas con `RegisterScene<T>()` o `ChangeScene<T>()`. Accede directamente a Window, Renderer e Input.                                                           |
+| `ApplicationConfig` | Configura título, resolución, máximo de pasos fijos y archivo de log antes de que comience el bucle. Todos los campos tienen valores por defecto - pasa solo lo que necesites.                  |
+| `Time`              | Utilidad estática. Delta time, paso de tiempo fijo, escala de tiempo, pausa/reanudar, contadores de FPS.                                                                                        |
+| `Log`               | Envuelve spdlog. Escribe en consola y archivo de log. Usa las macros `RS_LOG_INFO`, `RS_LOG_WARN`, `RS_LOG_ERROR`.                                                                              |
+| `FontManager`       | Carga una fuente TTF/OTF una vez, accede globalmente para renderizado de texto. Puedes establecer una fuente por defecto usando `SetDefaultFont("ruta/fuente.ttf")` en `OnAttach() override`.   |
+| `BackendFactory`    | Crea instancias concretas de `RendererAPI`, `Window` e `Input` para el backend seleccionado.                                                                                                    |
+| `Scene`             | Clase base para escenas. Proporciona callbacks del ciclo de vida (OnStart, OnUpdate, OnFixedUpdate, OnDraw, OnPause, OnResume). Las escenas reciben un EngineContext para acceso a subsistemas. |
+| `SceneManager`      | Gestionar escenas. Soporta operaciones de push/pop, pausa/reanudar y búsqueda de escenas por ID o nombre.                                                                                       |
 
 </details>
 
 <details>
 <summary>Scene</summary>
 
-| Archivo        | Propósito                                                                                                                                                                                                                                             |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Scene`        | Clase base para escenas. Proporciona callbacks del ciclo de vida (OnStart, OnUpdate, OnFixedUpdate, OnDraw, OnAttach, OnDetach, OnPause, OnResume). Cada escena recibe un EngineContext para acceso a Window, Renderer e Input.                       |
-| `SceneManager` | Gestiona una pila LIFO de escenas. Operaciones: AddScene (push), RemoveScene (pop), SetScene (reemplazar todo). Control de flujo: PauseCurrentScene, ResumeCurrentScene. Búsqueda: GetCurrentScene, GetSceneByID, GetSceneByName, GetUnderlyingScene. |
+En la version 0.6.0 se introdujo un nuevo sistema de escenas para permitir una arquitectura basada en escenas más robusta y flexible. El sistema de escenas proporciona una forma estructurada de organizar el código de tu aplicación en diferentes escenas (menú principal, juego, pantalla de pausa, etc.) con su propio ciclo de vida y acceso a los subsistemas del motor.
+
+**¿Cómo crear una escena?**
+
+Para crear una escena, hereda de la clase `Scene` y usa el macro `RS_SCENE(MiEscena)` dentro de la definición para registrar el nombre e ID de la escena automáticamente:
+
+```cpp
+class MiEscena : public Scene {
+    RS_SCENE(MiEscena)
+    // ... métodos override como OnAttach, OnUpdate, etc.
+};
+```
+
+Luego, registra la escena en tu aplicación usando `RegisterScene`:
+
+```cpp
+app->RegisterScene<MiEscena>();
+```
+
+Hay que registrar la escena antes de poder usarla. Esto permite cambiar a esa escena por nombre o tipo en cualquier momento.
+Para definir la escena inicial, puedes usar `SetInitialScene<MiEscena>()` o `ChangeScene<MiEscena>()` en tu función `CreateApplication()`:
+
+```cpp
+RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
+{
+    auto* app = new Application();
+    app->RegisterScene<MiEscena>();
+    app->SetInitialScene<MiEscena>(); // Establece MiEscena como la escena inicial
+    return app;
+}
+```
+
+Esto permite cambiar a esa escena por nombre o tipo en cualquier momento.
 
 </details>
 
@@ -241,12 +245,14 @@ void OnDetach() override {
 <details>
 <summary>Math</summary>
 
-| Archivo   | Propósito                                                                                                                                                                                                                                                                                                                          |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Vector2` | Vector 2D con operadores aritméticos y métodos de utilidad comunes.                                                                                                                                                                                                                                                                |
-| `Vector3` | Vector 3D, usado internamente para operaciones de color/limpieza y matemáticas generales.                                                                                                                                                                                                                                          |
-| `Math`    | Helpers matemáticos comunes: clamp, lerp, map, wrap y utilidades trigonométricas.                                                                                                                                                                                                                                                  |
-| `Random`  | RNG Mersenne Twister con semilla. Rangos de enteros y flotantes, helpers booleanos, muestreo de contenedores, más ruido coherente (Perlin 2D/3D, Simplex, Cellular, Value) y Fractal Brownian Motion. La semilla es auto-aleatoria al inicio; llama a `Seed()` para resultados deterministas o `SeedRandom()` para re-aleatorizar. |
+| Archivo      | Propósito                                                                                                                                                                                                                                                                                                                          |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Vector2`    | Vector 2D con operadores aritméticos y métodos de utilidad comunes.                                                                                                                                                                                                                                                                |
+| `Vector2Int` | Vector 2D de enteros con operadores aritméticos y métodos de utilidad comunes.                                                                                                                                                                                                                                                     |
+| `Vector3`    | Vector 3D, usado internamente para operaciones de color/limpieza y matemáticas generales.                                                                                                                                                                                                                                          |
+| `Vector3Int` | Vector 3D de enteros con operadores aritméticos y métodos de utilidad comunes.                                                                                                                                                                                                                                                     |
+| `Math`       | Helpers matemáticos comunes: clamp, lerp, map, wrap y utilidades trigonométricas.                                                                                                                                                                                                                                                  |
+| `Random`     | RNG Mersenne Twister con semilla. Rangos de enteros y flotantes, helpers booleanos, muestreo de contenedores, más ruido coherente (Perlin 2D/3D, Simplex, Cellular, Value) y Fractal Brownian Motion. La semilla es auto-aleatoria al inicio; llama a `Seed()` para resultados deterministas o `SeedRandom()` para re-aleatorizar. |
 
 </details>
 
@@ -282,15 +288,6 @@ cmake --preset release            # Configurar Release (Ninja)
 cmake --build --preset release    # Compilar Release
 ```
 
-### Usando Makefile
-
-```bash
-make build                     # configurar y compilar (Debug por defecto)
-make build BUILD_TYPE=Release  # compilación release
-make rebuild                   # limpiar y compilar
-make help                      # listar todos los targets disponibles
-```
-
 ### CMake Manual
 
 ```bash
@@ -300,7 +297,7 @@ cmake --build build --config Release
 
 ## Inicio Rápido
 
-Crea una escena heredando de `Scene` y sobreescribe los métodos del ciclo de vida. Luego regístrala con tu aplicación usando `SetScene()` o `AddScene()`.
+Crea una escena heredando de `Scene` y sobreescribe los métodos del ciclo de vida. Luego regístrala con tu aplicación usando `RegisterScene<T>()` o `ChangeScene<T>()`, después de `SetInitialScene<T>()` para definir la escena inicial.
 
 ```cpp
 #include "Raysim/Raysim.hpp"
@@ -309,6 +306,9 @@ Crea una escena heredando de `Scene` y sobreescribe los métodos del ciclo de vi
 using namespace RS;
 
 class MyScene : public Scene {
+    RS_SCENE(MyScene)
+
+private:
     Vector2 position = {400, 300};
     Vector2 velocity = {150, 100};
 
@@ -337,7 +337,8 @@ class MyScene : public Scene {
 RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
 {
     auto* app = new Application();
-    app->AddScene(CreateScope<MyScene>());
+    app->RegisterScene<MyScene>();
+    app->SetInitialScene<MyScene>();
     return app;
 }
 ```

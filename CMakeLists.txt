@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(Raysim VERSION 0.4.1 LANGUAGES CXX C)
+project(Raysim VERSION 0.6.0 LANGUAGES CXX C)
 
 # Module path for easier includes
 # Anywhere you see include(...) you can check <root>/cmake for that file
