@@ -1,8 +1,3 @@
-#if defined(_WIN32)
-#undef DrawText
-#undef DrawTextEx
-#endif
-
 #pragma once
 
 /**
@@ -22,6 +17,24 @@
  */
 
 // Main headers for the Raysim framework
+
+// Exclude conflicting Win32 definitions that clash with raylib
+// (wingdi.h defines Rectangle as a function, winuser.h defines CloseWindow/ShowCursor)
+#if defined(_WIN32)
+    #define WIN32_LEAN_AND_MEAN
+    #ifndef NOMINMAX
+        #define NOMINMAX
+    #endif
+    #ifndef NOGDI
+        #define NOGDI
+    #endif
+    #ifndef NOUSER
+        #define NOUSER
+    #endif
+    #undef DrawTextEx
+    #undef DrawText
+    #undef CreateWindow
+#endif
 
 #include "Raysim/Core/Base.hpp"
 

@@ -11,6 +11,7 @@
     #define NOUSER
     #undef DrawTextEx
     #undef DrawText
+    #undef CreateWindow
 #endif
 
 // Standard library common includes for implementation files
