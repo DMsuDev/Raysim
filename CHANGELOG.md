@@ -2,6 +2,48 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.1] - 2026-04-25
+
+### Added
+
+- `RS_SCENE` macro for automatic scene type registration and name/ID generation
+- `Vector2Int` and `Vector3Int` structs for 2D and 3D integer vector operations
+- Logging level management with registries for unique and TTL-based logging
+- Added `NVI` (Non-Virtual Interface) pattern to `Window` for better encapsulation and future-proofing
+- Moved `GetWindow()`, `GetInput()`, and `GetRenderer()` direct to `Scene` for easier access without needing `GetContext()`
+- Memory management and assertion utilities consolidated into `Base.hpp`
+- `EngineContext` struct for passing subsystem references to scenes
+
+### Changed
+
+- Replaced `AddScene` with `RegisterScene` and `SetInitialScene` for improved scene management
+- Streamlined `Scene` and `SceneManager` classes, removing redundant methods
+- `Window->OnUpdate` replaced by `PollEvents` and `SwapBuffer` for clearer separation
+- RaylibWindow methods updated to follow the new `Window` interface naming conventions
+- Compiler settings reorganized into separate files: `CompilerOptimization.cmake`, `CompilerOptions.cmake`, `CompilerWarnings.cmake`
+- Win32 definition exclusions reorganized in header files
+- spdlog linking simplified with FetchContent fallback
+- Library alias creation simplified
+- `pch.hpp` include paths updated to use direct references
+- Operator formatting consistency improved in `Vector2Int` and `Vector3Int`
+- Removed `Scene.cpp` from source list
+
+### Fixed
+
+- `pch.hpp` now included first in all source files to ensure precompiled header usage
+- `NOMINMAX` definition now properly guarded to prevent conflicts with other headers
+- `RS_CORE_ASSERT_TRUE` macro in scene module fixed to remove unused second parameter
+
+### Build
+
+- Modernized CMake configuration with modular structure
+- Added `rs_options` for configurable build settings
+- Integrated LTO (Link Time Optimization) configuration
+- Added sanitizer support configuration
+- Fixed shared library linking issues
+- Added `imgui` and `spdlog` as third-party submodules
+- Added GitHub workflow to automate vcpkg baseline updates
+
 ## [0.4.1] - 2026-04-09
 
 ### Added
