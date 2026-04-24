@@ -1,5 +1,5 @@
 # Create the library target
-add_library(Raysim)
+add_library(Raysim ${RS_LIB_TYPE})
 add_library(Raysim::Raysim ALIAS Raysim)
 
 # Group in IDEs
@@ -9,15 +9,17 @@ set_target_properties(Raysim PROPERTIES FOLDER "Raysim")
 # SETTINGS
 # ============================================================
 
-set_project_warnings(Raysim)
-set_project_options(Raysim)
-set_project_optimization(Raysim)
+rs_apply_build_defines(Raysim)
 
-enable_coverage(Raysim)
-enable_sanitizers(Raysim)
+rs_enable_sanitizers(Raysim)
+rs_enable_coverage(Raysim)
+rs_enable_optimizations(Raysim)
+rs_enable_lto(Raysim)
 
 # Add precompiled headers for faster compilation
-target_precompile_headers(Raysim PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/pch.hpp)
+if(RS_ENABLE_PCH)
+    target_precompile_headers(Raysim PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/pch.hpp)
+endif()
 
 # ============================================================================
 # RAYSIM CORE LIBRARY - SOURCE FILES
@@ -77,11 +79,16 @@ target_include_directories(Raysim
 target_link_libraries(Raysim
     PUBLIC
         imgui
-        glfw
-        raylib
         spdlog
+        $<$<BOOL:${RS_BUILD_SHARED}>:raylib>
+        $<$<BOOL:${RS_BUILD_SHARED}>:glfw>
+        $<$<BOOL:${RS_BUILD_SHARED}>:glad>
+        $<$<BOOL:${RS_BUILD_SHARED}>:imgui_glfw_opengl>
     PRIVATE
-        glad
-        imgui_backends
+        rs_warnings
+        $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:raylib>
+        $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:glfw>
+        $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:glad>
+        $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:imgui_glfw_opengl>
         $<$<PLATFORM_ID:Windows>:winmm>
 )

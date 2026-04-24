@@ -28,15 +28,3 @@ endif()
 
 # Generate compile_commands.json to make it easier to work with clang based tools
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-# Enable Link Time Optimization if requested
-if(RS_ENABLE_LTO)
-  include(CheckIPOSupported)
-  check_ipo_supported(RESULT result OUTPUT error)
-
-  if(result)
-    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
-  else()
-    message(WARNING "IPO not supported: ${error}")
-  endif()
-endif()

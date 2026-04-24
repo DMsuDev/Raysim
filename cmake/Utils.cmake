@@ -4,20 +4,20 @@ include_guard()
 # ============================================================
 # Helper: disable warnings for external libs
 # ============================================================
-function(disable_warnings target)
-    get_target_property(target_type ${target} TYPE)
-
-    if (target_type STREQUAL "INTERFACE_LIBRARY")
-        if (MSVC)
-            target_compile_options(${target} INTERFACE /W0)
-        else()
-            target_compile_options(${target} INTERFACE -w)
-        endif()
+function(rs_disable_warnings target)
+    if(MSVC)
+        target_compile_options(${target} PRIVATE /w)
     else()
-        if (MSVC)
-            target_compile_options(${target} PRIVATE /W0)
-        else()
-            target_compile_options(${target} PRIVATE -w)
-        endif()
+        target_compile_options(${target} PRIVATE -w)
     endif()
+endfunction()
+
+function(rs_third_party_setup target)
+    # Disable warnings for the target
+    rs_disable_warnings(${target})
+
+    # Group the target under "third_party" in IDEs
+    set_target_properties(${target} PROPERTIES
+        FOLDER "third_party"
+    )
 endfunction()

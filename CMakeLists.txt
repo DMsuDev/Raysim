@@ -41,6 +41,9 @@ include(Sanitizers)
 # Code coverage configuration
 include(Coverage)
 
+# Link Time Optimization (LTO) configuration
+include(LOT)
+
 # Include ThirdParty dependencies
 include(ThirdParty)
 

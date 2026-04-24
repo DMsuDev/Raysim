@@ -4,17 +4,14 @@
 
 include_guard()
 
-function(enable_coverage target_name)
+function(rs_enable_coverage target_name)
   if(NOT TARGET ${target_name})
     message(FATAL_ERROR "Target '${target_name}' does not exist")
   endif()
 
   if(NOT RS_ENABLE_COVERAGE)
-    message(STATUS "Coverage: Disabled")
     return()
   endif()
-
-  message(STATUS "Coverage: Enabled")
 
   # Check if the compiler supports coverage flags
   if(NOT CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
@@ -27,8 +24,25 @@ function(enable_coverage target_name)
     message(WARNING "Coverage + Sanitizers may produce unreliable results")
   endif()
 
+  message(STATUS "Coverage enabled for ${target_name}")
+
+  # Flags for coverage instrumentation
+  set(COVERAGE_COMPILE_FLAGS
+    -O0
+    -g
+    --coverage
+  )
+
+  set(COVERAGE_LINK_FLAGS
+    --coverage
+  )
+
   # Add coverage flags to the target
-  target_compile_options(${target_name} INTERFACE --coverage -O0 -g)
-  target_link_options(${target_name} INTERFACE --coverage)
+  target_compile_options(${target_name} PRIVATE
+    $<$<CONFIG:Debug,RelWithDebInfo>:${COVERAGE_COMPILE_FLAGS}>
+  )
+  target_link_options(${target_name} PRIVATE
+    $<$<CONFIG:Debug,RelWithDebInfo>:${COVERAGE_LINK_FLAGS}>
+  )
 
 endfunction()

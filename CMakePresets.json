@@ -6,34 +6,44 @@
       "name": "base",
       "hidden": true,
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "RS_BUILD_EXAMPLES": "ON",
-        "RS_ENABLE_COVERAGE": "OFF"
+        "RS_BUILD_SHARED": "ON",
+        "RS_ENABLE_COVERAGE": "OFF",
+        "RS_ENABLE_SANITIZERS": "OFF",
+        "RS_ENABLE_LTO": "OFF"
+      }
+    },
+    {
+      "name": "vcpkg",
+      "hidden": true,
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake"
       }
     },
 
     {
       "name": "ninja",
       "hidden": true,
-      "inherits": "base",
+      "inherits": "vcpkg",
       "generator": "Ninja"
     },
-
     {
       "name": "msvc",
       "hidden": true,
-      "inherits": "base",
+      "inherits": "vcpkg",
       "generator": "Visual Studio 17 2022",
       "architecture": "x64",
       "cacheVariables": {
         "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel"
       }
     },
+
     {
       "name": "debug",
-      "inherits": "ninja",
       "displayName": "Debug (Ninja)",
+      "inherits": "ninja",
       "binaryDir": "${sourceDir}/build/ninja/debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
@@ -47,20 +57,30 @@
     },
     {
       "name": "release",
-      "inherits": "ninja",
       "displayName": "Release (Ninja)",
+      "inherits": "ninja",
       "binaryDir": "${sourceDir}/build/ninja/release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "RS_ENABLE_SANITIZERS": "OFF",
         "RS_ENABLE_LTO": "ON"
       }
     },
     {
+      "name": "relwithdebinfo",
+      "displayName": "RelWithDebInfo (Ninja)",
+      "inherits": "ninja",
+      "binaryDir": "${sourceDir}/build/ninja/relwithdebinfo",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "RS_ENABLE_LTO": "ON"
+      }
+    },
+
+    {
       "name": "msvc-debug",
-      "inherits": "msvc",
       "displayName": "Debug (MSVC)",
-      "binaryDir": "${sourceDir}/build/msvc/debug",
+      "inherits": "msvc",
+      "binaryDir": "${sourceDir}/build/msvc",
       "cacheVariables": {
         "RS_ENABLE_SANITIZERS": "ON",
         "RS_ENABLE_ASAN": "ON"
@@ -68,12 +88,11 @@
     },
     {
       "name": "msvc-release",
-      "inherits": "msvc",
       "displayName": "Release (MSVC)",
-      "binaryDir": "${sourceDir}/build/msvc/release",
+      "inherits": "msvc",
+      "binaryDir": "${sourceDir}/build/msvc",
       "cacheVariables": {
-        "RS_ENABLE_SANITIZERS": "OFF",
-        "RS_ENABLE_LTO": "OFF"
+        "RS_ENABLE_LTO": "ON"
       }
     }
   ],
@@ -86,6 +105,10 @@
     {
       "name": "release",
       "configurePreset": "release"
+    },
+    {
+      "name": "relwithdebinfo",
+      "configurePreset": "relwithdebinfo"
     },
     {
       "name": "msvc-debug",

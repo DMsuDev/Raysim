@@ -1,3 +1,5 @@
+include_guard()
+
 # Destination for shared assets. If the generator is multi-config, place
 # assets under a config subfolder (e.g. Debug/Release) using $<CONFIG>.
 if(CMAKE_CONFIGURATION_TYPES)
