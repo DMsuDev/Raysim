@@ -10,7 +10,6 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 # ============================================================================
 
 find_package(Threads REQUIRED)
-find_package(spdlog CONFIG REQUIRED)
 find_package(glfw3  CONFIG REQUIRED)
 find_package(raylib CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
