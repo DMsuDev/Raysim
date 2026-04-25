@@ -27,6 +27,4 @@ function(rs_enable_optimizations target)
         $<$<CONFIG:Release,RelWithDebInfo>:NDEBUG>
     )
 
-    message(STATUS "Optimizations enabled for ${target}")
-
 endfunction()

@@ -24,24 +24,7 @@ option(RS_ENABLE_LSAN  "Enable LeakSanitizer" OFF)
 option(RS_ENABLE_LTO "Enable Link Time Optimization" OFF)
 option(RS_ENABLE_PCH "Enable precompiled headers" ON)
 option(RS_BUILD_EXAMPLES "Build example applications" ON)
-option(RS_BUILD_SHARED "Build Raysim as shared library" ON)
-
-# ============================================================
-# Build profile logic
-# ============================================================
-
-if(RS_BUILD_PROFILE STREQUAL "Debug")
-  set(RS_ENABLE_SANITIZERS ON CACHE BOOL "" FORCE)
-  set(RS_ENABLE_LTO OFF CACHE BOOL "" FORCE)
-
-elseif(RS_BUILD_PROFILE STREQUAL "Dev")
-  set(RS_ENABLE_SANITIZERS OFF CACHE BOOL "" FORCE)
-  set(RS_ENABLE_LTO OFF CACHE BOOL "" FORCE)
-
-elseif(RS_BUILD_PROFILE STREQUAL "Shipping")
-  set(RS_ENABLE_SANITIZERS OFF CACHE BOOL "" FORCE)
-  set(RS_ENABLE_LTO ON CACHE BOOL "" FORCE)
-endif()
+option(RS_BUILD_SHARED "Build Raysim as shared library" OFF)
 
 # ============================================================
 # Sanitizer consistency
