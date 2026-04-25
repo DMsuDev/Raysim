@@ -1,4 +1,4 @@
-# == LOT.cmake - CMake module for enabling Link Time Optimization (LTO) =
+# == CMake module for enabling Link Time Optimization (LTO) =
 include_guard()
 
 function(rs_enable_lto target_name)
