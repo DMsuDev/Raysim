@@ -42,7 +42,7 @@ include(Sanitizers)
 include(Coverage)
 
 # Link Time Optimization (LTO) configuration
-include(LOT)
+include(LTO)
 
 # Include ThirdParty dependencies
 include(ThirdParty)
