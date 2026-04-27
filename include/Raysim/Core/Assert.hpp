@@ -13,7 +13,7 @@
  */
 #pragma once
 
-#include "Log.hpp"
+#include "Raysim/Core/Log.hpp"
 
 // ============================================================================
 // Source Location Support
