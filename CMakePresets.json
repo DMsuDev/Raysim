@@ -8,7 +8,7 @@
       "cacheVariables": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "RS_BUILD_EXAMPLES": "ON",
-        "RS_BUILD_SHARED": "ON",
+        "RS_BUILD_SHARED": "OFF",
         "RS_ENABLE_COVERAGE": "OFF",
         "RS_ENABLE_SANITIZERS": "OFF",
         "RS_ENABLE_LTO": "OFF"

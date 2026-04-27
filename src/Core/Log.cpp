@@ -128,9 +128,10 @@ void Log::Init(bool async)
 void Log::Shutdown()
 {
     if (!IsInitialized()) return;
+
+    s_CoreLogger.reset();
+    s_ClientLogger.reset();
     spdlog::shutdown();
-    s_CoreLogger = nullptr;
-    s_ClientLogger = nullptr;
 }
 
 //==============================================================================

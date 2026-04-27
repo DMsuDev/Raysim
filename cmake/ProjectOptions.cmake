@@ -9,8 +9,8 @@ include_guard()
 # Global options
 # ============================================================
 
-option(RS_ENABLE_SANITIZERS "Enable all sanitizers" OFF)
-option(RS_ENABLE_COVERAGE   "Enable coverage reporting" OFF)
+option(RS_ENABLE_SANITIZERS  "Enable all sanitizers" OFF)
+option(RS_ENABLE_COVERAGE    "Enable coverage reporting" OFF)
 option(RS_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 
 # Sanitizers
@@ -21,17 +21,18 @@ option(RS_ENABLE_MSAN  "Enable MemorySanitizer (Clang only)" OFF)
 option(RS_ENABLE_LSAN  "Enable LeakSanitizer" OFF)
 
 # Features
-option(RS_ENABLE_LTO "Enable Link Time Optimization" OFF)
-option(RS_ENABLE_PCH "Enable precompiled headers" ON)
+option(RS_ENABLE_LTO     "Enable Link Time Optimization" OFF)
+option(RS_ENABLE_PCH     "Enable precompiled headers" ON)
 option(RS_BUILD_EXAMPLES "Build example applications" ON)
-option(RS_BUILD_SHARED "Build Raysim as shared library" OFF)
+option(RS_BUILD_SHARED   "Build Raysim as shared library" OFF)
+option(RS_ENABLE_PROFILE "Enable profiling instrumentation" OFF)
 
 # ============================================================
 # Sanitizer consistency
 # ============================================================
 
 if(RS_ENABLE_SANITIZERS)
-  set(RS_ENABLE_ASAN  ON CACHE BOOL "" FORCE)
+  set(RS_ENABLE_ASAN ON CACHE BOOL "" FORCE)
   set(RS_ENABLE_UBSAN ON CACHE BOOL "" FORCE)
 endif()
 
