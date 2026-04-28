@@ -122,7 +122,7 @@ public:
         return false;
     }
 
-    static void Log(const std::string& key, double ttlSeconds, LogLevel level, const std::string& msg);
+    static void LogTTL(const std::string& key, double ttlSeconds, LogLevel level, const std::string& msg);
 };
 
 /// @brief Static logging facade. Manages two independent loggers:

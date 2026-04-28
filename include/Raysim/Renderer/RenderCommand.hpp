@@ -11,13 +11,13 @@ namespace RS
      *
      * Provides a convenient facade so that user code can issue render commands
      * without a direct dependency on any concrete graphics API.
-     * Holds a **shared** reference to the RendererAPI so that the backend
-     * stays alive as long as any RenderCommand instance exists.
+     * The RendererAPI instance is owned by RenderCommand and is initialized via Init().
      *
      * Typical setup in Application:
      * @code
      * auto api = BackendFactory::CreateRenderer(RenderAPI::Raylib);
-     * auto rc  = RenderCommand(Shared<RendererAPI>(std::move(api)));
+     * auto rc  = RenderCommand();
+     * rc.Init(RS::CreateScope<RendererAPI>(std::move(api)));
      * @endcode
      *
      * @see RendererAPI
@@ -25,32 +25,30 @@ namespace RS
     class RenderCommand
     {
     public:
-        explicit RenderCommand(Shared<RendererAPI> api)
-            : m_API(std::move(api))
+        static void Init(Scope<RendererAPI> api)
         {
-            RS_CORE_ASSERT(m_API, "RenderCommand: RendererAPI must not be null");
+            RS_CORE_ASSERT(api != nullptr, "RendererAPI instance cannot be null");
+            RS_PROFILE_FUNCTION();
+
+            m_API = std::move(api);
+            m_API->Init();
         }
+        static void Shutdown() { m_API.reset(); }
 
-        void Init() { m_API->Init(); }
-        void Shutdown() { m_API.reset(); }
+        static void BeginFrame() { m_API->BeginFrame(); }
+        static void EndFrame() { m_API->EndFrame(); }
 
-        void BeginFrame() { m_API->BeginFrame(); }
-        void EndFrame() { m_API->EndFrame(); }
-
-        void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+        static void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
         {
             m_API->SetViewport(x, y, width, height);
         }
 
-        void ClearScreen(const Color &color) { m_API->ClearScreen(color); }
-        void ClearScreen(const Vector3 &color) { m_API->ClearScreen(color); }
-        void Clear() { m_API->Clear(); }
-
-        /// Returns the shared RendererAPI.
-        Shared<RendererAPI> GetAPI() const { return m_API; }
+        static void ClearScreen(const Color &color) { m_API->ClearScreen(color); }
+        static void ClearScreen(const Vector3 &color) { m_API->ClearScreen(color); }
+        static void Clear() { m_API->Clear(); }
 
     private:
-        Shared<RendererAPI> m_API;
+        static Scope<RendererAPI> m_API;
     };
 
 }

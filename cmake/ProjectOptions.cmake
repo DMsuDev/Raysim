@@ -60,8 +60,19 @@ endif()
 
 # Helper function to apply build profile defines to a target
 function(rs_apply_build_defines target)
+  if(NOT TARGET ${target})
+    message(FATAL_ERROR "Target '${target}' does not exist")
+  endif()
+
+  target_compile_definitions(${target}
+    PUBLIC
+      $<$<CONFIG:Debug,RelWithDebInfo>:RS_BUILD_DEBUG>
+  )
+
+  if(RS_ENABLE_PROFILE)
     target_compile_definitions(${target}
-        PUBLIC
-            $<$<CONFIG:Debug,RelWithDebInfo>:RS_BUILD_DEBUG>
+      PUBLIC
+        $<$<CONFIG:Debug,RelWithDebInfo,Release>:RS_ENABLE_PROFILE>
     )
+  endif()
 endfunction()

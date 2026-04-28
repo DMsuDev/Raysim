@@ -73,3 +73,5 @@ namespace RS
 
 #include "Raysim/Core/Log.hpp"
 #include "Raysim/Core/Assert.hpp"
+
+#include "Raysim/Debug/Instrumentor.hpp"
