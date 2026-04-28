@@ -188,13 +188,13 @@ private:
 
         // Frequency X
         std::snprintf(buf, sizeof(buf), "Frequency X: %.2f (Left/Right)", frequencyX);
-        Text::DrawText(std::string(buf), 30, y, 20, Color{150, 255, 100},
+        Text::RenderText(std::string(buf), 30, y, 20, Color{150, 255, 100},
                    OriginMode::TopLeft);
         y += lineHeight;
 
         // Frequency Y
         std::snprintf(buf, sizeof(buf), "Frequency Y: %.2f (Up/Down)", frequencyY);
-        Text::DrawText(std::string(buf), 30, y, 20, Color{255, 200, 100},
+        Text::RenderText(std::string(buf), 30, y, 20, Color{255, 200, 100},
                    OriginMode::TopLeft);
         y += lineHeight;
 
@@ -202,40 +202,40 @@ private:
         float phaseDegrees = std::fmod(phaseShift * 180.0f / Math::PI, 360.0f);
         std::snprintf(buf, sizeof(buf), "Phase: %.1f° | Speed: %.3f (P/O dir, +/- speed)",
                       phaseDegrees, phaseRotationSpeed);
-        Text::DrawText(std::string(buf), 30, y, 20, Color{100, 200, 255},
+        Text::RenderText(std::string(buf), 30, y, 20, Color{100, 200, 255},
                    OriginMode::TopLeft);
         y += lineHeight;
 
         // Frequency ratio (key to understanding the shape)
         std::snprintf(buf, sizeof(buf), "Ratio Fx:Fy = %.2f:%.2f",
                   frequencyX, frequencyY);
-        Text::DrawText(std::string(buf), 30, y, 20, Color{255, 150, 200},
+        Text::RenderText(std::string(buf), 30, y, 20, Color{255, 150, 200},
                    OriginMode::TopLeft);
         y += lineHeight;
 
         // Current preset
         std::snprintf(buf, sizeof(buf), "Preset [%d/6]: %s", currentPreset + 1,
                       PRESETS[currentPreset].name.c_str());
-        Text::DrawText(std::string(buf), 30, y, 20, Color{200, 100, 255},
+        Text::RenderText(std::string(buf), 30, y, 20, Color{200, 100, 255},
                        OriginMode::TopLeft);
         y += lineHeight;
 
         // Resolution and FPS
         std::snprintf(buf, sizeof(buf), "Res: %d | FPS: %d", resolution,
                       static_cast<int>(Time::GetFPS()));
-        Text::DrawText(std::string(buf), 30, y, 20, Color{200, 255, 100},
+        Text::RenderText(std::string(buf), 30, y, 20, Color{200, 255, 100},
                        OriginMode::TopLeft);
 
         // Controls at the bottom
         float bottomY = static_cast<float>(GetWindow().GetHeight()) - 50.0f;
-        Text::DrawText("Arrows=Freq  P/O=Dir  +/-=Speed  1-6=Preset  R=Reset",
+        Text::RenderText("Arrows=Freq  P/O=Dir  +/-=Speed  1-6=Preset  R=Reset",
                    20, bottomY, 18, Colors::LightGray, OriginMode::BottomLeft);
 
         // Description of the current preset
         bottomY += 25;
         std::snprintf(buf, sizeof(buf), "Info: %s",
                       PRESETS[currentPreset].description.c_str());
-        Text::DrawText(std::string(buf), 20, bottomY, 16, Color{200, 200, 150},
+        Text::RenderText(std::string(buf), 20, bottomY, 16, Color{200, 200, 150},
                        OriginMode::BottomLeft);
     }
 
@@ -288,7 +288,7 @@ public:
         float h = static_cast<float>(GetWindow().GetHeight());
         centerX     = w * 0.5f;
         centerY     = h * 0.5f;
-        curveRadius = Math::Min(w, h) * 0.375f;
+        curveRadius = Math::MinValue(w, h) * 0.375f;
         rectW       = curveRadius * 2.0f;
         rectH       = curveRadius * 2.0f;
         rectX       = centerX - curveRadius;

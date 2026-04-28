@@ -1,14 +1,6 @@
 #pragma once
 
-#include <random>
-
-namespace RS {
-
-/**
- * @namespace Math
- * @brief Common mathematical constants and utility functions.
- */
-namespace Math {
+namespace RS::Math {
 
 /**
  * @namespace Math::Random
@@ -244,6 +236,4 @@ namespace Random {
 
 } // namespace Random
 
-} // namespace Math
-
-} // namespace RS
+} // namespace RS::Math

@@ -17,7 +17,7 @@ namespace RS {
  * The window backend provides window creation, event handling, and input
  * polling. Each backend also supplies its own Input implementation.
  *
- * @see BackendFactory::CreateWindow, BackendFactory::CreateInput
+ * @see BackendFactory::CreateAppWindow, BackendFactory::CreateInput
  */
 enum class WindowBackend
 {
@@ -76,13 +76,13 @@ public:
      * @param backend The windowing library to use.
      * @return Owning pointer to a concrete Window implementation.
      */
-    static Scope<Window> CreateWindow(WindowBackend backend, const WindowProps& props);
+    static Scope<Window> CreateAppWindow(WindowBackend backend, const WindowProps& props);
 
     /**
      * @brief Create an input handler for the specified backend.
      *
      * Input is tied to the windowing system, so it uses the same
-     * WindowBackend enum as CreateWindow().
+     * WindowBackend enum as CreateAppWindow().
      *
      * @param backend The windowing library to use.
      * @return Owning pointer to a concrete Input implementation.

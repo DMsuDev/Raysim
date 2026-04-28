@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Math.hpp"
+#include "Raysim/Math/MathUtils.hpp"
 
-#include <cstddef>
+#include <cstdint>
 #include <ostream>
 
 namespace RS {

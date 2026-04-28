@@ -1,21 +1,6 @@
-//==============================================================================
-//  Noise Landscape
-//  Procedurally generated scrolling terrain using Math::Random noise functions.
-//
-//  Controls:
-//    [1]     Perlin noise
-//    [2]     Simplex noise
-//    [3]     Cellular noise
-//    [4]     Value noise
-//    [5]     Fractal Brownian Motion
-//    [SPACE] Pause / Resume auto-scroll
-//    [R]     Re-seed (randomise terrain + star field)
-//    [+]     Increase scroll speed
-//    [-]     Decrease scroll speed
-//==============================================================================
-
 #include "Raysim/Raysim.hpp"
 #include "Raysim/Core/EntryPoint.hpp"
+
 #include "SkyLayer.hpp"
 #include "TerrainLayer.hpp"
 
@@ -64,11 +49,11 @@ private:
         std::string reseedLine= "[R] Reseed";
         std::string fpsLine   = "FPS: " + std::to_string(static_cast<int>(Time::GetSmoothedFPS()));
 
-        Text::DrawText(modeLine,   16.0f, 16.0f, 22, Colors::White);
-        Text::DrawText(pauseLine,  16.0f, 44.0f, 18, Colors::LightGray);
-        Text::DrawText(speedLine,  16.0f, 68.0f, 18, Colors::LightGray);
-        Text::DrawText(reseedLine, 16.0f, 92.0f, 18, Colors::LightGray);
-        Text::DrawText(fpsLine, static_cast<float>(GetWindow().GetWidth()) - 16.0f, 16.0f, 20,
+        Text::RenderText(modeLine,   16.0f, 16.0f, 22, Colors::White);
+        Text::RenderText(pauseLine,  16.0f, 44.0f, 18, Colors::LightGray);
+        Text::RenderText(speedLine,  16.0f, 68.0f, 18, Colors::LightGray);
+        Text::RenderText(reseedLine, 16.0f, 92.0f, 18, Colors::LightGray);
+        Text::RenderText(fpsLine, static_cast<float>(GetWindow().GetWidth()) - 16.0f, 16.0f, 20,
                    Colors::LightGray, OriginMode::TopRight);
     }
 
@@ -105,9 +90,9 @@ public:
         if (GetInput().IsKeyPressed(KeyCode::Space)) autoScroll_ = !autoScroll_;
 
         if (GetInput().IsKeyDown(KeyCode::Up))
-            scrollSpeed_ = Math::Min(scrollSpeed_ + 80.0f * dt, 600.0f);
+            scrollSpeed_ = Math::MinValue(scrollSpeed_ + 80.0f * dt, 600.0f);
         if (GetInput().IsKeyDown(KeyCode::Down))
-            scrollSpeed_ = Math::Max(scrollSpeed_ - 80.0f * dt, 5.0f);
+            scrollSpeed_ = Math::MaxValue(scrollSpeed_ - 80.0f * dt, 5.0f);
 
         //--- Reseed - regenerate both sky and terrain -----------------------
         if (GetInput().IsKeyPressed(KeyCode::R)) {

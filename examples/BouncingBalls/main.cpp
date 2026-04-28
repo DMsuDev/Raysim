@@ -1,19 +1,6 @@
-//==============================================================================
-//  Bouncing Balls
-//  Physics-based 2D simulation: spawn, attract and repel balls
-//  with configurable gravity and mouse interaction.
-//
-//  Controls:
-//    [LMB]  Spawn a ball at the cursor
-//    [RMB]  Repel nearby balls
-//    [MMB]  Attract nearby balls
-//    [G]    Toggle gravity
-//    [V]    Toggle velocity vectors
-//    [S]    Toggle stats overlay
-//==============================================================================
-
 #include "Raysim/Raysim.hpp"
 #include "Raysim/Core/EntryPoint.hpp"
+
 #include <cmath>
 #include <vector>
 
@@ -156,7 +143,7 @@ private:
 
     void DrawBackground() {
         Vector2 center{ GetWindow().GetWidth() * 0.5f, GetWindow().GetHeight() * 0.45f };
-        float   maxR = Math::Max(GetWindow().GetWidth(), GetWindow().GetHeight()) * 0.95f;
+        float   maxR = Math::MaxValue(GetWindow().GetWidth(), GetWindow().GetHeight()) * 0.95f;
         Color   base{18, 24, 38};
 
         const int STEPS = 28;
@@ -205,7 +192,7 @@ private:
         Shapes::DrawRect(ox + 2, oy + 2, 160, 36, {0, 0, 0, 90},              OriginMode::TopLeft);
         Shapes::DrawRect(ox,     oy,     160, 36, {col.r, col.g, col.b, 160}, OriginMode::TopLeft);
         Shapes::DrawRectOutline(ox, oy, 160, 36, {255, 255, 255, 30});
-        Text::DrawText(text, ox + 12, oy + 8, 24, {245, 245, 245}, OriginMode::TopLeft);
+        Text::RenderText(text, ox + 12, oy + 8, 24, {245, 245, 245}, OriginMode::TopLeft);
     }
 
     void DrawMouseCursors() {
@@ -230,7 +217,7 @@ private:
         DrawChip(18,         h - 60.0f, "Gravity: "  + std::string(useGravity_        ? "ON" : "OFF"), {200, 120, 80,  180}, t, 3.0f);
         DrawChip(w - 220.0f, h - 60.0f, "Velocity: " + std::string(showVelocityLines_ ? "ON" : "OFF"), {100, 200, 150, 180}, t, 3.0f);
 
-        Text::DrawText("[LMB] Add  [RMB] Repel  [MMB] Attract  [G] Gravity  [V] Velocity  [S] Stats",
+        Text::RenderText("[LMB] Add  [RMB] Repel  [MMB] Attract  [G] Gravity  [V] Velocity  [S] Stats",
                        20, h - 100.0f, 20, {200, 200, 220}, OriginMode::TopLeft);
     }
 

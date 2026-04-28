@@ -75,29 +75,29 @@ public:
         // Mouse position text
         std::string posText = "Mouse: (" + std::to_string(static_cast<int>(mousePos.x)) +
                              ", " + std::to_string(static_cast<int>(mousePos.y)) + ")";
-        Text::DrawText(posText, 50, 50, 24, Colors::White, OriginMode::TopLeft);
+        Text::RenderText(posText, 50, 50, 24, Colors::White, OriginMode::TopLeft);
 
         // Instructions
-        Text::DrawText("Move your mouse! RMB, LMB or MMB to interact",
+        Text::RenderText("Move your mouse! RMB, LMB or MMB to interact",
                        50, h - 50.0f, 21, Colors::LightGray, OriginMode::BottomLeft);
 
         // Draw FPS
         std::string fpsText = "FPS: " + std::to_string(static_cast<int>(Time::GetSmoothedFPS()));
-        Text::DrawText(fpsText, w - 50.0f, 50, 24, Colors::LightGray, OriginMode::TopRight);
+        Text::RenderText(fpsText, w - 50.0f, 50, 24, Colors::LightGray, OriginMode::TopRight);
 
         // Color blocks on mouse buttons
         float btnY = 100.0f;
         if (leftDown_) {
             Shapes::DrawRect(w * 0.2f, btnY, 80, 80, Colors::RayRed, OriginMode::Center);
-            Text::DrawText("LEFT", w * 0.2f, btnY, 20, Colors::RayBlack, OriginMode::Center);
+            Text::RenderText("LEFT", w * 0.2f, btnY, 20, Colors::RayBlack, OriginMode::Center);
         }
         if (rightDown_) {
             Shapes::DrawRect(w * 0.8f, btnY, 80, 80, Colors::RayGreen, OriginMode::Center);
-            Text::DrawText("RIGHT", w * 0.8f, btnY, 20, Colors::RayBlack, OriginMode::Center);
+            Text::RenderText("RIGHT", w * 0.8f, btnY, 20, Colors::RayBlack, OriginMode::Center);
         }
         if (middleDown_) {
             Shapes::DrawRect(w * 0.5f, btnY, 80, 80, Colors::RayBlue, OriginMode::Center);
-            Text::DrawText("MIDDLE", w * 0.5f, btnY, 20, Colors::RayBlack, OriginMode::Center);
+            Text::RenderText("MIDDLE", w * 0.5f, btnY, 20, Colors::RayBlack, OriginMode::Center);
         }
     }
 };

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Math.hpp"
+#include "Raysim/Math/MathUtils.hpp"
 
-#include <cstddef>
 #include <ostream>
+#include <cstdint>
 
 namespace RS {
 
