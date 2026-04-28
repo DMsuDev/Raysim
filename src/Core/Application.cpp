@@ -10,7 +10,7 @@ Application::Application(const ApplicationConfig& config)
     RS_PROFILE_FUNCTION();
 
     // --- Create backends ----------------------------------------------
-    m_Window   = BackendFactory::CreateWindow(m_Configuration.Backend, m_Configuration.Window);
+    m_Window   = BackendFactory::CreateAppWindow(m_Configuration.Backend, m_Configuration.Window);
     m_Input    = BackendFactory::CreateInput(m_Configuration.Backend);
 
     RS_CORE_ASSERT(m_Window,   "Failed to create window backend");

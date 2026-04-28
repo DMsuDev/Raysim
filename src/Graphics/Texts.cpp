@@ -63,14 +63,14 @@ namespace {
 // Basic text (no origin mode)
 //==============================================================================
 
-void Text::DrawText(const std::string& text, float x, float y, int fontSize, const Color& color) {
+void Text::RenderText(const std::string& text, float x, float y, int fontSize, const Color& color) {
     RS_ASSERT(!text.empty(), "Text cannot be empty");
     RS_ASSERT(fontSize > 0, "Font size must be positive: {}", fontSize);
 
     DrawTextInternal(text, x, y, static_cast<float>(fontSize), 0.0f, color);
 }
 
-void Text::DrawTextEx(const std::string& text, float x, float y, float fontSize, float spacing, const Color& color) {
+void Text::RenderTextEx(const std::string& text, float x, float y, float fontSize, float spacing, const Color& color) {
     RS_ASSERT(!text.empty(), "Text cannot be empty");
     RS_ASSERT(fontSize > 0, "Font size must be positive: {}", fontSize);
     RS_ASSERT(spacing >= 0, "Spacing must be non-negative: {}", spacing);
@@ -82,7 +82,7 @@ void Text::DrawTextEx(const std::string& text, float x, float y, float fontSize,
 // Text with origin mode
 //==============================================================================
 
-void Text::DrawText(const std::string& text, float x, float y, int fontSize, const Color& color, OriginMode origin) {
+void Text::RenderText(const std::string& text, float x, float y, int fontSize, const Color& color, OriginMode origin) {
     RS_ASSERT(!text.empty(), "Text cannot be empty");
     RS_ASSERT(fontSize > 0, "Font size must be positive: {}", fontSize);
 
@@ -94,7 +94,7 @@ void Text::DrawText(const std::string& text, float x, float y, int fontSize, con
     DrawTextInternal(text, adjustedX, adjustedY, static_cast<float>(fontSize), 0.0f, color);
 }
 
-void Text::DrawTextEx(const std::string& text, float x, float y, float fontSize, float spacing, const Color& color, OriginMode origin) {
+void Text::RenderTextEx(const std::string& text, float x, float y, float fontSize, float spacing, const Color& color, OriginMode origin) {
     RS_ASSERT(!text.empty(), "Text cannot be empty");
     RS_ASSERT(fontSize > 0, "Font size must be positive: {}", fontSize);
     RS_ASSERT(spacing >= 0, "Spacing must be non-negative: {}", spacing);
@@ -111,7 +111,7 @@ void Text::DrawTextEx(const std::string& text, float x, float y, float fontSize,
 // Text in rectangle
 //==============================================================================
 
-void Text::DrawTextInRect(const std::string& text, float x, float y, float w, float h, float fontSize, const Color& color, OriginMode origin, float spacing) {
+void Text::RenderTextInRectangle(const std::string& text, float x, float y, float w, float h, float fontSize, const Color& color, OriginMode origin, float spacing) {
     RS_ASSERT(!text.empty(), "Text cannot be empty");
     RS_ASSERT(fontSize > 0, "Font size must be positive: {}", fontSize);
     RS_ASSERT(spacing >= 0, "Spacing must be non-negative: {}", spacing);

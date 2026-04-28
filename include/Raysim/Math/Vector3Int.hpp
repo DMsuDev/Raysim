@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Math.hpp"
+#include "Raysim/Math/MathUtils.hpp"
 
-#include <cstddef>
+#include <cstdint>
 #include <ostream>
 
 namespace RS {
@@ -86,7 +86,7 @@ struct Vector3Int {
      * @param rhs Right-hand vector
      * @return Dot product
      */
-    constexpr uint64_t Dot(const Vector3Int& rhs) const noexcept { return static_cast<uint64_t>(x*rhs.x + y*rhs.y + z*rhs.z); }
+    constexpr int64_t Dot(const Vector3Int& rhs) const noexcept { return static_cast<uint64_t>(x*rhs.x + y*rhs.y + z*rhs.z); }
 
     /**
      * @brief 3D cross product (vector result perpendicular to both)

@@ -25,7 +25,7 @@ Scope<RendererAPI> BackendFactory::CreateRenderer(RenderAPI api)
     }
 }
 
-Scope<Window> BackendFactory::CreateWindow(WindowBackend backend, const WindowProps& props)
+Scope<Window> BackendFactory::CreateAppWindow(WindowBackend backend, const WindowProps& props)
 {
     switch (backend)
     {

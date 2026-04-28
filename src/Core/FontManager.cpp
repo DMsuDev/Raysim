@@ -73,7 +73,7 @@ void RS::FontManager::LoadFont(const std::string& fontPath, int fontSize)
         ::SetTextureFilter(font->texture, TEXTURE_FILTER_BILINEAR);
     }
 
-    // Only set fontHandle for custom fonts, use DrawText fallback for default font
+    // Only set fontHandle for custom fonts, use RenderText fallback for default font
     if (!usingDefault) {
         fontHandle_  = FontHandle(static_cast<void*>(font));
         RS_CORE_INFO("Font loaded successfully");

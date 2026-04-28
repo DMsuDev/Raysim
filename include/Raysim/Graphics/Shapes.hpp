@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Color.hpp"
 #include "Raysim/Math/Vector2.hpp"
 #include "OriginMode.hpp"
