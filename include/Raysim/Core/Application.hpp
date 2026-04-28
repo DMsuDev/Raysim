@@ -1,24 +1,33 @@
 #pragma once
 
-#include <optional>
-#include <memory>
-#include <string>
+// Exclude conflicting Win32 definitions that clash with raylib
+// (wingdi.h defines Rectangle as a function, winuser.h defines CloseWindow/ShowCursor)
+#if defined(_WIN32)
+    #define WIN32_LEAN_AND_MEAN
+    #ifndef NOMINMAX
+        #define NOMINMAX
+    #endif
+    #ifndef NOGDI
+        #define NOGDI
+    #endif
+    #ifndef NOUSER
+        #define NOUSER
+    #endif
+    #undef DrawTextEx
+    #undef DrawText
+    #undef CreateWindow
+#endif
 
 #include "Raysim/Graphics/Color.hpp"
 #include "Raysim/Input/KeyCodes.hpp"
+
 #include "Raysim/Math/Vector2.hpp"
 #include "Raysim/Math/Vector3.hpp"
-
-#include "Raysim/Renderer/RendererAPI.hpp"
-#include "Raysim/Renderer/RenderCommand.hpp"
-#include "Raysim/Core/Window.hpp"
-#include "Raysim/Input/Input.hpp"
-
-#include "Raysim/Scene/SceneManager.hpp"
-
 #include "Raysim/Math/Random.hpp"
 
-#include "Raysim/Core/BackendFactory.hpp"
+#include "Raysim/Renderer/RenderCommand.hpp"
+#include "Raysim/Scene/SceneManager.hpp"
+
 #include "Raysim/Core/EngineContext.hpp"
 #include "Raysim/Core/ApplicationConfig.hpp"
 #include "Raysim/Core/FontManager.hpp"
@@ -164,10 +173,7 @@ private:
 
     ApplicationConfig   m_Configuration;  // Application configuration
     Scope<Window>       m_Window;         // The main window
-    Shared<RendererAPI> m_Renderer;       // Renderer backend
     Scope<Input>        m_Input;          // Input backend
-
-    Scope<RenderCommand> m_RenderCommand;
 
     std::optional<SceneManager> m_SceneManager;
     EngineContext m_EngineContext;

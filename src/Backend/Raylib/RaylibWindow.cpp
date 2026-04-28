@@ -23,9 +23,8 @@ RaylibWindow::RaylibWindow(const WindowProps& props)
     m_Data.Title  = props.Title;
     m_Data.Width  = props.Width;
     m_Data.Height = props.Height;
-    m_Data.PrevWidth  = m_Data.Width;
-    m_Data.PrevHeight = m_Data.Height;
 
+    ::SetConfigFlags(FLAG_WINDOW_ALWAYS_RUN);
     ::SetTraceLogLevel(LOG_ERROR);
     ::InitWindow(m_Data.Width, m_Data.Height, m_Data.Title.c_str());
     RS_CORE_DEBUG("RaylibWindow ready: title='{}', {}x{}", m_Data.Title, m_Data.Width, m_Data.Height);
@@ -80,22 +79,14 @@ void RaylibWindow::ImplSwapBuffers()
 
 void RaylibWindow::ImplSetSize(int width, int height)
 {
-    RS_CORE_INFO("Setting window size to {}x{}", width, height);
-    RS_ASSERT(width > 0 && height > 0, "Window width and height must be greater than 0");
-
     m_Data.Width = width;
     m_Data.Height = height;
 
-    if (!m_Data.Fullscreen) {
-        m_Data.PrevWidth  = width;
-        m_Data.PrevHeight = height;
-    }
+    if (!::IsWindowReady())
+        return;
 
-    if (::IsWindowReady())
-    {
-        ::SetWindowSize(m_Data.Width, m_Data.Height);
-        RS_CORE_DEBUG("Window size updated to {}x{}", m_Data.Width, m_Data.Height);
-    }
+    ::SetWindowSize(m_Data.Width, m_Data.Height);
+    RS_CORE_DEBUG("Window size updated to {}x{}", m_Data.Width, m_Data.Height);
 }
 
 Vector2Int RaylibWindow::ImplGetSize() const
@@ -109,9 +100,6 @@ Vector2Int RaylibWindow::ImplGetSize() const
 
 void RaylibWindow::ImplSetTitle(const std::string& title)
 {
-    RS_CORE_INFO("Setting window title to '{}'", title);
-    RS_ASSERT(!title.empty(), "Window title cannot be empty");
-
     m_Data.Title = title;
 
     if (::IsWindowReady())
@@ -127,38 +115,19 @@ void RaylibWindow::ImplSetTitle(const std::string& title)
 
 void RaylibWindow::ImplSetFullscreen(bool fullscreen)
 {
-    if (!::IsWindowReady()) return;
-
-    if (fullscreen == m_Data.Fullscreen) return;
+    if (fullscreen == m_Data.Fullscreen)
+        return;
 
     m_Data.Fullscreen = fullscreen;
-    m_Data.BorderlessFullscreen = false;
 
-    if (fullscreen)
-    {
-        // Save current windowed position & size
-        m_Data.PrevWidth  = m_Data.Width;
-        m_Data.PrevHeight = m_Data.Height;
+    ::ToggleFullscreen();
 
-        SetSize(::GetMonitorWidth(0), ::GetMonitorHeight(0));
-
-        ::ToggleFullscreen();
-    }
-    else
-    {
-        SetSize(m_Data.PrevWidth, m_Data.PrevHeight);
-
-        // Raylib does not support programmatically exiting fullscreen mode,
-        // so we simply toggle it again to return to windowed mode.
-        ::ToggleFullscreen();
-    }
-
-    RS_CORE_INFO("Changed window mode to {} ({}x{})", m_Data.Fullscreen ? "fullscreen" : "windowed", m_Data.Width, m_Data.Height);
+    RS_CORE_INFO("Changed window mode to {}", fullscreen ? "fullscreen" : "windowed");
 }
 
 bool RaylibWindow::ImplIsMinimized() const
 {
-    return ::IsWindowState(FLAG_WINDOW_MINIMIZED);
+    return ::IsWindowMinimized();
 }
 
 // ============================================================================

@@ -53,7 +53,7 @@ void LogOnceRegistry::LogOnce(const std::string& key, LogLevel level, const std:
     }
 }
 
-void LogTTLRegistry::Log(const std::string& key, double ttlSeconds, LogLevel level, const std::string& msg) {
+void LogTTLRegistry::LogTTL(const std::string& key, double ttlSeconds, LogLevel level, const std::string& msg) {
     if (ShouldLog(key, ttlSeconds)) {
         LogWithLevel(level, msg);
     }

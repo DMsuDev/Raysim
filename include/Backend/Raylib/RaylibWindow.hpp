@@ -70,13 +70,6 @@ private:
         int Height = 0;
         bool VSync = true;
         bool Fullscreen = false;
-        bool BorderlessFullscreen = false;
-
-        // Saved windowed-mode dimensions for fullscreen toggle
-        int PrevWidth  = 0;
-        int PrevHeight = 0;
-        int PrevPosX   = 0;
-        int PrevPosY   = 0;
     };
 
     WindowData m_Data;

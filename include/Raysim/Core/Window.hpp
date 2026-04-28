@@ -38,37 +38,78 @@ public:
 // Non-virtual interface (NVI)
 // ===========================================================
 
-    void PollEvents() { ImplPollEvents(); }
-    void SwapBuffers() { ImplSwapBuffers(); }
+    void PollEvents()
+    {
+        RS_PROFILE_FUNCTION();
+        ImplPollEvents();
+    }
+    void SwapBuffers()
+    {
+        RS_PROFILE_FUNCTION();
+        ImplSwapBuffers();
+    }
 
     [[nodiscard]] bool ShouldClose() const noexcept { return ImplShouldClose(); }
 
-    void SetSize(int width, int height) { ImplSetSize(width, height); }
-    void SetSize(const Vector2Int& size) { ImplSetSize(size.x, size.y); }
+    void SetSize(int width, int height)
+    {
+        RS_CORE_ASSERT(width > 0 && height > 0, "Window size must be positive.");
+        RS_PROFILE_FUNCTION();
+
+        RS_CORE_DEBUG("Setting window size to {}x{}", width, height);
+
+        ImplSetSize(width, height);
+    }
+    void SetSize(const Vector2Int& size) { SetSize(size.x, size.y); }
 
     Vector2Int GetSize() const { return ImplGetSize(); }
-    int GetWidth() const { return ImplGetSize().x; }
-    int GetHeight() const { return ImplGetSize().y; }
+    int GetWidth()       const { return ImplGetSize().x; }
+    int GetHeight()      const { return ImplGetSize().y; }
 
-    void GetFramebufferSize(int& width, int& height) const { ImplGetFramebufferSize(width, height); }
+    void GetFramebufferSize(int& width, int& height) const
+    {
+        ImplGetFramebufferSize(width, height);
+    }
 
-    void SetFullscreen(bool fullscreen) { ImplSetFullscreen(fullscreen); }
-    [[nodiscard]] bool IsFullscreen() const noexcept { return ImplIsFullscreen(); }
+    void SetFullscreen(bool fullscreen)
+    {
+        RS_PROFILE_FUNCTION();
+        ImplSetFullscreen(fullscreen);
+    }
+    [[nodiscard]] bool IsFullscreen() const noexcept
+    {
+        return ImplIsFullscreen();
+    }
 
-    void SetVSync(bool enabled) { ImplSetVSync(enabled); }
-    [[nodiscard]] bool IsVSync() const noexcept { return ImplIsVSync(); }
+    void SetVSync(bool enabled)
+    {
+        ImplSetVSync(enabled);
+    }
+    [[nodiscard]] bool IsVSync() const noexcept
+    {
+        return ImplIsVSync();
+    }
 
-    [[nodiscard]] bool IsMinimized() const noexcept { return ImplIsMinimized(); }
+    [[nodiscard]] bool IsMinimized() const noexcept
+    {
+        return ImplIsMinimized();
+    }
 
     void SetTitle(const std::string& title)
     {
+        RS_CORE_ASSERT(!title.empty(), "Window title cannot be empty.");
+        RS_CORE_DEBUG("Setting window title to '{}'", title);
+
         m_Title = title;
         ImplSetTitle(title);
     }
 
     [[nodiscard]] const std::string& GetTitle() const noexcept { return m_Title; }
 
-    void* GetNativeWindow() const noexcept { return ImplGetNativeWindow(); }
+    void* GetNativeWindow() const noexcept
+    {
+        return ImplGetNativeWindow();
+    }
 
     template<typename T>
     T* GetNativeWindow() const noexcept
