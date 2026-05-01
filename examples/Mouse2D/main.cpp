@@ -115,6 +115,6 @@ RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
 
     auto* app = new RS::Application(config);
     app->RegisterScene<MouseDetection>();
-    app->SetInitialScene<MouseDetection>();
+    app->ChangeScene<MouseDetection>();
     return app;
 }

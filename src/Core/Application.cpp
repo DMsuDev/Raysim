@@ -1,6 +1,18 @@
 #include "pch.hpp"
-
 #include "Raysim/Core/Application.hpp"
+
+// --- Properties and enums ---
+#include "Raysim/Graphics/Color.hpp"
+#include "Raysim/Input/KeyCodes.hpp"
+
+// --- Core system headers ---
+#include "Raysim/Renderer/RenderCommand.hpp"
+#include "Raysim/Input/Input.hpp"
+#include "Raysim/Core/Window.hpp"
+#include "Raysim/Core/FontManager.hpp"
+#include "Raysim/Core/Time.hpp"
+
+#include "Raysim/Core/BackendFactory.hpp"
 
 namespace RS {
 
@@ -26,9 +38,8 @@ Application::Application(const ApplicationConfig& config)
     RebuildContext();
 
     // -- SceneManager ------------------------------------------------------
-    m_SceneManager.emplace(m_EngineContext);
-
-    RS_CORE_ASSERT(m_SceneManager, "Failed to create SceneManager");
+    m_SceneManager = CreateScope<SceneManager>(m_EngineContext);
+    m_EngineContext.Scenes = m_SceneManager.get();
 
     RS_CORE_INFO("Application '{}' ready.", m_Configuration.Window.Title);
 }
@@ -38,6 +49,10 @@ Application::~Application() noexcept
     RS_PROFILE_FUNCTION();
 
     RS_CORE_INFO("Destroying application '{}'", m_Configuration.Window.Title);
+
+    // Ensure GPU resources are released even if Close() was never called
+    RenderCommand::Shutdown();
+    Log::Flush();
 }
 
 // ============================================================================

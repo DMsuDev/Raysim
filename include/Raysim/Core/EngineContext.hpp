@@ -1,27 +1,30 @@
 #pragma once
 
-// --- Core system headers ---
-#include "Raysim/Core/ApplicationConfig.hpp"
-
-// --- Subsystem headers ---
-#include "Raysim/Core/Window.hpp"
-#include "Raysim/Renderer/RenderCommand.hpp"
-#include "Raysim/Input/Input.hpp"
-
 namespace RS
 {
+    // Forward declarations of core engine subsystems to avoid circular dependencies
+
+    // --- Core system headers ---
+    struct ApplicationConfig;
+
+    // --- Subsystem headers ---
+    class Window;
+    class SceneManager;
+    class RenderCommand;
+    class Input;
+
     /**
      * @struct EngineContext
      * @brief A simple struct to hold pointers to core engine subsystems.
      *
-     * This is passed to each Scene so they can access the Window, Renderer, and
-     * Input systems without needing global singletons. It is owned and managed by
-     * the Application, which populates it after creating the backends.
+     * This context is passed to scenes and other systems that need access to core functionality
+     * without directly depending on the Application class. It provides a clean interface to
+     * access the window, input system, renderer, and scene manager from anywhere in the codebase.
      */
     struct EngineContext
     {
         ApplicationConfig *Config = nullptr; // Configuration settings
-        RenderCommand *Renderer = nullptr;   // Command dispatcher for rendering
+        SceneManager *Scenes = nullptr;      // Scene management and transitions
         Window *MainWindow = nullptr;        // Main window
         Input *InputSystem = nullptr;        // Input polling
     };
