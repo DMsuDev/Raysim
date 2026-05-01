@@ -366,6 +366,6 @@ RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
 
     auto* app = new RS::Application(config);
     app->RegisterScene<LissajousSimulation>();
-    app->SetInitialScene<LissajousSimulation>();
+    app->ChangeScene<LissajousSimulation>();
     return app;
 }

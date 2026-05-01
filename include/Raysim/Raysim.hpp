@@ -29,6 +29,7 @@
 // Function specifiers in case library is build/used as a shared library
 // NOTE: Microsoft specifiers to tell compiler that symbols are imported/exported from a .dll
 // NOTE: visibility("default") attribute makes symbols "visible" when compiled with -fvisibility=hidden
+// TODO: Implement __declspec(dllexport/dllimport) for Windows and visibility attributes for Unix-like systems
 #if defined(_WIN32) || defined(__CYGWIN__)
     #if defined(RS_BUILD_SHARED)
         #if defined(RS_BUILD_DLL)
@@ -56,12 +57,25 @@
 #endif
 
 #include "Raysim/Core/Base.hpp"
+
+// --- Properties and enums ---
+#include "Raysim/Graphics/Color.hpp"
+#include "Raysim/Input/KeyCodes.hpp"
+
+// --- Core system headers ---
+#include "Raysim/Renderer/RenderCommand.hpp"
+#include "Raysim/Scene/Scene.hpp"
+#include "Raysim/Scene/SceneManager.hpp"
+#include "Raysim/Input/Input.hpp"
+#include "Raysim/Core/Window.hpp"
+#include "Raysim/Core/FontManager.hpp"
+#include "Raysim/Core/Time.hpp"
+
 #include "Raysim/Core/Application.hpp"
 
+// --- Graphics ---
 #include "Raysim/Graphics/Shapes.hpp"
 #include "Raysim/Graphics/Texts.hpp"
-#include "Raysim/Graphics/Color.hpp"
 
+// --- Math ---
 #include "Raysim/Math/Math.hpp"
-
-#include "Raysim/Input/KeyCodes.hpp"

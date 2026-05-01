@@ -133,6 +133,6 @@ RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
 
     auto* app = new RS::Application(config);
     app->RegisterScene<NoiseLandscape>();
-    app->SetInitialScene<NoiseLandscape>();
+    app->ChangeScene<NoiseLandscape>();
     return app;
 }

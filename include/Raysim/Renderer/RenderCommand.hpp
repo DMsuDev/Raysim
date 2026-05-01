@@ -4,7 +4,6 @@
 
 namespace RS
 {
-
     /**
      * @class RenderCommand
      * @brief Thin command dispatcher that forwards rendering calls to the active RendererAPI.
@@ -51,4 +50,4 @@ namespace RS
         static Scope<RendererAPI> m_API;
     };
 
-}
+} // namespace RS

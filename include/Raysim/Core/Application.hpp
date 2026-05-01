@@ -18,23 +18,20 @@
     #undef CreateWindow
 #endif
 
-#include "Raysim/Graphics/Color.hpp"
-#include "Raysim/Input/KeyCodes.hpp"
+// --- Properties and enums ---
+#include "Raysim/Core/ApplicationConfig.hpp"
+#include "Raysim/Core/EngineContext.hpp"
 
-#include "Raysim/Math/Vector2.hpp"
-#include "Raysim/Math/Vector3.hpp"
-#include "Raysim/Math/Random.hpp"
-
-#include "Raysim/Renderer/RenderCommand.hpp"
 #include "Raysim/Scene/SceneManager.hpp"
 
-#include "Raysim/Core/BackendFactory.hpp"
-#include "Raysim/Core/EngineContext.hpp"
-#include "Raysim/Core/ApplicationConfig.hpp"
-#include "Raysim/Core/FontManager.hpp"
-#include "Raysim/Core/Time.hpp"
-
 namespace RS {
+
+// ============================================================================
+// Forward declarations
+// ============================================================================
+
+class Window;
+class Input;
 
 // ============================================================================
 // Command-line arguments wrapper
@@ -106,8 +103,6 @@ public:
     Application(Application&&)                 = default;
     Application& operator=(Application&&)      = default;
 
-public:
-
 // ============================================================================
 // Scene management
 // ============================================================================
@@ -131,17 +126,6 @@ public:
             m_SceneManager->ChangeScene<T>(std::forward<Args>(args)...);
         } else {
             RS_CORE_ERROR("Cannot change scene: SceneManager is not initialized");
-        }
-    }
-
-    /// Set the initial scene to start with. This is a convenience method that simply changes to the specified scene at startup.
-    template<typename T>
-    void SetInitialScene()
-    {
-        if (m_SceneManager) {
-            m_SceneManager->ChangeScene<T>();
-        } else {
-            RS_CORE_ERROR("Cannot set initial scene: SceneManager is not initialized");
         }
     }
 
@@ -176,7 +160,7 @@ private:
     Scope<Window>       m_Window;         // The main window
     Scope<Input>        m_Input;          // Input backend
 
-    std::optional<SceneManager> m_SceneManager;
+    Scope<SceneManager> m_SceneManager;
     EngineContext m_EngineContext;
 
     // Rebuild m_EngineContext from current backend pointers.

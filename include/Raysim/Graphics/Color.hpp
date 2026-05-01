@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Raysim/Math/Vector3.hpp"
 #include <string>
+#include "Raysim/Math/Vector3.hpp"
 
 namespace RS {
 

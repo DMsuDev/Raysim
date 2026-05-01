@@ -339,6 +339,6 @@ RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
 
     auto* app = new RS::Application(config);
     app->RegisterScene<BouncingBalls>();
-    app->SetInitialScene<BouncingBalls>();
+    app->ChangeScene<BouncingBalls>();
     return app;
 }
