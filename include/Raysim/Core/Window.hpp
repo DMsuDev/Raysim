@@ -1,26 +1,11 @@
 #pragma once
 
-#include <string>
-#include <functional>
-
 #include "Raysim/Core/Base.hpp"
+#include "Raysim/Core/WindowProperties.hpp"
+
 #include "Raysim/Math/Vector2Int.hpp"
 
 namespace RS {
-
-/**
- * @struct WindowProps
- * @brief Configuration properties for creating a window.
- */
-struct WindowProps {
-    std::string Title  = "Raysim App";   ///< The title of the window.
-    int         Width  = 1600;          ///< The width of the window in pixels.
-    int         Height = 900;           ///< The height of the window in pixels.
-
-    WindowProps() = default;
-    WindowProps(const std::string& title, int width, int height)
-        : Title(title), Width(width), Height(height) {}
-};
 
 /**
  * @interface Window
