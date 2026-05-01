@@ -10,11 +10,11 @@ Application::Application(const ApplicationConfig& config)
     RS_PROFILE_FUNCTION();
 
     // --- Create backends ----------------------------------------------
-    m_Window   = BackendFactory::CreateAppWindow(m_Configuration.Backend, m_Configuration.Window);
-    m_Input    = BackendFactory::CreateInput(m_Configuration.Backend);
+    m_Window = BackendFactory::CreateAppWindow(m_Configuration.Backend, m_Configuration.Window);
+    m_Input = BackendFactory::CreateInput(m_Configuration.Backend);
 
-    RS_CORE_ASSERT(m_Window,   "Failed to create window backend");
-    RS_CORE_ASSERT(m_Input,    "Failed to create input backend");
+    RS_CORE_ASSERT(m_Window, "Failed to create window backend");
+    RS_CORE_ASSERT(m_Input, "Failed to create input backend");
 
     // -- Initialise RenderCommand backend ------------------------------------
     auto api = BackendFactory::CreateRenderer(m_Configuration.Renderer);
@@ -102,15 +102,15 @@ void Application::Run()
 
             // Fixed timestep updates
             uint32_t stepsTaken = 0;
-            while (Time::ShouldFixedStep() && stepsTaken < m_Configuration.MaxFixedSteps)
+            while (Time::ShouldFixedStep() && stepsTaken < m_MaxFixedSteps)
             {
                 sm.FixedUpdate(Time::GetFixedDeltaTime());
                 ++stepsTaken;
             }
 
-            if (stepsTaken == m_Configuration.MaxFixedSteps)
+            if (stepsTaken == m_MaxFixedSteps)
             {
-                RS_CORE_WARN("Frame drop detected! Fixed steps clamped to {}", m_Configuration.MaxFixedSteps);
+                RS_CORE_WARN("Frame drop detected! Fixed steps clamped to {}", m_MaxFixedSteps);
             }
 
             sm.Update(Time::GetDeltaTime());

@@ -1,53 +1,15 @@
 #pragma once
 
-#include "Raysim/Renderer/RendererAPI.hpp"
+// --- Enums ---
+#include "Raysim/Core/BackendType.hpp"
+#include "Raysim/Core/WindowProperties.hpp"
+
+// --- Core System Headers ---
 #include "Raysim/Core/Window.hpp"
 #include "Raysim/Input/Input.hpp"
+#include "Raysim/Renderer/RendererAPI.hpp"
 
 namespace RS {
-
-// ============================================================================
-// BACKEND ENUMS
-// ============================================================================
-
-/**
- * @enum WindowBackend
- * @brief Identifies the windowing and input library to use.
- *
- * The window backend provides window creation, event handling, and input
- * polling. Each backend also supplies its own Input implementation.
- *
- * @see BackendFactory::CreateAppWindow, BackendFactory::CreateInput
- */
-enum class WindowBackend
-{
-    GLFW,       ///< GLFW windowing library (planned)
-    SDL,        ///< SDL windowing library  (planned)
-    Raylib      ///< Raylib: window + input integrated
-};
-
-/**
- * @enum RenderAPI
- * @brief Identifies the graphics rendering API to use.
- *
- * The render API is orthogonal to the window backend.
- * Some combinations are invalid (e.g. GLFW + Raylib renderer).
- * Use Raylib as both WindowBackend and RenderAPI when working with Raylib.
- *
- * @see BackendFactory::CreateRenderer
- */
-enum class RenderAPI
-{
-    OpenGL,     ///< OpenGL   (placeholder: requires GLFW or SDL window)
-    Vulkan,     ///< Vulkan   (placeholder: requires GLFW or SDL window)
-    DirectX12,  ///< DirectX 12 (placeholder: Windows only)
-    Raylib,     ///< Raylib   (uses Raylib's integrated renderer)
-    Null        ///< No-op renderer: no GPU operations performed
-};
-
-// ============================================================================
-// BACKEND FACTORY
-// ============================================================================
 
 /**
  * @class BackendFactory

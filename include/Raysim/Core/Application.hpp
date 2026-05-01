@@ -28,6 +28,7 @@
 #include "Raysim/Renderer/RenderCommand.hpp"
 #include "Raysim/Scene/SceneManager.hpp"
 
+#include "Raysim/Core/BackendFactory.hpp"
 #include "Raysim/Core/EngineContext.hpp"
 #include "Raysim/Core/ApplicationConfig.hpp"
 #include "Raysim/Core/FontManager.hpp"
@@ -178,11 +179,14 @@ private:
     std::optional<SceneManager> m_SceneManager;
     EngineContext m_EngineContext;
 
-    /// Rebuild m_EngineContext from current backend pointers.
+    // Rebuild m_EngineContext from current backend pointers.
     void RebuildContext();
 
-    bool m_Running   = true;                     // Application running state
-    bool m_Minimized = false;                    // Is window minimized?
+    bool m_Running   = true;  // Application running state
+    bool m_Minimized = false; // Is window minimized?
+
+    // Max fixed update steps per frame (prevents spiral of death)
+    uint32_t m_MaxFixedSteps = 8;
 };
 
 #pragma endregion
