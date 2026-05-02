@@ -10,6 +10,23 @@ namespace RS {
 
 void SceneManager::HandleTransition()
 {
+    // If no scene was ever requested via ChangeScene, auto-start the first registered one.
+    if (!m_Current && !m_NextScene)
+    {
+        if (!m_HasRequestedScene && m_HasFirstRegistered)
+        {
+            RS_CORE_WARN(
+                "No initial scene was set via ChangeScene(). "
+                "Auto-starting the first registered scene: '{}'.",
+                m_Registry[m_FirstRegisteredID].Name);
+            ChangeScene(m_FirstRegisteredID);
+        }
+        else
+        {
+            return;
+        }
+    }
+
     if (!m_NextScene)
         return;
 
@@ -33,7 +50,12 @@ void SceneManager::ChangeScene(SceneID id)
 {
     auto it = m_Registry.find(id);
     if (it == m_Registry.end())
+    {
+        RS_CORE_ERROR("ChangeScene: no scene with ID {} is registered. Call RegisterScene<T>() first.", id);
         return;
+    }
+
+    m_HasRequestedScene = true;
 
     const auto& desc = it->second;
 
@@ -47,8 +69,12 @@ void SceneManager::ChangeScene(const std::string& name)
 {
     auto it = m_NameToID.find(name);
     if (it == m_NameToID.end())
+    {
+        RS_CORE_ERROR("ChangeScene: no scene named '{}' is registered. Call RegisterScene<T>() first.", name);
         return;
+    }
 
+    m_HasRequestedScene = true;
     ChangeScene(it->second);
 }
 
