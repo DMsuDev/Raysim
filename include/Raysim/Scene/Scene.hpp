@@ -180,6 +180,9 @@ protected:
     inline Input& GetInput() noexcept { return *m_Context->InputSystem; }
     /// @brief Get the window subsystem from the engine context.
     inline Window& GetWindow() noexcept { return *m_Context->MainWindow; }
+    /// @brief Get the SceneManager to trigger scene transitions from within a scene.
+    /// @note Use this to call ChangeScene<T>(), ChangeScene(id), or ChangeScene(name).
+    inline SceneManager& GetSceneManager() noexcept { return *m_Context->Scenes; }
     /// @brief Returns a proxy reference to the static RenderCommand dispatcher.
     /// @note RenderCommand is a purely static API, it holds no instance state.
     ///       This accessor exists only for API consistency and backward compatibility,
