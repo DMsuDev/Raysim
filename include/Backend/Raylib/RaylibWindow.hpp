@@ -19,7 +19,12 @@ public:
     RaylibWindow(const WindowProps& props);
     ~RaylibWindow() override;
 
-    // Raylib handles event polling and buffer swapping internally, so these are no-ops.
+// ===========================================================
+// Window Methods
+// ===========================================================
+
+protected:
+
     void ImplPollEvents() override;
     void ImplSwapBuffers() override;
 
@@ -28,7 +33,6 @@ public:
     // -- Size ----------------------------------------------------------------
 
     void ImplSetSize(int width, int height) override;
-
     Vector2Int ImplGetSize() const override;
 
     // -- Title ---------------------------------------------------------------
@@ -58,10 +62,12 @@ public:
     /// Raylib does not expose a native window handle, so this returns nullptr.
     void* ImplGetNativeWindow() const override { return nullptr; }
 
-private:
-    void Shutdown();
+// ===========================================================
+// Internal
+// ===========================================================
 
 private:
+    void Shutdown();
 
     struct WindowData
     {
