@@ -79,7 +79,7 @@ public:
      * Example usage in Draw():
      * @code
      * float alpha  = Time::GetInterpolationAlpha();
-     * Vector2 renderPos = Lerp(prevState.position, currentState.position, alpha);
+     * Vec2 renderPos = Lerp(prevState.position, currentState.position, alpha);
      * DrawObject(renderPos);
      * @endcode
      *
@@ -107,8 +107,11 @@ public:
     /// Time elapsed since last frame (ignores timeScale).
     static float GetUnscaledDeltaTime();
 
-    /// Smoothed delta time using exponential moving average (EMA).
+    /// Smoothed delta time using exponential moving average (EMA), affected by timeScale.
     static float GetSmoothDeltaTime();
+
+    /// Smoothed delta time using EMA, unaffected by timeScale.
+    static float GetUnscaledSmoothDeltaTime();
 
     /// Raw measured frame duration (before clamping/scaling).
     static float GetFrameTime();
