@@ -53,7 +53,7 @@ public:
     /// @brief Immediately queue a scene transition by type (compile-time overload).
     /// @tparam T     Scene type. Must use the RS_SCENE(T) macro.
     /// @tparam Args  Optional extra constructor arguments forwarded to T.
-    /// @note This overload constructs the scene directly — it does NOT require
+    /// @note This overload constructs the scene directly - it does NOT require
     ///       the scene to have been previously registered via RegisterScene<T>().
     ///       If you need to switch scenes by ID or name at runtime, register first
     ///       and use the ChangeScene(SceneID) / ChangeScene(string) overloads instead.

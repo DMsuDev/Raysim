@@ -185,8 +185,8 @@ Math::Vec2 STBTrueTypeProvider::MeasureText(
     float width = 0.0f;
     bool  first = true;
 
-    for (const unsigned char ch : text) {
-        const Glyph* glyph = font.GetGlyph(static_cast<uint32_t>(ch));
+    for (const char raw_ch : text) {
+        const Glyph* glyph = font.GetGlyph(static_cast<uint32_t>(static_cast<unsigned char>(raw_ch)));
         if (!glyph)
             continue;
 
