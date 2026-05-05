@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "Raysim/Math/Vector3.hpp"
+#include "Raysim/Math/Types/Vec3.hpp"
 
 namespace RS {
 
@@ -87,13 +87,12 @@ struct Color {
     [[nodiscard]] static Color FromHSV(float h, float s, float v, unsigned char alpha = 255);
 
     /**
-     * @brief Create a Color from HSV values using a Vector3 (hue, saturation, value)
-     * @param hsv Vector3 where x = hue (0-360), y = saturation
-     * z = value (0-1)
+     * @brief Create a Color from HSV values using a Vec3 (hue, saturation, value)
+     * @param hsv Math::Vec3 where x = hue (0-360), y = saturation (0-1), z = value (0-1)
      * @param alpha Optional alpha component (0-255, default 255)
      * @return Color object representing the HSV values
      */
-    [[nodiscard]] static Color FromHSV(const Vector3& hsv, unsigned char alpha = 255)
+    [[nodiscard]] static Color FromHSV(const Math::Vec3& hsv, unsigned char alpha = 255)
     {
         return FromHSV(hsv.x, hsv.y, hsv.z, alpha);
     }
@@ -107,9 +106,9 @@ struct Color {
 
     /**
     * @brief Convert this Color to HSV representation
-    * @return Vector3 where x = hue (0-360), y = saturation (0-1), z = value (0-1)
+    * @return Math::Vec3 where x = hue (0-360), y = saturation (0-1), z = value (0-1)
     */
-    [[nodiscard]] Vector3 ToHSV() const;
+    [[nodiscard]] Math::Vec3 ToHSV() const;
 };
 
 //=======================================================

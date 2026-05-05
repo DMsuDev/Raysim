@@ -1,7 +1,7 @@
 #pragma once
 #include "Raysim/Renderer/RendererAPI.hpp"
 
-namespace RS {
+namespace RS::Backend {
 
 /**
  * @class RaylibRendererAPI
@@ -11,7 +11,7 @@ namespace RS {
  *
  * @see RendererAPI
  */
-class RaylibRendererAPI : public RendererAPI
+class RaylibRendererAPI final : public RendererAPI
 {
 public:
     void BeginFrame() override;
@@ -22,8 +22,8 @@ public:
 
     void ClearScreen(const Color& color)   override;
     /// Overload to allow clearing with a linear RGB color vector [0,1]
-    void ClearScreen(const Vector3& color) override;
+    void ClearScreen(const Math::Vec3& color) override;
     void Clear() override;
 };
 
-} // namespace RS
+} // namespace RS::Backend

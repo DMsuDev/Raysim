@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Raysim/Core/Window.hpp"
-#include "Raysim/Math/Vector2.hpp"
 
-namespace RS {
+namespace RS::Backend {
 
 /**
  * @class RaylibWindow
@@ -13,7 +12,7 @@ namespace RS {
  *
  * @see Window, RaylibRendererAPI
  */
-class RaylibWindow : public Window
+class RaylibWindow final : public Window
 {
 public:
     RaylibWindow(const WindowProps& props);
@@ -33,7 +32,7 @@ protected:
     // -- Size ----------------------------------------------------------------
 
     void ImplSetSize(int width, int height) override;
-    Vector2Int ImplGetSize() const override;
+    Math::Vec2i ImplGetSize() const override;
 
     // -- Title ---------------------------------------------------------------
 
@@ -81,4 +80,4 @@ private:
     WindowData m_Data;
 };
 
-} // namespace RS
+} // namespace RS::Backend

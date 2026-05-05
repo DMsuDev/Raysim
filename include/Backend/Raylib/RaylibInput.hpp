@@ -1,7 +1,7 @@
 #pragma once
 #include "Raysim/Input/Input.hpp"
 
-namespace RS {
+namespace RS::Backend {
 
 /**
  * @class RaylibInput
@@ -10,7 +10,7 @@ namespace RS {
  * Provides input handling for keyboard, mouse, and gamepad through raylib's input functions.
  * All input queries are delegated directly to raylib's native functions.
  */
-class RaylibInput : public Input
+class RaylibInput final : public Input
 {
 public:
     RaylibInput() = default;
@@ -32,8 +32,8 @@ public:
     // MOUSE INPUT
     // ============================================================================
 
-    Vector2 GetMousePosition() const override;
-    Vector2 GetMouseDelta() const override;
+    Math::Vec2 GetMousePosition() const override;
+    Math::Vec2 GetMouseDelta() const override;
     bool IsMouseButtonDown(MouseButton button) const override;
     bool IsMouseButtonPressed(MouseButton button) const override;
     bool IsMouseButtonReleased(MouseButton button) const override;
@@ -51,4 +51,4 @@ public:
     float GetGamepadAxisValue(int gamepad, int axis) const override;
 };
 
-} // namespace RS
+} // namespace RS::Backend
