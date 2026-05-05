@@ -1,16 +1,15 @@
+/**********************************************************************************************
+ *   Raysim Math Utilities
+ *
+ *   This header provides common mathematical constants and utility functions such as clamping,
+ *   interpolation, and angle conversions.  It is included by Math.hpp to re-export these
+ *   functions as part of the public Math API.
+ **********************************************************************************************/
+
 #pragma once
 
-//==============================================================================
-// Math utilities
-//==============================================================================
-// Provides common mathematical constants and utility functions such as clamping,
-// interpolation, and angle conversions.
 #include <cmath>
 
-/**
- * @namespace Math
- * @brief Common mathematical constants and utility functions
- */
 namespace RS::Math {
 
 //==============================================================================
