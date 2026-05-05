@@ -1,69 +1,59 @@
 #pragma once
 
-#include "Math.hpp"
+#include "../Utils/MathUtils.hpp"
 
 #include <cstddef>
 #include <ostream>
 
-namespace RS {
+namespace RS::Math {
 
 /**
- * @struct Vector3
+ * @struct Vec3
  * @brief 3D vector with arithmetic and geometric operations
  *
  * Represents a 3D vector for positions, velocities, and directions in 3D space.
  * Includes 3D-specific operations like cross product with vector result and axis rotation.
  */
-struct Vector3 {
+struct Vec3 {
     float x{0.0f}, y{0.0f}, z{0.0f};
 
     /**
      * @brief Default construct (zero vector)
      */
-    constexpr Vector3() noexcept = default;
+    constexpr Vec3() noexcept = default;
     /**
      * @brief Construct from x, y, z components
      * @param in_x X component
      * @param in_y Y component
      * @param in_z Z component
      */
-    constexpr Vector3(float in_x, float in_y, float in_z) noexcept : x(in_x), y(in_y), z(in_z) {}
+    constexpr Vec3(float in_x, float in_y, float in_z) noexcept : x(in_x), y(in_y), z(in_z) {}
     /**
      * @brief Construct uniform vector (x = y = z = s)
      * @param s Scalar applied to all components
      */
-    explicit constexpr Vector3(float s) noexcept : x(s), y(s), z(s) {}
+    explicit constexpr Vec3(float s) noexcept : x(s), y(s), z(s) {}
 
 //==============================================================================
 // Operators
 //==============================================================================
 
-    constexpr Vector3 operator+(const Vector3& o) const noexcept { return {x + o.x, y + o.y, z + o.z}; }
-    constexpr Vector3 operator-(const Vector3& o) const noexcept { return {x - o.x, y - o.y, z - o.z}; }
-    constexpr Vector3 operator*(float s)          const noexcept { return {x * s, y * s, z * s}; }
-    constexpr Vector3 operator/(float s)          const noexcept { return (s != 0.0f && s == s) ? (*this * (1.0f/s)) : Vector3{}; }
+    constexpr Vec3 operator+(const Vec3& o) const noexcept { return {x + o.x, y + o.y, z + o.z}; }
+    constexpr Vec3 operator-(const Vec3& o) const noexcept { return {x - o.x, y - o.y, z - o.z}; }
+    constexpr Vec3 operator*(float s)          const noexcept { return {x * s, y * s, z * s}; }
+    constexpr Vec3 operator/(float s)          const noexcept { return (s != 0.0f && s == s) ? (*this * (1.0f/s)) : Vec3{}; }
 
-    constexpr Vector3 operator-() const noexcept { return {-x, -y, -z}; }
+    constexpr Vec3 operator-() const noexcept { return {-x, -y, -z}; }
 
-    constexpr Vector3& operator+=(const Vector3& o) noexcept { x += o.x; y += o.y; z += o.z; return *this; }
-    constexpr Vector3& operator-=(const Vector3& o) noexcept { x -= o.x; y -= o.y; z -= o.z; return *this; }
-    constexpr Vector3& operator*=(float s) noexcept          { x *= s; y *= s; z *= s; return *this; }
-    constexpr Vector3& operator/=(float s) noexcept          { if (s != 0.0f && s == s) *this *= (1.0f/s); return *this; }
+    constexpr Vec3& operator+=(const Vec3& o) noexcept { x += o.x; y += o.y; z += o.z; return *this; }
+    constexpr Vec3& operator-=(const Vec3& o) noexcept { x -= o.x; y -= o.y; z -= o.z; return *this; }
+    constexpr Vec3& operator*=(float s) noexcept          { x *= s; y *= s; z *= s; return *this; }
+    constexpr Vec3& operator/=(float s) noexcept          { if (s != 0.0f && s == s) *this *= (1.0f/s); return *this; }
 
-    constexpr bool operator==(const Vector3& o) const noexcept { return x == o.x && y == o.y && z == o.z; }
-    constexpr bool operator!=(const Vector3& o) const noexcept { return !(*this == o); }
+    constexpr bool operator==(const Vec3& o) const noexcept { return x == o.x && y == o.y && z == o.z; }
+    constexpr bool operator!=(const Vec3& o) const noexcept { return !(*this == o); }
 
-    /**
-     * @brief Access components by index (0=x,1=y,2=z)
-     * @param i Index of component
-     * @return Reference to component (non-const)
-     */
     constexpr float& operator[](size_t i) noexcept { return (&x)[i]; }
-    /**
-     * @brief Const access to components by index (0=x,1=y,2=z)
-     * @param i Index of component
-     * @return Const reference to component
-     */
     constexpr const float& operator[](size_t i) const noexcept { return (&x)[i]; }
 
 //==============================================================================
@@ -86,14 +76,14 @@ struct Vector3 {
      * @param rhs Right-hand vector
      * @return Dot product
      */
-    constexpr float Dot(const Vector3& rhs) const noexcept { return x*rhs.x + y*rhs.y + z*rhs.z; }
+    constexpr float Dot(const Vec3& rhs) const noexcept { return x*rhs.x + y*rhs.y + z*rhs.z; }
 
     /**
      * @brief 3D cross product (vector result perpendicular to both)
      * @param rhs Right-hand vector
      * @return Cross product vector (this x rhs)
      */
-    constexpr Vector3 Cross(const Vector3& rhs) const noexcept {
+    constexpr Vec3 Cross(const Vec3& rhs) const noexcept {
         return {
             y * rhs.z - z * rhs.y,
             z * rhs.x - x * rhs.z,
@@ -128,9 +118,9 @@ struct Vector3 {
      * @brief Return normalized vector
      * @return Unit vector in same direction or zero vector if magnitude ~0
      */
-    Vector3 Normalized() const noexcept {
+    Vec3 Normalized() const noexcept {
         float m = Length();
-        return (m > 1e-6f) ? *this / m : Vector3{};
+        return (m > 1e-6f) ? *this / m : Vec3{};
     }
 
     /**
@@ -146,8 +136,8 @@ struct Vector3 {
      * @param axis Rotation axis (normalized automatically)
      * @param angle Rotation angle in radians
      */
-    Vector3 Rotate(const Vector3& axis, float angle) const noexcept {
-        Vector3 k = axis.Normalized();
+    Vec3 Rotate(const Vec3& axis, float angle) const noexcept {
+        Vec3 k = axis.Normalized();
         float c = std::cos(angle);
         float s = std::sin(angle);
 
@@ -161,9 +151,9 @@ struct Vector3 {
      * @param onto Vector to project onto
      * @return Projection of this onto `onto`
      */
-    constexpr Vector3 Project(const Vector3& onto) const noexcept {
+    constexpr Vec3 Project(const Vec3& onto) const noexcept {
         float d = onto.LengthSquared();
-        return (d > 1e-6f) ? onto * (Dot(onto) / d) : Vector3{};
+        return (d > 1e-6f) ? onto * (Dot(onto) / d) : Vec3{};
     }
 
     /**
@@ -171,7 +161,7 @@ struct Vector3 {
      * @param n Surface normal (should be normalized)
      * @return Reflected vector
      */
-    constexpr Vector3 Reflect(const Vector3& n) const noexcept {
+    constexpr Vec3 Reflect(const Vec3& n) const noexcept {
         return *this - n * (2.0f * Dot(n));
     }
 
@@ -197,27 +187,27 @@ struct Vector3 {
      * @param b Second point
      * @return Euclidean distance between a and b
      */
-    static float Distance(const Vector3& a, const Vector3& b) noexcept { return (b - a).Length(); }
+    static float Distance(const Vec3& a, const Vec3& b) noexcept { return (b - a).Length(); }
     /**
      * @brief Calculate squared distance between two points (faster, avoids sqrt)
      * @param a First point
      * @param b Second point
      * @return Squared distance between a and b
      */
-    static float DistanceSquared(const Vector3& a, const Vector3& b) noexcept { return (b - a).LengthSquared(); }
+    static float DistanceSquared(const Vec3& a, const Vec3& b) noexcept { return (b - a).LengthSquared(); }
 
     /**
      * @brief Create unit vector from angle in XY plane
      * @param angle Angle in radians
-     * @return Unit Vector3 on XY plane
+     * @return Unit Vec3 on XY plane
      */
-    static Vector3 FromAngleXY(float angle) noexcept { return {std::cos(angle), std::sin(angle), 0.0f}; }
+    static Vec3 FromAngleXY(float angle) noexcept { return {std::cos(angle), std::sin(angle), 0.0f}; }
     /**
      * @brief Create unit vector from angle in XZ plane
      * @param angle Angle in radians
-     * @return Unit Vector3 on XZ plane
+     * @return Unit Vec3 on XZ plane
      */
-    static Vector3 FromAngleXZ(float angle) noexcept { return {std::cos(angle), 0.0f, std::sin(angle)}; }
+    static Vec3 FromAngleXZ(float angle) noexcept { return {std::cos(angle), 0.0f, std::sin(angle)}; }
 
     /**
      * @brief Angle between two vectors (0..pi)
@@ -225,7 +215,7 @@ struct Vector3 {
      * @param b Second vector
      * @return Angle in radians between a and b
      */
-    static float AngleBetween(const Vector3& a, const Vector3& b) noexcept {
+    static float AngleBetween(const Vec3& a, const Vec3& b) noexcept {
         float dot = a.Dot(b);
         float m = std::sqrt(a.LengthSquared() * b.LengthSquared());
         if (m < 1e-6f) return 0.0f;
@@ -237,36 +227,17 @@ struct Vector3 {
 // Common vectors
 //==============================================================================
 
-    static constexpr Vector3 Zero() noexcept  { return {0.0f, 0.0f, 0.0f}; }
-    static constexpr Vector3 One() noexcept   { return {1.0f, 1.0f, 1.0f}; }
-    static constexpr Vector3 UnitX() noexcept { return {1.0f, 0.0f, 0.0f}; }
-    static constexpr Vector3 UnitY() noexcept { return {0.0f, 1.0f, 0.0f}; }
-    static constexpr Vector3 UnitZ() noexcept { return {0.0f, 0.0f, 1.0f}; }
-
-    /// Rounded x coordinate as integer (useful for pixel-space operations).
-    int ix() const noexcept { return static_cast<int>(std::round(x)); }
-
-    /// Rounded y coordinate as integer (useful for pixel-space operations).
-    int iy() const noexcept { return static_cast<int>(std::round(y)); }
-
-    /// Rounded z coordinate as integer (useful for pixel-space operations).
-    int iz() const noexcept { return static_cast<int>(std::round(z)); }
+    static constexpr Vec3 Zero() noexcept  { return {0.0f, 0.0f, 0.0f}; }
+    static constexpr Vec3 One() noexcept   { return {1.0f, 1.0f, 1.0f}; }
+    static constexpr Vec3 UnitX() noexcept { return {1.0f, 0.0f, 0.0f}; }
+    static constexpr Vec3 UnitY() noexcept { return {0.0f, 1.0f, 0.0f}; }
+    static constexpr Vec3 UnitZ() noexcept { return {0.0f, 0.0f, 1.0f}; }
 };
 
-constexpr Vector3 operator*(float s, const Vector3& v) noexcept { return v * s; }
+constexpr Vec3 operator*(float s, const Vec3& v) noexcept { return v * s; }
 
-// ============================================================================
-// Stream output operators
-// ============================================================================
-
-/**
- * @brief Stream output for Vector3
- * @param os Output stream
- * @param v Vector3 to output
- * @return Reference to the output stream
- */
-inline std::ostream& operator<<(std::ostream& os, const Vector3& v) {
+inline std::ostream& operator<<(std::ostream& os, const Vec3& v) {
     return os << "(" << v.x << ", " << v.y << ", " << v.z << ")";
 }
 
-} // namespace RS
+} // namespace RS::Math
