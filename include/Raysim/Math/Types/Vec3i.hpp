@@ -17,21 +17,8 @@ namespace RS::Math {
 struct Vec3i {
     int x{0}, y{0}, z{0};
 
-    /**
-     * @brief Default construct (zero vector)
-     */
     constexpr Vec3i() noexcept = default;
-    /**
-     * @brief Construct from x, y, z components
-     * @param in_x X component
-     * @param in_y Y component
-     * @param in_z Z component
-     */
     constexpr Vec3i(int in_x, int in_y, int in_z) noexcept : x(in_x), y(in_y), z(in_z) {}
-    /**
-     * @brief Construct uniform vector (x = y = z = s)
-     * @param s Scalar applied to all components
-     */
     explicit constexpr Vec3i(int s) noexcept : x(s), y(s), z(s) {}
 
 //==============================================================================
