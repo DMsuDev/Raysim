@@ -10,6 +10,7 @@ namespace RS
     class RendererAPI;
     class Window;
     class Input;
+    namespace Fonts { class FontRenderer; }
 
     /**
      * @class BackendFactory
@@ -50,6 +51,17 @@ namespace RS
          * @return Owning pointer to a concrete Input implementation.
          */
         static Scope<Input> CreateInput(WindowBackend backend);
+
+        /**
+         * @brief Create a font renderer for the specified graphics API.
+         *
+         * The returned renderer is wired into FontManager via
+         * FontManager::SetRenderer().
+         *
+         * @param api The rendering API to use.
+         * @return Owning pointer to a concrete FontRenderer implementation.
+         */
+        static Scope<Fonts::FontRenderer> CreateFontRenderer(RenderAPI api);
     };
 
 } // namespace RS
