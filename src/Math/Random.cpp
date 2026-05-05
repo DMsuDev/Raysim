@@ -4,7 +4,7 @@
 
 #include <cmath>
 #include <algorithm>
-#include <limits>
+#include <cstdint>
 #include <random>
 
 namespace RS::Math::Random {
@@ -14,19 +14,12 @@ namespace RS::Math::Random {
 //==============================================================================
 
 // Seeded from hardware RNG so every launch is unique by default.
-static std::random_device rd;
-static std::mt19937       generator(rd());
+// std::random_device is used transiently, not for ongoing generation, to avoid performance overhead.
+// The Mersenne Twister engine is used for fast generation after seeding.
+static std::mt19937 generator(std::random_device{}());
 
-// Noise seed - mixed into every hash so Seed() changes the noise landscape.
-static unsigned int noiseSeed = rd();
-
-namespace {
-[[nodiscard]] float ExclusiveUpperBound(float max) noexcept
-{
-    if (!std::isfinite(max)) return max;
-    return std::nextafter(max, -std::numeric_limits<float>::infinity());
-}
-} // namespace
+// Noise seed mixed into every hash so Seed() changes the noise landscape.
+static uint32_t noiseSeed = std::random_device{}();
 
 //==============================================================================
 // Seeding
@@ -40,7 +33,7 @@ void Seed(unsigned int seed)
 
 void SeedRandom()
 {
-    unsigned int s = rd();
+    const uint32_t s = std::random_device{}();
     generator.seed(s);
     noiseSeed = s;
 }
@@ -67,19 +60,20 @@ int Range(int min, int max) {
 }
 
 float Float() {
-    std::uniform_real_distribution<float> distribution(0.0f, ExclusiveUpperBound(1.0f));
+    // uniform_real_distribution guarantees [a, b) by the standard.
+    std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
     return distribution(generator);
 }
 
 float Float(float max) {
     if (max <= 0.0f) return 0.0f;
-    std::uniform_real_distribution<float> distribution(0.0f, ExclusiveUpperBound(max));
+    std::uniform_real_distribution<float> distribution(0.0f, max);
     return distribution(generator);
 }
 
 float Range(float min, float max) {
     if (min >= max) return min;
-    std::uniform_real_distribution<float> distribution(min, ExclusiveUpperBound(max));
+    std::uniform_real_distribution<float> distribution(min, max);
     return distribution(generator);
 }
 
@@ -88,21 +82,21 @@ bool Bool() {
 }
 
 bool Bool(float probability) {
-    probability = (probability < 0.0f) ? 0.0f : (probability > 1.0f) ? 1.0f : probability;
-    return Float() < probability;
+    return Float() < std::clamp(probability, 0.0f, 1.0f);
 }
 
 //==============================================================================
 // Noise - internal hash helpers (incorporate noiseSeed)
 //==============================================================================
 
+// All arithmetic is in uint32_t to avoid signed-integer-overflow UB.
 static int HashInt(int v)
 {
-    v ^= static_cast<int>(noiseSeed);
-    v = (v ^ 61) ^ (v >> 16);
-    v *= 0x27d4eb2d;
-    v ^= v >> 15;
-    return v & 0x7fffffff;
+    uint32_t h = static_cast<uint32_t>(v) ^ noiseSeed;
+    h = (h ^ 61u) ^ (h >> 16u);
+    h *= 0x27d4eb2du;
+    h ^= h >> 15u;
+    return static_cast<int>(h & 0x7fffffffu);
 }
 
 static float HashFloat(int v)
@@ -112,23 +106,32 @@ static float HashFloat(int v)
 
 static int Hash2DInt(int x, int y)
 {
-    return HashInt((x * 73856093) ^ (y * 19349663));
+    return HashInt(static_cast<int>(
+        static_cast<uint32_t>(x) * 73856093u ^
+        static_cast<uint32_t>(y) * 19349663u));
 }
 
 static float Hash2DFloat(int x, int y)
 {
-    return HashFloat((x * 73856093) ^ (y * 19349663));
+    return HashFloat(static_cast<int>(
+        static_cast<uint32_t>(x) * 73856093u ^
+        static_cast<uint32_t>(y) * 19349663u));
 }
 
 // Separate hash for the Y component of cell feature points so X and Y are independent.
 static float Hash2DFloatB(int x, int y)
 {
-    return HashFloat((x * 83492791) ^ (y * 48611));
+    return HashFloat(static_cast<int>(
+        static_cast<uint32_t>(x) * 83492791u ^
+        static_cast<uint32_t>(y) * 48611u));
 }
 
 static int Hash3DInt(int x, int y, int z)
 {
-    return HashInt((x * 73856093) ^ (y * 19349663) ^ (z * 83492791));
+    return HashInt(static_cast<int>(
+        static_cast<uint32_t>(x) * 73856093u ^
+        static_cast<uint32_t>(y) * 19349663u ^
+        static_cast<uint32_t>(z) * 83492791u));
 }
 
 /// Quintic interpolation (6t^5 - 15t^4 + 10t^3) - smoother than 3t^2 - 2t^3.
@@ -274,24 +277,26 @@ float CellularNoise(float x, float y)
     float xf = x - static_cast<float>(xi);
     float yf = y - static_cast<float>(yi);
 
-    float minDist = 2.0f;
+    // Compare squared distances to avoid 9 sqrt calls.
+    float minDistSq = 4.0f; // (2.0)^2 maximum possible distance across a unit cell
 
     for (int di = -1; di <= 1; ++di) {
         for (int dj = -1; dj <= 1; ++dj) {
-            int cx = xi + di;
-            int cy = yi + dj;
+            const int cx = xi + di;
+            const int cy = yi + dj;
             // Independent hashes for X and Y so feature points aren't on the diagonal
-            float fpx = static_cast<float>(di) + Hash2DFloat (cx, cy);
-            float fpy = static_cast<float>(dj) + Hash2DFloatB(cx, cy);
+            const float fpx = static_cast<float>(di) + Hash2DFloat (cx, cy);
+            const float fpy = static_cast<float>(dj) + Hash2DFloatB(cx, cy);
 
-            float dx = fpx - xf;
-            float dy = fpy - yf;
-            float dist = std::sqrt(dx * dx + dy * dy);
-            minDist = std::min(minDist, dist);
+            const float dx = fpx - xf;
+            const float dy = fpy - yf;
+            const float distSq = dx * dx + dy * dy;
+            if (distSq < minDistSq)
+                minDistSq = distSq;
         }
     }
 
-    return std::clamp(minDist, 0.0f, 1.0f);
+    return std::clamp(std::sqrt(minDistSq), 0.0f, 1.0f);
 }
 
 //==============================================================================
@@ -324,6 +329,8 @@ float ValueNoise(float x, float y)
 
 float FractalBrownianMotion(float x, float y, int octaves, float persistence, float lacunarity)
 {
+    if (octaves <= 0) return 0.0f;
+
     float result    = 0.0f;
     float amplitude = 1.0f;
     float maxValue  = 0.0f;
