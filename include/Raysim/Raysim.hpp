@@ -68,7 +68,6 @@
 #include "Raysim/Scene/SceneManager.hpp"
 #include "Raysim/Input/Input.hpp"
 #include "Raysim/Core/Window.hpp"
-#include "Raysim/Core/FontManager.hpp"
 #include "Raysim/Core/Time.hpp"
 
 #include "Raysim/Core/Application.hpp"
@@ -77,5 +76,12 @@
 #include "Raysim/Graphics/Shapes.hpp"
 #include "Raysim/Graphics/Texts.hpp"
 
+// --- Font system ---
+#include "Raysim/Fonts/Fonts.hpp"
+
 // --- Math ---
 #include "Raysim/Math/Math.hpp"
+
+namespace RS {
+    using FontManager = RS::Fonts::FontManager;
+} // namespace RS

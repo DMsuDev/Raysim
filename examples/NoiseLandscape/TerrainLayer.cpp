@@ -17,7 +17,8 @@ const char* NoiseName(NoiseMode m)
         case NoiseMode::Value:    return "Value Noise";
         case NoiseMode::FBM:      return "Fractal Brownian Motion";
     }
-    return "";
+    RS_CORE_ASSERT(false, "Unhandled NoiseMode value");
+    return "Unknown";
 }
 
 //==============================================================================
@@ -26,7 +27,10 @@ const char* NoiseName(NoiseMode m)
 
 TerrainLayer::TerrainLayer(float screenW, float screenH, int columnW)
     : screenW_(screenW), screenH_(screenH), columnW_(columnW)
-{}
+{
+    RS_ASSERT(screenW > 0.0f && screenH > 0.0f, "Screen dimensions must be positive");
+    RS_ASSERT(columnW > 0, "Column width must be > 0");
+}
 
 void TerrainLayer::Reseed()
 {

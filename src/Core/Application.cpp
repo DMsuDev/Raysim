@@ -9,12 +9,17 @@
 #include "Raysim/Renderer/RenderCommand.hpp"
 #include "Raysim/Input/Input.hpp"
 #include "Raysim/Core/Window.hpp"
-#include "Raysim/Core/FontManager.hpp"
 #include "Raysim/Core/Time.hpp"
+#include "Raysim/Fonts/FontManager.hpp"
+#include "Raysim/Fonts/Providers/STBTrueTypeProvider.hpp"
+
+// --- Math ---
+#include "Raysim/Math/Random.hpp"
 
 #include "Raysim/Core/BackendFactory.hpp"
 
 namespace RS {
+using namespace RS::Fonts;
 
 Application::Application(const ApplicationConfig& config)
     : m_Configuration(config)
@@ -34,6 +39,11 @@ Application::Application(const ApplicationConfig& config)
 
     RS::RenderCommand::Init(std::move(api));
 
+    // -- Font system --------------------------------------------------------
+    FontManager::SetProvider(CreateScope<STBTrueTypeProvider>());
+    FontManager::SetRenderer(BackendFactory::CreateFontRenderer(m_Configuration.Renderer));
+    FontManager::LoadDefaultFont();
+
     // -- Populate EngineContext ---------------------------------------------
     RebuildContext();
 
@@ -50,8 +60,11 @@ Application::~Application() noexcept
 
     RS_CORE_INFO("Destroying application '{}'", m_Configuration.Window.Title);
 
-    // Ensure GPU resources are released even if Close() was never called
-    RenderCommand::Shutdown();
+    // Ensure all subsystems are released even if Close() was never called.
+    // Close() is idempotent via m_Running - safe to call from the destructor.
+    if (m_Running)
+        Close();
+
     Log::Flush();
 }
 
@@ -169,7 +182,8 @@ void Application::Close()
     m_Input.reset();
     m_Window.reset();
 
-    RS::RenderCommand::Shutdown();
+    Fonts::FontManager::Shutdown();
+    RenderCommand::Shutdown();
 }
 
 //==============================================================================
@@ -178,7 +192,7 @@ void Application::Close()
 
 void Application::SetDefaultFont(const std::string& fontPath, int fontSize)
 {
-    FontManager::LoadFont(fontPath, fontSize);
+    Fonts::FontManager::LoadFont("default", fontPath, fontSize);
 }
 
 //==============================================================================
@@ -187,7 +201,7 @@ void Application::SetDefaultFont(const std::string& fontPath, int fontSize)
 
 void Application::SetRandomSeed(unsigned int seed)
 {
-    Math::Random::Seed(seed);
+    ::RS::Math::Random::Seed(seed);
 }
 
 } // namespace RS

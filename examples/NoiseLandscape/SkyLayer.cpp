@@ -10,6 +10,9 @@ using namespace RS;
 SkyLayer::SkyLayer(float width, float skyH, int starCount, int steps)
     : starCount_(starCount), gradientSteps_(steps), width_(width), skyH_(skyH)
 {
+    RS_ASSERT(width > 0.0f && skyH > 0.0f, "Sky dimensions must be positive");
+    RS_ASSERT(starCount >= 0, "Star count must be non-negative");
+    RS_ASSERT(steps > 0, "Gradient steps must be > 0");
     SpawnStars();
 }
 

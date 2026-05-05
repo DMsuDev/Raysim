@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Raysim/Math/Types/Vec2.hpp"
+
 namespace RS {
 
 /**
@@ -33,5 +35,44 @@ enum class OriginMode {
     BottomCenter,
     BottomRight
 };
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+/// @brief Convert OriginMode to a normalized origin vector in [0..1].
+///
+/// Maps each OriginMode to a 2D offset vector where:
+/// - x in [0, 1]: 0=left, 0.5=center, 1=right
+/// - y in [0, 1]: 0=top, 0.5=center, 1=bottom
+///
+/// @param origin The OriginMode to convert.
+/// @return A Vec2 representing the normalized offset.
+///
+/// Example:
+/// @code
+/// auto v = OriginToVector(OriginMode::Center);  // Returns {0.5f, 0.5f}
+/// auto v = OriginToVector(OriginMode::TopLeft); // Returns {0.0f, 0.0f}
+/// @endcode
+[[nodiscard]] constexpr Math::Vec2 OriginToVector(OriginMode origin) noexcept
+{
+    float x = 0.0f;
+    float y = 0.0f;
+
+    switch (origin) {
+        case OriginMode::TopLeft:      x = 0.0f; y = 0.0f; break;
+        case OriginMode::TopCenter:    x = 0.5f; y = 0.0f; break;
+        case OriginMode::TopRight:     x = 1.0f; y = 0.0f; break;
+        case OriginMode::CenterLeft:   x = 0.0f; y = 0.5f; break;
+        case OriginMode::Center:       x = 0.5f; y = 0.5f; break;
+        case OriginMode::CenterRight:  x = 1.0f; y = 0.5f; break;
+        case OriginMode::BottomLeft:   x = 0.0f; y = 1.0f; break;
+        case OriginMode::BottomCenter: x = 0.5f; y = 1.0f; break;
+        case OriginMode::BottomRight:  x = 1.0f; y = 1.0f; break;
+        default:                       x = 0.0f; y = 0.0f; break;
+    }
+
+    return { x, y };
+}
 
 } // namespace RS
