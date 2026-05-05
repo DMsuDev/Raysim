@@ -1,0 +1,58 @@
+#pragma once
+
+#include "FontAtlas.hpp"
+
+#include <string>
+
+namespace RS::Fonts {
+
+// High-level font class that owns the atlas and provides glyph lookup.
+class Font {
+
+public:
+    const std::string& GetName() const { return m_Name; }
+    const std::string& GetPath() const { return m_Path; }
+    int GetSize() const { return m_Size; }
+
+    [[nodiscard]] const Glyph* GetGlyph(uint32_t codepoint) const noexcept {
+        if (m_Atlas.IsValid()) {
+            const Glyph* glyph = m_Atlas.GetGlyph(codepoint);
+            if (glyph)
+                return glyph;
+        }
+        return m_Fallback; // Return fallback glyph if not found
+    }
+
+    // --- Font metrics ---
+    [[nodiscard]] float GetAscent()     const noexcept { return m_Atlas.metrics.ascent; }
+    [[nodiscard]] float GetDescent()    const noexcept { return m_Atlas.metrics.descent; }
+    [[nodiscard]] float GetLineGap()    const noexcept { return m_Atlas.metrics.lineGap; }
+    [[nodiscard]] float GetLineHeight() const noexcept { return m_Atlas.metrics.lineHeight; }
+
+    [[nodiscard]] const FontAtlas& GetAtlas() const noexcept { return m_Atlas; }
+
+    [[nodiscard]] bool IsLoaded()   const noexcept { return m_IsLoaded; }
+    [[nodiscard]] bool IsDefault()  const noexcept { return m_IsDefault; }
+
+    void SetName(const std::string& name)   { m_Name = name; }
+    void SetPath(const std::string& path)   { m_Path = path; }
+    void SetSize(int size)                  { m_Size = size; }
+    void SetAtlas(FontAtlas atlas)          { m_Atlas = std::move(atlas); }
+    void SetLoaded(bool loaded)             { m_IsLoaded = loaded; }
+    void SetDefault(bool isDefault)         { m_IsDefault = isDefault; }
+    void SetFallback(const Glyph* fallback) { m_Fallback = fallback; }
+
+private:
+    std::string m_Name;
+    std::string m_Path;
+    int m_Size = 0;
+
+    FontAtlas m_Atlas;
+
+    const Glyph* m_Fallback = nullptr;
+
+    bool m_IsLoaded  = false;
+    bool m_IsDefault = false;
+};
+
+} // namespace RS::Fonts
