@@ -40,7 +40,6 @@ set(RAYSIM_SOURCES
     ${SRC_DIR}/Renderer/RenderCommand.cpp
 
     # Core managers
-    ${SRC_DIR}/Core/FontManager.cpp
     ${SRC_DIR}/Core/BackendFactory.cpp
     ${SRC_DIR}/Core/Time.cpp
     ${SRC_DIR}/Core/Application.cpp
@@ -54,7 +53,15 @@ set(RAYSIM_SOURCES
     # Backend: Raylib implementations
     ${SRC_DIR}/Backend/Raylib/RaylibInput.cpp
     ${SRC_DIR}/Backend/Raylib/RaylibRendererAPI.cpp
+    ${SRC_DIR}/Backend/Raylib/RaylibTexture.cpp
     ${SRC_DIR}/Backend/Raylib/RaylibWindow.cpp
+    ${SRC_DIR}/Backend/Raylib/RaylibFontRenderer.cpp
+
+    # Font system
+    ${SRC_DIR}/Fonts/Providers/STBTrueTypeProvider.cpp
+    ${SRC_DIR}/Fonts/FontManager.cpp
+
+    ${SRC_DIR}/Utils/PathUtils.cpp
 )
 
 # Add the sources to the library target
@@ -72,6 +79,7 @@ target_include_directories(Raysim
 
     PRIVATE
         ${CMAKE_SOURCE_DIR}/src
+        ${CMAKE_SOURCE_DIR}/third_party/stb
         ${IMGUI_DIR}
         ${IMGUI_DIR}/backends
 )

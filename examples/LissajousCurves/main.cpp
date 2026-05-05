@@ -3,11 +3,20 @@
 
 #include <cmath>
 #include <vector>
-#include <cstdio>
 #include <algorithm>
 #include <string>
+#include <sstream>
+#include <iomanip>
 
 using namespace RS;
+
+/// Format a float to a fixed number of decimal places.
+static std::string FormatFloat(float value, int decimals)
+{
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(decimals) << value;
+    return oss.str();
+}
 
 struct LissajousPreset {
     std::string name;
@@ -67,7 +76,7 @@ private:
     float phaseRotationSpeed = 0.2f; // increased default speed
     bool animatePhase = false;
 
-    std::vector<Vector2> curvePoints;
+    std::vector<Math::Vec2> curvePoints;
     int resolution = 1200;
     std::vector<float> paramT;
 
@@ -175,7 +184,7 @@ private:
         float idxF   = t * static_cast<float>(curvePoints.size() - 1);
         int   idx    = static_cast<int>(std::floor(idxF));
         int   next   = std::min(idx + 1, static_cast<int>(curvePoints.size()) - 1);
-        Vector2 pos  = Math::Lerp(curvePoints[idx], curvePoints[next], idxF - idx);
+        Math::Vec2 pos  = Math::Lerp(curvePoints[idx], curvePoints[next], idxF - idx);
         Shapes::DrawCircle(pos.x, pos.y, 10, Colors::RayYellow, OriginMode::Center);
     }
 
@@ -184,47 +193,39 @@ private:
     void DrawUI() {
         const int lineHeight = 30;
         float y = 30;
-        char buf[256];
 
         // Frequency X
-        std::snprintf(buf, sizeof(buf), "Frequency X: %.2f (Left/Right)", frequencyX);
-        Text::RenderText(std::string(buf), 30, y, 20, Color{150, 255, 100},
-                   OriginMode::TopLeft);
+        Text::RenderText("Frequency X: " + FormatFloat(frequencyX, 2) + " (Left/Right)",
+                         30, y, 20, Color{150, 255, 100}, OriginMode::TopLeft);
         y += lineHeight;
 
         // Frequency Y
-        std::snprintf(buf, sizeof(buf), "Frequency Y: %.2f (Up/Down)", frequencyY);
-        Text::RenderText(std::string(buf), 30, y, 20, Color{255, 200, 100},
-                   OriginMode::TopLeft);
+        Text::RenderText("Frequency Y: " + FormatFloat(frequencyY, 2) + " (Up/Down)",
+                         30, y, 20, Color{255, 200, 100}, OriginMode::TopLeft);
         y += lineHeight;
 
         // Phase shift and rotation speed
         float phaseDegrees = std::fmod(phaseShift * 180.0f / Math::PI, 360.0f);
-        std::snprintf(buf, sizeof(buf), "Phase: %.1f° | Speed: %.3f (P/O dir, +/- speed)",
-                      phaseDegrees, phaseRotationSpeed);
-        Text::RenderText(std::string(buf), 30, y, 20, Color{100, 200, 255},
-                   OriginMode::TopLeft);
+        Text::RenderText("Phase: " + FormatFloat(phaseDegrees, 1) + "\xC2\xB0 | Speed: " +
+                         FormatFloat(phaseRotationSpeed, 3) + " (P/O dir, +/- speed)",
+                         30, y, 20, Color{100, 200, 255}, OriginMode::TopLeft);
         y += lineHeight;
 
-        // Frequency ratio (key to understanding the shape)
-        std::snprintf(buf, sizeof(buf), "Ratio Fx:Fy = %.2f:%.2f",
-                  frequencyX, frequencyY);
-        Text::RenderText(std::string(buf), 30, y, 20, Color{255, 150, 200},
-                   OriginMode::TopLeft);
+        // Frequency ratio
+        Text::RenderText("Ratio Fx:Fy = " + FormatFloat(frequencyX, 2) + ":" + FormatFloat(frequencyY, 2),
+                         30, y, 20, Color{255, 150, 200}, OriginMode::TopLeft);
         y += lineHeight;
 
         // Current preset
-        std::snprintf(buf, sizeof(buf), "Preset [%d/6]: %s", currentPreset + 1,
-                      PRESETS[currentPreset].name.c_str());
-        Text::RenderText(std::string(buf), 30, y, 20, Color{200, 100, 255},
-                       OriginMode::TopLeft);
+        Text::RenderText("Preset [" + std::to_string(currentPreset + 1) + "/6]: " +
+                         PRESETS[currentPreset].name,
+                         30, y, 20, Color{200, 100, 255}, OriginMode::TopLeft);
         y += lineHeight;
 
         // Resolution and FPS
-        std::snprintf(buf, sizeof(buf), "Res: %d | FPS: %d", resolution,
-                      static_cast<int>(Time::GetFPS()));
-        Text::RenderText(std::string(buf), 30, y, 20, Color{200, 255, 100},
-                       OriginMode::TopLeft);
+        Text::RenderText("Res: " + std::to_string(resolution) + " | FPS: " +
+                         std::to_string(Time::GetFPS()),
+                         30, y, 20, Color{200, 255, 100}, OriginMode::TopLeft);
 
         // Controls at the bottom
         float bottomY = static_cast<float>(GetWindow().GetHeight()) - 50.0f;
@@ -233,21 +234,19 @@ private:
 
         // Description of the current preset
         bottomY += 25;
-        std::snprintf(buf, sizeof(buf), "Info: %s",
-                      PRESETS[currentPreset].description.c_str());
-        Text::RenderText(std::string(buf), 20, bottomY, 16, Color{200, 200, 150},
-                       OriginMode::BottomLeft);
+        Text::RenderText("Info: " + PRESETS[currentPreset].description,
+                         20, bottomY, 16, Color{200, 200, 150}, OriginMode::BottomLeft);
     }
 
     /// Generate curve points using parametric Lissajous equations
     void GenerateCurve() {
-        if ((int)curvePoints.size() != resolution)
+        if (static_cast<int>(curvePoints.size()) != resolution)
             curvePoints.resize(resolution);
         for (int i = 0; i < resolution; ++i) {
             float t = paramT[i];
             float x = curveRadius * std::sin(smoothFrequencyX * t + phaseShift);
             float y = curveRadius * std::sin(smoothFrequencyY * t);
-            curvePoints[i] = Vector2(centerX + x, centerY + y);
+            curvePoints[i] = Math::Vec2(centerX + x, centerY + y);
         }
     }
 
@@ -262,9 +261,14 @@ public:
 #pragma region Setup
 
     void OnStart() override {
+        RS_INFO("LissajousSimulation starting: resolution={}, preset={} ({})",
+                resolution, currentPreset + 1, PRESETS[currentPreset].name);
+
+        RS_ASSERT(resolution > 0, "Curve resolution must be > 0");
+
         GetWindow().SetSize(1200, 800);
         GetWindow().SetTitle("Raysim - Lissajous Curves");
-        FontManager::LoadFont("assets/fonts/OpenSans-Regular.ttf");
+        FontManager::LoadFont("opensans", "fonts/OpenSans-Regular.ttf", 32);
         Time::SetTargetFPS(60);
 
         curvePoints.reserve(resolution);
@@ -311,7 +315,7 @@ public:
 
         // Select presets with number keys 1-6
         for (int i = 0; i < 6; ++i) {
-            if (GetInput().IsKeyPressed((KeyCode)((int)KeyCode::One + i))) {
+            if (GetInput().IsKeyPressed(static_cast<KeyCode>(static_cast<int>(KeyCode::One) + i))) {
                 currentPreset = i;
                 frequencyX = PRESETS[i].frequencyX;
                 frequencyY = PRESETS[i].frequencyY;

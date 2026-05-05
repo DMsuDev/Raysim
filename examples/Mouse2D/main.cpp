@@ -6,13 +6,12 @@ using namespace RS;
 class MouseDetection : public Scene {
     RS_SCENE(MouseDetection)
 
+private:
     // Convenience accessors
     int GetWidth()  { return GetWindow().GetWidth(); }
     int GetHeight() { return GetWindow().GetHeight(); }
-
-private:
-    Vector2 mousePos{0.0f, 0.0f};
-    Vector2 mouseSmoothedPos{0.0f, 0.0f};
+    Math::Vec2 mousePos{0.0f, 0.0f};
+    Math::Vec2 mouseSmoothedPos{0.0f, 0.0f};
     float squareSpeed = 10.0f;
 
     // Mouse button state captured in Update for Draw
@@ -25,7 +24,7 @@ public:
     void OnStart() override {
         GetWindow().SetSize(1000, 600);
         GetWindow().SetTitle("Raysim - Mouse Detection Demo");
-        FontManager::LoadFont("assets/fonts/OpenSans-Regular.ttf");
+        FontManager::LoadFont("opensans", "fonts/OpenSans-Regular.ttf", 32);
         Time::SetTargetFPS(60);
     }
 

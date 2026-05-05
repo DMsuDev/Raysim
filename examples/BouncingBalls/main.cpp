@@ -11,8 +11,8 @@ using namespace RS;
 //==============================================================================
 
 struct Ball {
-    Vector2 position;
-    Vector2 velocity;
+    Math::Vec2 position;
+    Math::Vec2 velocity;
     float   radius;
     Color   color;
     bool    isMoving = true;
@@ -41,7 +41,7 @@ private:
     bool showStats_         = true;
 
     //--- Mouse state (set in Update, consumed in FixedUpdate) --------
-    Vector2 mousePos_        = {};
+    Math::Vec2 mousePos_        = {};
     bool    rightMouseDown_  = false;
     bool    middleMouseDown_ = false;
 
@@ -100,7 +100,7 @@ private:
     void ApplyMouseForce(float dt, bool attract) {
         for (auto& ball : balls_) {
 
-            Vector2 delta    = mousePos_ - ball.position;
+            Math::Vec2 delta = mousePos_ - ball.position;
             float   distance = delta.Length();
 
             if (distance < INFLUENCE_RADIUS && distance > MIN_INFLUENCE) {
@@ -116,12 +116,12 @@ private:
     void ResolveBallCollisions() {
         for (size_t i = 0; i < balls_.size(); ++i) {
             for (size_t j = i + 1; j < balls_.size(); ++j) {
-                Vector2 delta   = balls_[j].position - balls_[i].position;
+                Math::Vec2 delta   = balls_[j].position - balls_[i].position;
                 float   dist    = delta.Length();
                 float   minDist = balls_[i].radius + balls_[j].radius;
 
                 if (dist < minDist && dist > 0.0f) {
-                    Vector2 normal  = delta / dist;
+                    Math::Vec2 normal  = delta / dist;
                     float   overlap = (minDist - dist) * 0.5f;
 
                     balls_[i].position -= normal * overlap;
@@ -142,7 +142,7 @@ private:
 #pragma region Drawing
 
     void DrawBackground() {
-        Vector2 center{ GetWindow().GetWidth() * 0.5f, GetWindow().GetHeight() * 0.45f };
+        Math::Vec2 center{ GetWindow().GetWidth() * 0.5f, GetWindow().GetHeight() * 0.45f };
         float   maxR = Math::MaxValue(GetWindow().GetWidth(), GetWindow().GetHeight()) * 0.95f;
         Color   base{18, 24, 38};
 
@@ -161,7 +161,7 @@ private:
 
         //--- Pulsing glow outline ----------------------------------------
         float pulse     = Math::PingPong(t * 2.0f + ball.position.x * 0.005f, 0.3f);
-        auto  glowAlpha = (unsigned char)Math::Clamp(speed * 0.4f + pulse * 80.0f, 0.0f, 255.0f);
+        auto  glowAlpha = static_cast<unsigned char>(Math::Clamp(speed * 0.4f + pulse * 80.0f, 0.0f, 255.0f));
         Shapes::DrawCircleOutline(ball.position.x, ball.position.y,
                                   ball.radius * (1.3f + pulse * 0.15f),
                                   {ball.color.r, ball.color.g, ball.color.b, glowAlpha});
@@ -230,6 +230,7 @@ private:
 #pragma region Spawning
 
     void SpawnRandomBalls(int count) {
+        balls_.reserve(balls_.size() + static_cast<size_t>(count));
         for (int i = 0; i < count; ++i) {
             float x   = Math::Random::Range(100.0f, 900.0f);
             float y   = Math::Random::Range(50.0f,  300.0f);
@@ -264,9 +265,10 @@ public:
 #pragma region Setup
 
     void OnStart() override {
+        RS_INFO("BouncingBalls simulation starting - spawning 8 initial balls");
         GetWindow().SetSize(1000, 700);
         GetWindow().SetTitle("Raysim - Bouncing Balls Physics");
-        FontManager::LoadFont("assets/fonts/OpenSans-Regular.ttf");
+        FontManager::LoadFont("opensans", "fonts/OpenSans-Regular.ttf", 32);
         SpawnRandomBalls(8);
         Time::SetTargetFPS(60);
     }
@@ -320,11 +322,6 @@ public:
 #pragma endregion
 
 };
-
-//==============================================================================
-// Entry point
-//==============================================================================
-
 
 //==============================================================================
 // Entry point

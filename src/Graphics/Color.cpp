@@ -63,12 +63,12 @@ RS::Color RS::Color::FromHSV(float h, float s, float v, unsigned char alpha) {
 
     // Pattern for RGB assignment based on hue sector
     const int pattern[6][3] = {
-        {0, 1, 2}, // 0–60
-        {1, 0, 2}, // 60–120
-        {2, 0, 1}, // 120–180
-        {2, 1, 0}, // 180–240
-        {1, 2, 0}, // 240–300
-        {0, 2, 1}  // 300–360
+        {0, 1, 2}, // 0-60
+        {1, 0, 2}, // 60-120
+        {2, 0, 1}, // 120-180
+        {2, 1, 0}, // 180-240
+        {1, 2, 0}, // 240-300
+        {0, 2, 1}  // 300-360
     };
 
     // Determine which sector of the hue circle we're in
@@ -108,7 +108,7 @@ std::string RS::Color::ToHex(bool includeAlpha) const {
     return std::string(buffer, len);
 }
 
-RS::Vector3 RS::Color::ToHSV() const
+RS::Math::Vec3 RS::Color::ToHSV() const
 {
     // Normalize RGB values to [0, 1]
     float _r = this->r * (1.0f / 255.0f);

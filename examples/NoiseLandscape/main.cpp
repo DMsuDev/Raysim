@@ -67,9 +67,10 @@ public:
 
     void OnStart() override
     {
+        RS_INFO("NoiseLandscape starting");
         GetWindow().SetSize(1200, 700);
         GetWindow().SetTitle("Raysim - Noise Landscape");
-        FontManager::LoadFont("assets/fonts/OpenSans-Regular.ttf");
+        FontManager::LoadFont("opensans", "fonts/OpenSans-Regular.ttf", 32);
         Time::SetTargetFPS(60);
         float w = static_cast<float>(GetWindow().GetWidth());
         float h = static_cast<float>(GetWindow().GetHeight());
@@ -108,6 +109,7 @@ public:
 
     void OnDraw(float /*alpha*/) override
     {
+        RS_ASSERT(terrain_.has_value() && skyLayer_.has_value(), "Layers not initialized: was OnStart called?");
         float skyH = static_cast<float>(GetWindow().GetHeight()) * SKY_HEIGHT_RATIO;
         skyLayer_->SetSkyHeight(skyH);
         skyLayer_->DrawSky();               // gradient background

@@ -3,7 +3,7 @@
 #include "Raysim/Core/Base.hpp"
 #include "Raysim/Core/WindowProperties.hpp"
 
-#include "Raysim/Math/Vector2Int.hpp"
+#include "Raysim/Math/Types/Vec2i.hpp"
 
 namespace RS {
 
@@ -45,9 +45,9 @@ public:
 
         ImplSetSize(width, height);
     }
-    void SetSize(const Vector2Int& size) { SetSize(size.x, size.y); }
+    void SetSize(const Math::Vec2i& size) { SetSize(size.x, size.y); }
 
-    Vector2Int GetSize() const { return ImplGetSize(); }
+    Math::Vec2i GetSize() const { return ImplGetSize(); }
     int GetWidth()       const { return ImplGetSize().x; }
     int GetHeight()      const { return ImplGetSize().y; }
 
@@ -143,7 +143,7 @@ protected:
     virtual void ImplSetSize(int width, int height) = 0;
 
     /// @brief Retrieves the size of the window as a Vec2Int (width, height).
-    virtual Vector2Int ImplGetSize()   const = 0;
+    virtual Math::Vec2i ImplGetSize()   const = 0;
 
 // ===========================================================
 // Window mode properties
