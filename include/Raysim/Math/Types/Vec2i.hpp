@@ -17,20 +17,8 @@ namespace RS::Math {
 struct Vec2i {
     int x{0}, y{0};
 
-    /**
-     * @brief Default construct (zero vector)
-     */
     constexpr Vec2i() noexcept = default;
-    /**
-     * @brief Construct from x and y components
-     * @param in_x X component
-     * @param in_y Y component
-     */
     constexpr Vec2i(int in_x, int in_y) noexcept : x(in_x), y(in_y) {}
-    /**
-     * @brief Construct uniform vector (x = y = s)
-     * @param s Scalar applied to both components
-     */
     explicit constexpr Vec2i(int s) noexcept : x(s), y(s) {}
 
 //==============================================================================
