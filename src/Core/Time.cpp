@@ -1,8 +1,8 @@
+#include "pch.hpp"
 #include "Raysim/Core/Time.hpp"
 
 #include <chrono>
 #include <thread>
-#include <algorithm>
 
 namespace RS {
 
@@ -130,30 +130,19 @@ void LimitFPS()
     if (g.targetFrameTime <= 0.0f)
         return;
 
+    // Sleep until ~1ms before target, then busy-spin the remainder for precision.
+    const auto sleepUntil = g.nextFrameTarget - std::chrono::milliseconds(1);
+    if (clock::now() < sleepUntil)
+        std::this_thread::sleep_until(sleepUntil);
+
+    while (clock::now() < g.nextFrameTarget)
+        std::this_thread::yield();
+
+    // If we overslept by more than one full frame, reset the cadence to avoid
+    // a burst of back-to-back frames trying to catch up.
     const auto now = clock::now();
-
-    // If we're running behind, skip sleeping and just reset the target to
-    // avoid spiraling further out of control.
-    if (now > g.nextFrameTarget + seconds(g.targetFrameTime))
-    {
+    if (now > g.nextFrameTarget + std::chrono::duration_cast<clock::duration>(seconds(g.targetFrameTime)))
         g.nextFrameTarget = now;
-    }
-
-    if (now < g.nextFrameTarget)
-    {
-        auto sleepUntil = g.nextFrameTarget - std::chrono::milliseconds(1);
-
-        if (now < sleepUntil)
-            std::this_thread::sleep_until(sleepUntil);
-
-        while (clock::now() < g.nextFrameTarget)
-            std::this_thread::yield();
-    }
-
-    if (now > g.nextFrameTarget + seconds(g.targetFrameTime))
-    {
-        g.nextFrameTarget = now;
-    }
 
     g.nextFrameTarget += std::chrono::duration_cast<clock::duration>(
         seconds(g.targetFrameTime));
@@ -184,7 +173,7 @@ void Time::EndFrame()
     g.frameCount++;
 
     UpdateFPS(g.frameTime);
-    UpdateEMA(scaledDelta, g.smoothDeltaTime);
+    UpdateEMA(g.deltaTime, g.smoothDeltaTime);
 
     g.fixedAccumulator += g.deltaTime;
     g.fixedAccumulator = std::min(g.fixedAccumulator, g.maximumDeltaTime);
@@ -240,10 +229,11 @@ void Time::SetFixedDeltaTime(float step)
 // Delta time
 //============================================================
 
-float Time::GetFrameTime()         { return g.frameTime; }
-float Time::GetDeltaTime()         { return g.deltaTime * g.timeScale; }
-float Time::GetUnscaledDeltaTime() { return g.deltaTime; }
-float Time::GetSmoothDeltaTime()   { return g.smoothDeltaTime; }
+float Time::GetFrameTime()               { return g.frameTime; }
+float Time::GetDeltaTime()               { return g.deltaTime * g.timeScale; }
+float Time::GetUnscaledDeltaTime()       { return g.deltaTime; }
+float Time::GetSmoothDeltaTime()         { return g.smoothDeltaTime * g.timeScale; }
+float Time::GetUnscaledSmoothDeltaTime() { return g.smoothDeltaTime; }
 
 //============================================================
 // Time scale
