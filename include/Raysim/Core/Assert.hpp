@@ -44,8 +44,8 @@
 // ============================================================================
 //
 // Two families of assertion macros, mirroring the Core/Client logger split:
-//   RS_CORE_ASSERT*  – engine internals, logs through RS_CORE_ERROR
-//   RS_ASSERT*       – client/application, logs through RS_ERROR
+//   RS_CORE_ASSERT*  - engine internals, logs through RS_CORE_ERROR
+//   RS_ASSERT*       - client/application, logs through RS_ERROR
 //
 // The `type` token is pasted to form the logger macro:
 //   type = _CORE_  ->  RS_CORE_ERROR(...)

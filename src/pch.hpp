@@ -4,7 +4,9 @@
 // Exclude conflicting Win32 definitions
 //----------------------------------------------------------------------------------
 #if defined(_WIN32)
-    #define WIN32_LEAN_AND_MEAN
+    #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+    #endif
     #ifndef NOMINMAX
         #define NOMINMAX
     #endif

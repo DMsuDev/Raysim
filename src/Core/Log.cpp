@@ -24,7 +24,7 @@ inline spdlog::level::level_enum ToSpd(LogLevel level)
     }
 }
 
-void LogWithLevel(LogLevel level, const std::string& msg) {
+static void LogWithLevel(LogLevel level, const std::string& msg) {
     switch (level) {
         case LogLevel::Trace:    RS_CORE_TRACE(msg); break;
         case LogLevel::Debug:    RS_CORE_DEBUG(msg); break;
