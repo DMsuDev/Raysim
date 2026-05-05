@@ -4,7 +4,7 @@
 
 #include <raylib.h>
 
-namespace RS {
+namespace RS::Backend {
 
 /** @brief Helper function to convert enum values to raylib's expected integer codes
  *
@@ -45,14 +45,14 @@ KeyCode RaylibInput::GetLastKeyPressed() const {
 // MOUSE INPUT
 // ============================================================================
 
-Vector2 RaylibInput::GetMousePosition() const {
+Math::Vec2 RaylibInput::GetMousePosition() const {
     ::Vector2 pos = ::GetMousePosition();
-    return Vector2{pos.x, pos.y};
+    return Math::Vec2{pos.x, pos.y};
 }
 
-Vector2 RaylibInput::GetMouseDelta() const {
+Math::Vec2 RaylibInput::GetMouseDelta() const {
     ::Vector2 delta = ::GetMouseDelta();
-    return RS::Vector2{delta.x, delta.y};
+    return Math::Vec2{delta.x, delta.y};
 }
 
 bool RaylibInput::IsMouseButtonDown(MouseButton button) const {
@@ -99,4 +99,4 @@ float RaylibInput::GetGamepadAxisValue(int gamepad, int axis) const {
     return ::GetGamepadAxisMovement(gamepad, axis);
 }
 
-} // namespace RS
+} // namespace RS::Backend

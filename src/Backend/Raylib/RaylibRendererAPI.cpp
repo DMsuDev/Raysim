@@ -1,20 +1,20 @@
 #include "pch.hpp"
 
 #include "Raysim/Graphics/Color.hpp"
-#include "Raysim/Math/Vector3.hpp"
+#include "Raysim/Math/Types/Vec3.hpp"
 
 #include "Backend/Raylib/RaylibRendererAPI.hpp"
 
 #include <raylib.h>
 
-namespace RS {
+namespace RS::Backend {
 
 void RaylibRendererAPI::ClearScreen(const Color& color)
 {
     ::ClearBackground(::Color{color.r, color.g, color.b, color.a});
 }
 
-void RaylibRendererAPI::ClearScreen(const Vector3& color)
+void RaylibRendererAPI::ClearScreen(const Math::Vec3& color)
 {
     auto toByte = [](float v) -> unsigned char {
         float clamped = (v < 0.0f) ? 0.0f : (v > 1.0f) ? 1.0f : v;
@@ -47,4 +47,4 @@ void RaylibRendererAPI::SetViewport(uint32_t /*x*/, uint32_t /*y*/,
 
 
 
-} // namespace RS
+} // namespace RS::Backend

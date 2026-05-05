@@ -2,7 +2,8 @@
 
 #include "Raysim/Core/Base.hpp"
 
-#include "Raysim/Math/Vector2.hpp"
+#include "Raysim/Math/Types/Vec2.hpp"
+#include "Raysim/Math/Types/Vec3.hpp"
 #include "Raysim/Graphics/Color.hpp"
 
 #include <cstdint>
@@ -101,7 +102,7 @@ public:
      *
      * @param color RGB colour vector (linear space).
      */
-    virtual void ClearScreen(const Vector3& color) = 0;
+    virtual void ClearScreen(const Math::Vec3& color) = 0;
 
     /**
      * @brief Clear all buffers (color, depth, stencil) to their default values.

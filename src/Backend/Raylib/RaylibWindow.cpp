@@ -1,11 +1,11 @@
 #include "pch.hpp"
 
-#include "Raysim/Math/Vector2.hpp"
 #include "Backend/Raylib/RaylibWindow.hpp"
+#include "Raysim/Math/Types/Vec2.hpp"
 
 #include <raylib.h>
 
-namespace RS {
+namespace RS::Backend {
 
 // ============================================================================
 // Construction & Destruction
@@ -89,9 +89,9 @@ void RaylibWindow::ImplSetSize(int width, int height)
     RS_CORE_DEBUG("Window size updated to {}x{}", m_Data.Width, m_Data.Height);
 }
 
-Vector2Int RaylibWindow::ImplGetSize() const
+Math::Vec2i RaylibWindow::ImplGetSize() const
 {
-    return Vector2Int{m_Data.Width, m_Data.Height};
+    return Math::Vec2i{m_Data.Width, m_Data.Height};
 }
 
 // ============================================================================
@@ -144,4 +144,4 @@ void RaylibWindow::ImplSetVSync(bool enabled)
     );
 }
 
-} // namespace RS
+} // namespace RS::Backend
