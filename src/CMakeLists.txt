@@ -79,7 +79,6 @@ target_include_directories(Raysim
 
     PRIVATE
         ${CMAKE_SOURCE_DIR}/src
-        ${CMAKE_SOURCE_DIR}/third_party/stb
         ${IMGUI_DIR}
         ${IMGUI_DIR}/backends
 )
@@ -96,6 +95,7 @@ target_link_libraries(Raysim
         $<$<BOOL:${RS_BUILD_SHARED}>:glfw>
         $<$<BOOL:${RS_BUILD_SHARED}>:glad>
         $<$<BOOL:${RS_BUILD_SHARED}>:imgui_glfw_opengl>
+        $<$<BOOL:${RS_BUILD_SHARED}>:stb>
     PRIVATE
         rs_warnings
         $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:raylib>
