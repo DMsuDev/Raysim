@@ -63,7 +63,7 @@ void LogTTLRegistry::LogTTL(const std::string& key, double ttlSeconds, LogLevel 
 // Initialization
 //==============================================================================
 
-void Log::Init(bool async)
+void Log::Init(bool async, LogFileMode fileMode)
 {
     if (IsInitialized())
         return;
@@ -76,11 +76,14 @@ void Log::Init(bool async)
         /// Console pattern: colored `[HH:MM:SS] [logger] message`.
         consoleSink->set_pattern("%^[%T] [%n] %v%$");
 
+        // rotate_on_open=true clears/rotates the file on each startup (Truncate).
+        // rotate_on_open=false appends to the existing file (Append).
+        const bool rotateOnOpen = (fileMode == LogFileMode::Truncate);
         auto fileSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
             "Raysim.log",
             1024 * 1024 * 10,  // 10 MB per file
             5,                 // keep 5 rotated files
-            false
+            rotateOnOpen
         );
         fileSink->set_level(spdlog::level::trace);
         /// File pattern: `[HH:MM:SS] [level] logger: message`.

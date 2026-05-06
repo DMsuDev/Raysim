@@ -125,6 +125,13 @@ public:
     static void LogTTL(const std::string& key, double ttlSeconds, LogLevel level, const std::string& msg);
 };
 
+/// @brief Controls how the log file is opened at startup.
+enum class LogFileMode
+{
+    Append,   ///< Keep logs from previous runs (default).
+    Truncate  ///< Clear the log file on every startup.
+};
+
 /// @brief Static logging facade. Manages two independent loggers:
 ///
 /// - `CORE`: internal engine logging (not intended for end-users).
@@ -138,8 +145,9 @@ class Log
 {
 public:
     /// Initialize both Core and Client loggers.
-    /// @param async If true, logging is asynchronous (bounded queue, non-blocking).
-    static void Init(bool async = true);
+    /// @param async    If true, logging is asynchronous (bounded queue, non-blocking).
+    /// @param fileMode Append (keep old logs) or Truncate (clear on every startup).
+    static void Init(bool async = true, LogFileMode fileMode = LogFileMode::Append);
 
     /// Clean up loggers and flush all sinks. Call on application shutdown.
     static void Shutdown();
