@@ -261,7 +261,7 @@ public:
 #pragma region Setup
 
     void OnStart() override {
-        RS_INFO("LissajousSimulation starting: resolution={}, preset={} ({})",
+        RS_DEBUG("LissajousSimulation starting: resolution={}, preset={} ({})",
                 resolution, currentPreset + 1, PRESETS[currentPreset].name);
 
         RS_ASSERT(resolution > 0, "Curve resolution must be > 0");

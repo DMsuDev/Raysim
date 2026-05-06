@@ -78,7 +78,7 @@ public:
         }
     }
 
-    void Update(float dt, Key)
+    void Update([[maybe_unused]] float dt, Key)
     {
         if (m_State == SceneState::Running)
         {
@@ -89,13 +89,13 @@ public:
         }
     }
 
-    void FixedUpdate(float dt, Key)
+    void FixedUpdate([[maybe_unused]] float dt, Key)
     {
         if (m_State == SceneState::Running)
             OnFixedUpdate(dt);
     }
 
-    void Draw(float alpha, Key)
+    void Draw([[maybe_unused]] float alpha, Key)
     {
         // Can draw even if paused, but not if uninitialized or stopped
         if (m_State != SceneState::Uninitialized)

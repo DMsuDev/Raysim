@@ -67,7 +67,7 @@ public:
 
     void OnStart() override
     {
-        RS_INFO("NoiseLandscape starting");
+        RS_DEBUG("NoiseLandscape starting");
         GetWindow().SetSize(1200, 700);
         GetWindow().SetTitle("Raysim - Noise Landscape");
         FontManager::LoadFont("opensans", "fonts/OpenSans-Regular.ttf", 32);
@@ -107,7 +107,7 @@ public:
         terrain_->SetScrollX(scrollX_);
     }
 
-    void OnDraw(float /*alpha*/) override
+    void OnDraw(float alpha) override
     {
         RS_ASSERT(terrain_.has_value() && skyLayer_.has_value(), "Layers not initialized: was OnStart called?");
         float skyH = static_cast<float>(GetWindow().GetHeight()) * SKY_HEIGHT_RATIO;

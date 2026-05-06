@@ -65,7 +65,9 @@ bool STBTrueTypeProvider::LoadFont(
     uint32_t           charCount,
     Font&              outFont)
 {
-    RS_CORE_INFO("STBTrueTypeProvider: loading '{}' @ {}px ({} glyphs)", path, fontSize, charCount);
+    RS_PROFILE_FUNCTION();
+
+    RS_CORE_DEBUG("STBTrueTypeProvider: loading '{}' @ {}px ({} glyphs)", path, fontSize, charCount);
 
     // Read the entire TTF file into memory.
     std::vector<uint8_t> ttfBuf = ReadFile(path);
@@ -169,7 +171,7 @@ bool STBTrueTypeProvider::LoadFont(
     outFont.SetLoaded(true);
     outFont.SetDefault(false);
 
-    RS_CORE_INFO("STBTrueTypeProvider: loaded '{}' - atlas {}x{}, {} glyphs, lineHeight={:.1f}px",
+    RS_CORE_DEBUG("STBTrueTypeProvider: loaded '{}' - atlas {}x{}, {} glyphs, lineHeight={:.1f}px",
                  path, atlasW, atlasH, charCount, lineHeightPx);
     return true;
 }

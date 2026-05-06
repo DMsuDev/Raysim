@@ -10,6 +10,8 @@ namespace RS {
 
 void SceneManager::HandleTransition()
 {
+    RS_PROFILE_FUNCTION();
+
     // If no scene was ever requested via ChangeScene, auto-start the first registered one.
     if (!m_Current && !m_NextScene)
     {
@@ -32,12 +34,14 @@ void SceneManager::HandleTransition()
 
     if (m_Current)
     {
+        RS_CORE_TRACE("SceneManager: stopping scene '{}'", m_Current->m_Config.Name);
         m_Current->Stop(MakeKey());
         m_Current->OnDetach();
     }
 
     m_Current = std::move(m_NextScene);
 
+    RS_CORE_TRACE("SceneManager: starting scene '{}'", m_Current->m_Config.Name);
     m_Current->OnAttach();
     m_Current->Start(MakeKey());
 }
@@ -48,6 +52,8 @@ void SceneManager::HandleTransition()
 
 void SceneManager::ChangeScene(SceneID id)
 {
+    RS_PROFILE_FUNCTION();
+
     auto it = m_Registry.find(id);
     if (it == m_Registry.end())
     {
@@ -58,6 +64,7 @@ void SceneManager::ChangeScene(SceneID id)
     m_HasRequestedScene = true;
 
     const auto& desc = it->second;
+    RS_CORE_TRACE("SceneManager: queuing scene '{}' (id={})", desc.Name, id);
 
     m_NextScene = desc.Factory(m_Context);
 
@@ -67,6 +74,8 @@ void SceneManager::ChangeScene(SceneID id)
 
 void SceneManager::ChangeScene(const std::string& name)
 {
+    RS_PROFILE_FUNCTION();
+
     auto it = m_NameToID.find(name);
     if (it == m_NameToID.end())
     {

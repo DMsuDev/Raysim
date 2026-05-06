@@ -117,7 +117,7 @@ class StarField : public Scene
 public:
     void OnStart()               override;
     void OnUpdate(float dt)      override;
-    void OnDraw(float /*alpha*/) override;
+    void OnDraw(float alpha) override;
 };
 
 // ============================================================================
@@ -175,7 +175,7 @@ class PlasmaArt : public Scene
 public:
     void OnStart()               override;
     void OnUpdate(float dt)      override;
-    void OnDraw(float /*alpha*/) override;
+    void OnDraw(float alpha) override;
 };
 
 // ============================================================================
@@ -227,7 +227,7 @@ class ClockMandala : public Scene
 public:
     void OnStart()               override;
     void OnUpdate(float dt)      override;
-    void OnDraw(float /*alpha*/) override;
+    void OnDraw(float alpha) override;
 };
 
 // ============================================================================
@@ -269,7 +269,7 @@ void StarField::OnUpdate(float dt)
     }
 }
 
-void StarField::OnDraw(float /*alpha*/)
+void StarField::OnDraw(float alpha)
 {
     GetRenderer().ClearScreen(Color{5, 5, 18});
 
@@ -321,7 +321,7 @@ void PlasmaArt::OnUpdate(float dt)
     m_Time += dt * m_Speed;
 }
 
-void PlasmaArt::OnDraw(float /*alpha*/)
+void PlasmaArt::OnDraw(float alpha)
 {
     GetRenderer().ClearScreen(Colors::Black);
 
@@ -371,7 +371,7 @@ void ClockMandala::OnUpdate(float dt)
     m_Time += dt * m_Speed;
 }
 
-void ClockMandala::OnDraw(float /*alpha*/)
+void ClockMandala::OnDraw(float alpha)
 {
     GetRenderer().ClearScreen(Color{10, 5, 30});
 

@@ -12,6 +12,7 @@ namespace RS {
 
 Scope<RendererAPI> BackendFactory::CreateRenderer(RenderAPI api)
 {
+    RS_PROFILE_FUNCTION();
     switch (api)
     {
         case RenderAPI::Raylib:
@@ -29,6 +30,7 @@ Scope<RendererAPI> BackendFactory::CreateRenderer(RenderAPI api)
 
 Scope<Window> BackendFactory::CreateAppWindow(WindowBackend backend, const WindowProps& props)
 {
+    RS_PROFILE_FUNCTION();
     switch (backend)
     {
         case WindowBackend::Raylib:
@@ -49,6 +51,7 @@ Scope<Window> BackendFactory::CreateAppWindow(WindowBackend backend, const Windo
 
 Scope<Input> BackendFactory::CreateInput(WindowBackend backend)
 {
+    RS_PROFILE_FUNCTION();
     switch (backend)
     {
         case WindowBackend::Raylib:
@@ -67,6 +70,7 @@ Scope<Input> BackendFactory::CreateInput(WindowBackend backend)
 
 Scope<Fonts::FontRenderer> BackendFactory::CreateFontRenderer(RenderAPI api)
 {
+    RS_PROFILE_FUNCTION();
     switch (api)
     {
         case RenderAPI::Raylib:
@@ -84,6 +88,7 @@ Scope<Fonts::FontRenderer> BackendFactory::CreateFontRenderer(RenderAPI api)
 
 Scope<ImGuiBackend> BackendFactory::CreateImGuiBackend(WindowBackend windowBackend, RenderAPI renderAPI)
 {
+    RS_PROFILE_FUNCTION();
     switch (windowBackend)
     {
         case WindowBackend::Raylib:

@@ -265,7 +265,7 @@ public:
 #pragma region Setup
 
     void OnStart() override {
-        RS_INFO("BouncingBalls simulation starting - spawning 8 initial balls");
+        RS_DEBUG("BouncingBalls simulation starting - spawning 8 initial balls");
         GetWindow().SetSize(1000, 700);
         GetWindow().SetTitle("Raysim - Bouncing Balls Physics");
         FontManager::LoadFont("opensans", "fonts/OpenSans-Regular.ttf", 32);

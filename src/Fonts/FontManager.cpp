@@ -35,6 +35,7 @@ FontHandle FontManager::GenerateHandle() noexcept
 
 void FontManager::SetProvider(Scope<TrueTypeProvider> provider)
 {
+    RS_PROFILE_FUNCTION();
     RS_ASSERT(provider != nullptr, "FontManager: provider must not be null");
     s_TextProvider = std::move(provider);
     RS_CORE_DEBUG("FontManager: TrueType provider set");
@@ -42,6 +43,7 @@ void FontManager::SetProvider(Scope<TrueTypeProvider> provider)
 
 void FontManager::SetRenderer(Scope<FontRenderer> renderer)
 {
+    RS_PROFILE_FUNCTION();
     RS_ASSERT(renderer != nullptr, "FontManager: renderer must not be null");
     s_TextRenderer = std::move(renderer);
     s_TextRenderer->Init();
@@ -50,10 +52,11 @@ void FontManager::SetRenderer(Scope<FontRenderer> renderer)
 
 void FontManager::Shutdown()
 {
+    RS_PROFILE_FUNCTION();
     UnloadAll();
 
     if (s_TextRenderer) {
-        s_TextRenderer->Shutdown();
+        // s_TextRenderer->Shutdown() is called on reset via the destructor.
         s_TextRenderer.reset();
     }
 
@@ -75,6 +78,8 @@ FontHandle FontManager::LoadFont(
     uint32_t           firstChar,
     uint32_t           charCount)
 {
+    RS_PROFILE_FUNCTION();
+
     RS_ASSERT(!name.empty(), "FontManager::LoadFont -> name cannot be empty");
     RS_ASSERT(fontSize > 0,  "FontManager::LoadFont -> fontSize must be positive (got {})", fontSize);
 
@@ -127,12 +132,14 @@ FontHandle FontManager::LoadFont(
     if (name == "default" || s_DefaultHandle == DEFAULT_FONT_HANDLE)
         s_DefaultHandle = h;
 
-    RS_CORE_INFO("FontManager::LoadFont -> loaded '{}' (handle={}, size={}px)", name, h, fontSize);
+    RS_CORE_DEBUG("FontManager::LoadFont -> loaded '{}' (handle={}, size={}px)", name, h, fontSize);
     return h;
 }
 
 FontHandle FontManager::LoadDefaultFont()
 {
+    RS_PROFILE_FUNCTION();
+
     // Re-register the built-in default font entry (no provider / atlas needed;
     // RaylibFontRenderer handles DEFAULT_FONT_HANDLE internally via GetFontDefault()).
     // Use "__builtin__" as internal name so user-registered "default" doesn't conflict.

@@ -48,7 +48,7 @@ public:
      *
      * @param dt Delta time since the last frame in seconds.
      */
-    virtual void OnUpdate(float dt) {}
+    virtual void OnUpdate([[maybe_unused]] float dt) {}
 
     /**
      * @brief ImGui rendering callback invoked every frame.
