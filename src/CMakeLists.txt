@@ -43,12 +43,14 @@ set(RAYSIM_SOURCES
     ${SRC_DIR}/Core/BackendFactory.cpp
     ${SRC_DIR}/Core/Time.cpp
     ${SRC_DIR}/Core/Application.cpp
+    ${SRC_DIR}/Core/LayerStack.cpp
 
     # Math
     ${SRC_DIR}/Math/Random.cpp
 
     # Scenes
     ${SRC_DIR}/Scene/SceneManager.cpp
+    ${SRC_DIR}/Scene/Scene.cpp
 
     # Backend: Raylib implementations
     ${SRC_DIR}/Backend/Raylib/RaylibInput.cpp
@@ -56,6 +58,10 @@ set(RAYSIM_SOURCES
     ${SRC_DIR}/Backend/Raylib/RaylibTexture.cpp
     ${SRC_DIR}/Backend/Raylib/RaylibWindow.cpp
     ${SRC_DIR}/Backend/Raylib/RaylibFontRenderer.cpp
+    ${SRC_DIR}/Backend/Raylib/RaylibImGuiBackend.cpp
+
+    # ImGui layer
+    ${SRC_DIR}/ImGui/ImGuiLayer.cpp
 
     # Font system
     ${SRC_DIR}/Fonts/Providers/STBTrueTypeProvider.cpp

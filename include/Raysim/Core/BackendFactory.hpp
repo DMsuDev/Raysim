@@ -10,6 +10,7 @@ namespace RS
     class RendererAPI;
     class Window;
     class Input;
+    class ImGuiBackend;
     namespace Fonts { class FontRenderer; }
 
     /**
@@ -62,6 +63,18 @@ namespace RS
          * @return Owning pointer to a concrete FontRenderer implementation.
          */
         static Scope<Fonts::FontRenderer> CreateFontRenderer(RenderAPI api);
+
+        /**
+         * @brief Create an ImGui platform+renderer backend.
+         *
+         * Returns the correct ImGuiBackend implementation for the given
+         * window and renderer backends.
+         *
+         * @param windowBackend The windowing library in use.
+         * @param renderAPI     The graphics API in use.
+         * @return Owning pointer to a concrete ImGuiBackend, or nullptr on failure.
+         */
+        static Scope<ImGuiBackend> CreateImGuiBackend(WindowBackend windowBackend, RenderAPI renderAPI);
     };
 
 } // namespace RS

@@ -6,6 +6,7 @@
 #include "Backend/Raylib/RaylibWindow.hpp"
 #include "Backend/Raylib/RaylibInput.hpp"
 #include "Backend/Raylib/RaylibFontRenderer.hpp"
+#include "Backend/Raylib/RaylibImGuiBackend.hpp"
 
 namespace RS {
 
@@ -76,6 +77,25 @@ Scope<Fonts::FontRenderer> BackendFactory::CreateFontRenderer(RenderAPI api)
         default:
         {
             RS_CORE_ERROR("Unsupported font renderer backend: {}", static_cast<int>(api));
+            return nullptr;
+        }
+    }
+}
+
+Scope<ImGuiBackend> BackendFactory::CreateImGuiBackend(WindowBackend windowBackend, RenderAPI renderAPI)
+{
+    switch (windowBackend)
+    {
+        case WindowBackend::Raylib:
+        {
+            RS_CORE_DEBUG("ImGui backend created: Raylib (rlImGui stub)");
+            return CreateScope<Backend::RaylibImGuiBackend>();
+        }
+
+        default:
+        {
+            RS_CORE_ERROR("Unsupported ImGui backend — WindowBackend: {}, RenderAPI: {}",
+                          static_cast<int>(windowBackend), static_cast<int>(renderAPI));
             return nullptr;
         }
     }
