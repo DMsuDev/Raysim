@@ -81,6 +81,7 @@ target_include_directories(Raysim
         ${CMAKE_SOURCE_DIR}/src
         ${IMGUI_DIR}
         ${IMGUI_DIR}/backends
+        ${RLIMGUI_DIR}
 )
 
 # ============================================================
@@ -95,6 +96,7 @@ target_link_libraries(Raysim
         $<$<BOOL:${RS_BUILD_SHARED}>:glfw>
         $<$<BOOL:${RS_BUILD_SHARED}>:glad>
         $<$<BOOL:${RS_BUILD_SHARED}>:imgui_glfw_opengl>
+        $<$<BOOL:${RS_BUILD_SHARED}>:rlimgui>
         $<$<BOOL:${RS_BUILD_SHARED}>:stb>
     PRIVATE
         rs_warnings
@@ -102,5 +104,7 @@ target_link_libraries(Raysim
         $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:glfw>
         $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:glad>
         $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:imgui_glfw_opengl>
+        $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:rlimgui>
+        $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:stb>
         $<$<PLATFORM_ID:Windows>:winmm>
 )
