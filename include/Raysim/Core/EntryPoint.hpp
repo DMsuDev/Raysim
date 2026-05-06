@@ -8,6 +8,11 @@ int main(int argc, char** argv)
 {
 	RS::Log::Init();
 
+	RS_CORE_INFO("================================================");
+	RS_CORE_INFO("  Raysim Engine");
+	RS_CORE_INFO("  Build: " __DATE__ " " __TIME__);
+	RS_CORE_INFO("================================================");
+
 	RS_PROFILE_BEGIN_SESSION("Startup", "RaysimProfile-Startup.json");
 	auto app = RS::CreateApplication({ argc, argv });
 	RS_PROFILE_END_SESSION();

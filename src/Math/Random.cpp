@@ -27,6 +27,7 @@ static uint32_t noiseSeed = std::random_device{}();
 
 void Seed(unsigned int seed)
 {
+    RS_CORE_TRACE("Random: seeded with {}", seed);
     generator.seed(seed);
     noiseSeed = seed;
 }
@@ -34,6 +35,7 @@ void Seed(unsigned int seed)
 void SeedRandom()
 {
     const uint32_t s = std::random_device{}();
+    RS_CORE_TRACE("Random: seeded with hardware entropy ({})", s);
     generator.seed(s);
     noiseSeed = s;
 }

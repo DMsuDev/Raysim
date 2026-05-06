@@ -29,8 +29,12 @@ void Scene::ImGuiEndFrame()
 
 ImGuiLayer* Scene::SetupImGuiLayer()
 {
+    RS_PROFILE_FUNCTION();
+
     RS_CORE_ASSERT(m_Context, "Scene has no EngineContext: call SetupImGuiLayer() from OnAttach() or OnStart()");
     RS_CORE_ASSERT(m_ImGuiLayer == nullptr, "ImGuiLayer already set up for this scene");
+
+    RS_CORE_TRACE("Scene '{}': setting up ImGuiLayer", m_Config.Name);
 
     const auto& cfg = *m_Context->Config;
     auto backend = BackendFactory::CreateImGuiBackend(cfg.Backend, cfg.Renderer);
@@ -39,6 +43,7 @@ ImGuiLayer* Scene::SetupImGuiLayer()
     m_ImGuiLayer = layer;
     m_LayerStack.PushOverlay(layer);
 
+    RS_CORE_DEBUG("Scene '{}': ImGuiLayer ready", m_Config.Name);
     return m_ImGuiLayer;
 }
 

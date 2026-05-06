@@ -183,8 +183,8 @@ void Time::EndFrame()
 // Pause
 //============================================================
 
-void Time::Pause()           { g.paused = true; }
-void Time::Resume()          { g.paused = false; }
+void Time::Pause()           { RS_CORE_TRACE("Time: paused");  g.paused = true; }
+void Time::Resume()          { RS_CORE_TRACE("Time: resumed"); g.paused = false; }
 bool Time::IsPaused()        { return g.paused; }
 
 //============================================================
@@ -222,7 +222,10 @@ float Time::GetFixedUnscaledDeltaTime()
 
 void Time::SetFixedDeltaTime(float step)
 {
-    g.fixedDeltaTime = std::max(step, MIN_FIXED_DELTA_TIME);
+    RS_CORE_ASSERT(step > 0.0f, "Time::SetFixedDeltaTime: step must be positive (got {})", step);
+    const float clamped = std::max(step, MIN_FIXED_DELTA_TIME);
+    RS_CORE_TRACE("Time: fixed delta time set to {:.6f}s", clamped);
+    g.fixedDeltaTime = clamped;
 }
 
 //============================================================
@@ -243,7 +246,10 @@ float Time::GetTimeScale() { return g.timeScale; }
 
 void Time::SetTimeScale(float scale)
 {
-    g.timeScale = std::max(scale, MIN_TIME_SCALE);
+    RS_CORE_ASSERT(scale >= 0.0f, "Time::SetTimeScale: scale must be non-negative (got {})", scale);
+    const float clamped = std::max(scale, MIN_TIME_SCALE);
+    RS_CORE_TRACE("Time: time scale set to {:.4f}", clamped);
+    g.timeScale = clamped;
 }
 
 //============================================================
@@ -274,9 +280,11 @@ float Time::GetSmoothedFPS()
 
 void Time::SetTargetFPS(int fps)
 {
+    RS_CORE_ASSERT(fps >= 0, "Time::SetTargetFPS: fps must be non-negative (got {})", fps);
     if (fps > 0)
     {
         g.targetFrameTime = 1.0f / static_cast<float>(fps);
+        RS_CORE_TRACE("Time: target FPS set to {} ({:.4f}ms frame budget)", fps, g.targetFrameTime * 1000.0f);
 
         g.nextFrameTarget = clock::now() +
             std::chrono::duration_cast<clock::duration>(
@@ -285,6 +293,7 @@ void Time::SetTargetFPS(int fps)
     else
     {
         g.targetFrameTime = 0.0f;
+        RS_CORE_TRACE("Time: frame rate cap disabled");
     }
 }
 
@@ -299,7 +308,10 @@ float Time::GetMaximumDeltaTime()
 
 void Time::SetMaximumDeltaTime(float maxDelta)
 {
-    g.maximumDeltaTime = std::max(maxDelta, MIN_MAX_DELTA);
+    RS_CORE_ASSERT(maxDelta > 0.0f, "Time::SetMaximumDeltaTime: maxDelta must be positive (got {})", maxDelta);
+    const float clamped = std::max(maxDelta, MIN_MAX_DELTA);
+    RS_CORE_TRACE("Time: maximum delta time set to {:.6f}s", clamped);
+    g.maximumDeltaTime = clamped;
 }
 
 //============================================================
@@ -317,6 +329,7 @@ uint64_t Time::GetFrameCount()
 
 void Time::Reset()
 {
+    RS_CORE_TRACE("Time: state reset");
     auto start = g.realtimeStart;
     g = TimeState{};
     g.realtimeStart = start;

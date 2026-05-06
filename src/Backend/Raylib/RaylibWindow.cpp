@@ -19,7 +19,7 @@ RaylibWindow::RaylibWindow(const WindowProps& props)
         RS_ASSERT(false, "Window size must be greater than 0");
     }
 
-    RS_CORE_INFO("Initializing RaylibWindow with title '{}', size {}x{}", props.Title, props.Width, props.Height);
+    RS_CORE_DEBUG("Initializing RaylibWindow with title '{}', size {}x{}", props.Title, props.Width, props.Height);
     m_Data.Title  = props.Title;
     m_Data.Width  = props.Width;
     m_Data.Height = props.Height;
@@ -37,7 +37,7 @@ RaylibWindow::~RaylibWindow()
 
 void RaylibWindow::Shutdown()
 {
-    RS_CORE_INFO("Shutting down RaylibWindow");
+    RS_CORE_DEBUG("Shutting down RaylibWindow");
     if (::IsWindowReady())
     {
         ::CloseWindow();
@@ -122,7 +122,7 @@ void RaylibWindow::ImplSetFullscreen(bool fullscreen)
 
     ::ToggleFullscreen();
 
-    RS_CORE_INFO("Changed window mode to {}", fullscreen ? "fullscreen" : "windowed");
+    RS_CORE_DEBUG("Changed window mode to {}", fullscreen ? "fullscreen" : "windowed");
 }
 
 bool RaylibWindow::ImplIsMinimized() const

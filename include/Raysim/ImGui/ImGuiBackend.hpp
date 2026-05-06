@@ -25,7 +25,7 @@ public:
      *
      * @param window The application's main window.
      */
-    virtual void Init(Window& window) = 0;
+    virtual void Init([[maybe_unused]] Window& window) = 0;
 
     /**
      * @brief Shut down the platform and renderer backends.

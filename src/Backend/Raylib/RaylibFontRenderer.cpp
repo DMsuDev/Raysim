@@ -51,11 +51,13 @@ RaylibFontRenderer::~RaylibFontRenderer()
 
 void RaylibFontRenderer::Init()
 {
+    RS_PROFILE_FUNCTION();
     RS_CORE_DEBUG("RaylibFontRenderer: initialized");
 }
 
 void RaylibFontRenderer::Shutdown()
 {
+    RS_PROFILE_FUNCTION();
     size_t released = 0;
     for (auto& [handle, tex] : m_Textures) {
         if (tex && tex->texture.id > 0) {
@@ -75,6 +77,8 @@ void RaylibFontRenderer::Shutdown()
 
 bool RaylibFontRenderer::UploadFontAtlas(FontHandle handle, const FontAtlas& atlas)
 {
+    RS_PROFILE_FUNCTION();
+
     if (!atlas.IsValid()) {
         RS_CORE_ERROR("RaylibFontRenderer::UploadFontAtlas - invalid atlas for handle {}", handle);
         return false;

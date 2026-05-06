@@ -117,7 +117,7 @@ public:
 
         ImGui::Spacing();
         if (ImGui::Button("Log click"))
-            RS_INFO("Mouse2D: 'Log click' button pressed");
+            RS_DEBUG("Mouse2D: 'Log click' button pressed");
 
         ImGui::End();
     }
@@ -177,7 +177,7 @@ public:
         middleDown_ = GetInput().IsMouseButtonDown(MouseButton::Middle);
     }
 
-    void OnDraw(float /*alpha*/) override {
+    void OnDraw(float alpha) override {
         GetRenderer().ClearScreen(Colors::DarkBlue);
 
         float w = static_cast<float>(GetWidth());
