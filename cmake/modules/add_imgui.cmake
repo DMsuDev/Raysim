@@ -47,3 +47,24 @@ target_link_libraries(imgui_glfw_opengl
 )
 
 rs_third_party_setup(imgui_glfw_opengl)
+
+# ============================================================
+# rlImGui (Raylib ImGui integration)
+# ============================================================
+set(RLIMGUI_DIR ${CMAKE_SOURCE_DIR}/third_party/rlImGui)
+
+add_library(rlimgui STATIC
+    ${RLIMGUI_DIR}/rlImGui.cpp
+)
+
+target_include_directories(rlimgui
+    SYSTEM PUBLIC
+    ${RLIMGUI_DIR}
+    ${IMGUI_DIR}
+)
+
+target_link_libraries(rlimgui
+    PUBLIC imgui raylib
+)
+
+rs_third_party_setup(rlimgui)
