@@ -79,6 +79,11 @@
 // --- Font system ---
 #include "Raysim/Fonts/Fonts.hpp"
 
+// --- Layer system ---
+#include "Raysim/Core/Layer.hpp"
+#include "Raysim/Core/LayerStack.hpp"
+#include "Raysim/ImGui/ImGuiLayer.hpp"
+
 // --- Math ---
 #include "Raysim/Math/Math.hpp"
 

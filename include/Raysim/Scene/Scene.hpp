@@ -1,11 +1,14 @@
 #pragma once
 
 #include "Raysim/Core/EngineContext.hpp"
+#include "Raysim/Core/LayerStack.hpp"
 #include "Raysim/Renderer/RenderCommand.hpp"
 
 namespace RS {
 
 class SceneManager; // Forward declaration
+class ImGuiLayer;   // Forward declaration
+class ImGuiBackend; // Forward declaration
 
 // ============================================================
 // Type ID system
@@ -78,7 +81,12 @@ public:
     void Update(float dt, Key)
     {
         if (m_State == SceneState::Running)
+        {
             OnUpdate(dt);
+
+            // Update all layers and overlays in the stack after the scene update.
+            m_LayerStack.UpdateAll(dt);
+        }
     }
 
     void FixedUpdate(float dt, Key)
@@ -91,7 +99,15 @@ public:
     {
         // Can draw even if paused, but not if uninitialized or stopped
         if (m_State != SceneState::Uninitialized)
+        {
             OnDraw(alpha);
+
+            ImGuiBeginFrame();
+
+            m_LayerStack.RenderUIAll();
+
+            ImGuiEndFrame();
+        }
     }
 
     void Pause(Key)
@@ -116,6 +132,8 @@ public:
     {
         if (m_State != SceneState::Uninitialized)
         {
+            m_LayerStack.Clear();
+            m_ImGuiLayer = nullptr;
             OnDetach();
             m_State = SceneState::Uninitialized;
         }
@@ -172,6 +190,26 @@ protected:
     /// Use it to resume animations, restart timers, etc.
     virtual void OnResume() { }
 
+// ===========================================================================
+// Layer management
+// ===========================================================================
+
+    /// @brief Push a layer onto the scene's layer stack. Calls OnAttach() immediately.
+    void PushLayer(Layer* layer) { m_LayerStack.PushLayer(layer); }
+
+    /// @brief Push an overlay onto the scene's layer stack. Overlays render on top.
+    void PushOverlay(Layer* overlay) { m_LayerStack.PushOverlay(overlay); }
+
+    /// @brief Remove a layer from the scene's layer stack. Calls OnDetach().
+    void PopLayer(Layer* layer) { m_LayerStack.PopLayer(layer); }
+
+    /// @brief Remove an overlay from the scene's layer stack. Calls OnDetach().
+    void PopOverlay(Layer* overlay) { m_LayerStack.PopOverlay(overlay); }
+
+    /// @brief Create and push an ImGuiLayer overlay using the application's configured backend.
+    /// Returns a non-owning pointer to the created layer (owned by the LayerStack).
+    ImGuiLayer* SetupImGuiLayer();
+
 // ============================================================================
 // Direct access to subsystems
 // ============================================================================
@@ -192,6 +230,10 @@ protected:
 
 private:
 
+    // Called internally by the NVI Draw() to wrap layer UI rendering with ImGui frame.
+    void ImGuiBeginFrame();
+    void ImGuiEndFrame();
+
     struct SceneConfig
     {
         // Name of the scene (for lookup and debugging)
@@ -205,9 +247,11 @@ private:
         Paused,
     };
 
-    EngineContext* m_Context = nullptr;
-    SceneState     m_State   = SceneState::Uninitialized;
+    EngineContext* m_Context    = nullptr;
+    SceneState     m_State      = SceneState::Uninitialized;
     SceneConfig    m_Config;
+    LayerStack     m_LayerStack;
+    ImGuiLayer*    m_ImGuiLayer = nullptr; ///< Non-owning; owned by m_LayerStack
 
     friend class SceneManager;
 };
