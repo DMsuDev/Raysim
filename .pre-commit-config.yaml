@@ -30,7 +30,7 @@ repos:
       - id: check-merge-conflict # Detect merge conflict markers
       - id: check-added-large-files # Prevent giant files from being committed
         args: [--maxkb=1024]
-        exclude: ^(build/|_deps/|third_party/)
+        exclude: ^(build/|_deps/|third_party/|docs/)
       - id: mixed-line-ending # Detect mixed line endings
         args: [--fix=auto]
       - id: check-case-conflict # Check for files that would conflict on case-insensitive FS

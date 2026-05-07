@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.91.0] - 2026-05-07
+
+### Added
+
+- `SceneShowcase` example: multi-scene demo (StarField, PlasmaArt, ClockMandala) navigable via an `ImGui` overlay (`SceneNavLayer` layer)
+
+### Changed
+
+- `ApplicationConfig` is now the standard entry point for window configuration; `config.Window.Title/Width/Height` replaces per-call `GetWindow().SetTitle/SetSize`
+- Backend system refactored: `RS_BACKEND` CMake cache option (`raylib` [default] / `glfw_opengl` / `sfml` / `sdl2`) replaces the old `RS_IMGUI_BACKEND` approach — `BackendRegistry.cmake` dynamically loads `cmake/Backends/<name>.cmake` for the selected backend, and `src/CMakeLists.txt` now links against the unified `rs_backend` meta-target instead of hardcoded per-library entries
+- `vcpkg.json` — removed `glfw3` dependency (not needed for the Raylib backend; restore it when switching to `glfw_opengl`)
+- README files (English and Spanish) updated: added `SceneShowcase` to demos table, added **Setup** section, added **ImGui Integration** module section, removed unimplemented `Texture` entry from Graphics table, replaced `SetInitialScene` with `ChangeScene` throughout, updated Quick Start snippet to use `ApplicationConfig` and `Math::Vec2`
+
+### Removed
+
+- `SetInitialScene<T>()` removed — use `ChangeScene<T>()` after `RegisterScene<T>()` to activate the first scene
+
 ## [0.6.1] - 2026-04-25
 
 ### Added
