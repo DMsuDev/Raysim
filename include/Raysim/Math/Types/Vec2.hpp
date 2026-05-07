@@ -102,7 +102,7 @@ struct Vec2 {
     float Heading() const noexcept { return std::atan2(y, x); }
 
     /**
-     * @brief Perpendicular vector (rotated 90° counterclockwise)
+     * @brief Perpendicular vector (rotated 90 deg counterclockwise)
      * @return Perpendicular vector
      */
     constexpr Vec2 Perp() const noexcept { return {-y, x}; }

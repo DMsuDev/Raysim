@@ -109,7 +109,7 @@ void TerrainLayer::DrawTerrain(float skyH) const
         float screenX  = static_cast<float>(col * columnW_);
         float groundH  = screenH_ - terrainY;
 
-        // --- Surface cap colour (snow / rock / grass by elevation) ----------
+        // Surface cap colour (snow / rock / grass by elevation)
         Color capColor;
         if      (noise > 0.55f) capColor = SNOW_COLOR;
         else if (noise > 0.25f) capColor = Color::Lerp(GRASS_COLOR, ROCK_COLOR,
@@ -119,7 +119,7 @@ void TerrainLayer::DrawTerrain(float skyH) const
         Shapes::DrawRect(screenX, terrainY,
                          static_cast<float>(columnW_), CAP_HEIGHT, capColor);
 
-        // --- Underground bands: lerp from light dirt to dark bedrock --------
+        // Underground bands: lerp from light dirt to dark bedrock
         float belowCap = groundH - CAP_HEIGHT;
         if (belowCap <= 0.0f) continue;
 

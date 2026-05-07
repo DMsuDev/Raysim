@@ -17,7 +17,7 @@ class Window;
  * @brief Backend-agnostic layer that manages the full Dear ImGui lifecycle.
  *
  * ImGuiLayer owns an ImGuiBackend that handles the platform- and
- * renderer-specific setup (GLFW+OpenGL3, SDL+OpenGL3, Raylib, …).
+ * renderer-specific setup (GLFW+OpenGL3, SDL+OpenGL3, Raylib, etc.).
  * Push it as an overlay onto a LayerStack; call Begin() / End() around
  * your per-frame ImGui widget code.
  *

@@ -10,100 +10,70 @@
 
 namespace RS {
 
-Scope<RendererAPI> BackendFactory::CreateRenderer(RenderAPI api)
+Scope<RendererAPI> BackendFactory::CreateRenderer()
 {
     RS_PROFILE_FUNCTION();
-    switch (api)
-    {
-        case RenderAPI::Raylib:
-        {
-            RS_CORE_DEBUG("Renderer backend created: Raylib");
-            return CreateScope<Backend::RaylibRendererAPI>();
-        }
-        default:
-        {
-            RS_CORE_ERROR("Unsupported renderer backend: {}", static_cast<int>(api));
-            return nullptr;
-        }
-    }
-}
 
-Scope<Window> BackendFactory::CreateAppWindow(WindowBackend backend, const WindowProps& props)
-{
-    RS_PROFILE_FUNCTION();
-    switch (backend)
-    {
-        case WindowBackend::Raylib:
-        {
-            RS_CORE_DEBUG("Window backend created: Raylib");
-            return CreateScope<Backend::RaylibWindow>(props);
-        }
-        default:
-        {
-            RS_CORE_ERROR("Unsupported window backend: {}", static_cast<int>(backend));
-            return nullptr;
-        }
-    }
-
+#if defined(RS_BACKEND_RAYLIB)
+    RS_CORE_DEBUG("Renderer backend created: Raylib");
+    return CreateScope<Backend::RaylibRendererAPI>();
+#else
+    RS_CORE_ERROR("No supported renderer backend defined.");
     return nullptr;
+#endif
+}
+
+Scope<Window> BackendFactory::CreateAppWindow(const WindowProps& props)
+{
+    RS_PROFILE_FUNCTION();
+
+#if defined(RS_BACKEND_RAYLIB)
+    RS_CORE_DEBUG("Window backend created: Raylib");
+    return CreateScope<Backend::RaylibWindow>(props);
+#else
+    RS_CORE_ERROR("No supported window backend defined.");
+    return nullptr;
+#endif
 }
 
 
-Scope<Input> BackendFactory::CreateInput(WindowBackend backend)
+Scope<Input> BackendFactory::CreateInput()
 {
     RS_PROFILE_FUNCTION();
-    switch (backend)
-    {
-        case WindowBackend::Raylib:
-        {
-            RS_CORE_DEBUG("Input backend created: Raylib");
-            return CreateScope<Backend::RaylibInput>();
-        }
 
-        default:
-        {
-            RS_CORE_ERROR("Unsupported input backend: {}", static_cast<int>(backend));
-            return nullptr;
-        }
-    }
+#if defined(RS_BACKEND_RAYLIB)
+    RS_CORE_DEBUG("Input backend created: Raylib");
+    return CreateScope<Backend::RaylibInput>();
+#else
+    RS_CORE_ERROR("No supported input backend defined.");
+    return nullptr;
+#endif
 }
 
-Scope<Fonts::FontRenderer> BackendFactory::CreateFontRenderer(RenderAPI api)
+Scope<Fonts::FontRenderer> BackendFactory::CreateFontRenderer()
 {
     RS_PROFILE_FUNCTION();
-    switch (api)
-    {
-        case RenderAPI::Raylib:
-        {
-            RS_CORE_DEBUG("Font renderer backend created: Raylib");
-            return CreateScope<Backend::RaylibFontRenderer>();
-        }
-        default:
-        {
-            RS_CORE_ERROR("Unsupported font renderer backend: {}", static_cast<int>(api));
-            return nullptr;
-        }
-    }
+
+#if defined(RS_BACKEND_RAYLIB)
+    RS_CORE_DEBUG("FontRenderer backend created: Raylib");
+    return CreateScope<Backend::RaylibFontRenderer>();
+#else
+    RS_CORE_ERROR("No supported FontRenderer backend defined.");
+    return nullptr;
+#endif
 }
 
-Scope<ImGuiBackend> BackendFactory::CreateImGuiBackend(WindowBackend windowBackend, RenderAPI renderAPI)
+Scope<ImGuiBackend> BackendFactory::CreateImGuiBackend()
 {
     RS_PROFILE_FUNCTION();
-    switch (windowBackend)
-    {
-        case WindowBackend::Raylib:
-        {
-            RS_CORE_DEBUG("ImGui backend created: Raylib (rlImGui stub)");
-            return CreateScope<Backend::RaylibImGuiBackend>();
-        }
 
-        default:
-        {
-            RS_CORE_ERROR("Unsupported ImGui backend — WindowBackend: {}, RenderAPI: {}",
-                          static_cast<int>(windowBackend), static_cast<int>(renderAPI));
-            return nullptr;
-        }
-    }
+#if defined(RS_BACKEND_RAYLIB)
+    RS_CORE_DEBUG("ImGuiBackend created: Raylib");
+    return CreateScope<Backend::RaylibImGuiBackend>();
+#else
+    RS_CORE_ERROR("No supported ImGuiBackend defined for the current window and renderer backends.");
+    return nullptr;
+#endif
 }
 
 } // namespace RS

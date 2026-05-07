@@ -231,7 +231,7 @@ public:
 };
 
 // ============================================================================
-// StarField – implementations
+// StarField - implementations
 // ============================================================================
 
 void StarField::Reset(Star& s, bool spread)
@@ -299,7 +299,7 @@ void StarField::OnDraw(float alpha)
 }
 
 // ============================================================================
-// PlasmaArt – implementations
+// PlasmaArt - implementations
 // ============================================================================
 
 void PlasmaArt::OnStart()
@@ -349,7 +349,7 @@ void PlasmaArt::OnDraw(float alpha)
 }
 
 // ============================================================================
-// ClockMandala – implementations
+// ClockMandala - implementations
 // ============================================================================
 
 void ClockMandala::OnStart()

@@ -1,7 +1,26 @@
+/**********************************************************************************************
+ *   Raysim - A simple 2D graphics engine
+ *
+ *   LICENSE: Apache License, Version 2.0
+ *
+ *            Copyright 2026 Dayron Mustelier (@DMsuDev)
+ *
+ *   Raysim is licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *             http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ *
+ **********************************************************************************************/
+
 #pragma once
 
-// --- Enums ---
-#include "Raysim/Core/BackendType.hpp"
 #include "Raysim/Core/WindowProperties.hpp"
 
 namespace RS
@@ -17,11 +36,12 @@ namespace RS
      * @class BackendFactory
      * @brief Factory that creates concrete backend implementations.
      *
-     * Window and input are created from the WindowBackend enum (they are coupled
-     * because input depends on the windowing system). The renderer is created
-     * separately from the RenderAPI enum.
+     * The backend is selected at CMake configure time via -DRS_BACKEND=<name>,
+     * which sets a preprocessor flag (e.g. RS_BACKEND_RAYLIB). All methods
+     * dispatch at compile time using #if defined(...) blocks - there is no
+     * runtime selection.
      *
-     * @see WindowBackend, RenderAPI
+     * @see RS_BACKEND_RAYLIB, RS_BACKEND_GLFW_OPENGL
      */
     class BackendFactory
     {
@@ -29,52 +49,40 @@ namespace RS
         BackendFactory() = delete; // Static-only class
 
         /**
-         * @brief Create a renderer for the specified graphics API.
-         * @param api The rendering API to use.
-         * @return Owning pointer to a concrete RendererAPI implementation.
+         * @brief Create the renderer for the configured backend.
+         * @return Owning pointer to a concrete RendererAPI, or nullptr if no
+         *         backend flag is defined (configuration error).
          */
-        static Scope<RendererAPI> CreateRenderer(RenderAPI api);
+        static Scope<RendererAPI> CreateRenderer();
 
         /**
-         * @brief Create a window for the specified backend.
-         * @param backend The windowing library to use.
-         * @return Owning pointer to a concrete Window implementation.
+         * @brief Create the application window for the configured backend.
+         * @param props Window creation parameters (title, size, etc.).
+         * @return Owning pointer to a concrete Window, or nullptr if no
+         *         backend flag is defined (configuration error).
          */
-        static Scope<Window> CreateAppWindow(WindowBackend backend, const WindowProps &props);
+        static Scope<Window> CreateAppWindow(const WindowProps &props);
 
         /**
-         * @brief Create an input handler for the specified backend.
-         *
-         * Input is tied to the windowing system, so it uses the same
-         * WindowBackend enum as CreateAppWindow().
-         *
-         * @param backend The windowing library to use.
-         * @return Owning pointer to a concrete Input implementation.
+         * @brief Create the input handler for the configured backend.
+         * @return Owning pointer to a concrete Input, or nullptr if no
+         *         backend flag is defined (configuration error).
          */
-        static Scope<Input> CreateInput(WindowBackend backend);
+        static Scope<Input> CreateInput();
 
         /**
-         * @brief Create a font renderer for the specified graphics API.
-         *
-         * The returned renderer is wired into FontManager via
-         * FontManager::SetRenderer().
-         *
-         * @param api The rendering API to use.
-         * @return Owning pointer to a concrete FontRenderer implementation.
+         * @brief Create the font renderer for the configured backend.
+         * @return Owning pointer to a concrete FontRenderer, or nullptr if no
+         *         backend flag is defined (configuration error).
          */
-        static Scope<Fonts::FontRenderer> CreateFontRenderer(RenderAPI api);
+        static Scope<Fonts::FontRenderer> CreateFontRenderer();
 
         /**
-         * @brief Create an ImGui platform+renderer backend.
-         *
-         * Returns the correct ImGuiBackend implementation for the given
-         * window and renderer backends.
-         *
-         * @param windowBackend The windowing library in use.
-         * @param renderAPI     The graphics API in use.
-         * @return Owning pointer to a concrete ImGuiBackend, or nullptr on failure.
+         * @brief Create the ImGui platform+renderer backend for the configured backend.
+         * @return Owning pointer to a concrete ImGuiBackend, or nullptr if no
+         *         backend flag is defined (configuration error).
          */
-        static Scope<ImGuiBackend> CreateImGuiBackend(WindowBackend windowBackend, RenderAPI renderAPI);
+        static Scope<ImGuiBackend> CreateImGuiBackend();
     };
 
 } // namespace RS

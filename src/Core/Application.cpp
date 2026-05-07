@@ -16,6 +16,7 @@
 // --- Math ---
 #include "Raysim/Math/Random.hpp"
 
+// --- Backend factory ---
 #include "Raysim/Core/BackendFactory.hpp"
 
 namespace RS {
@@ -26,22 +27,25 @@ Application::Application(const ApplicationConfig& config)
 {
     RS_PROFILE_FUNCTION();
 
-    // --- Create backends ----------------------------------------------
-    m_Window = BackendFactory::CreateAppWindow(m_Configuration.Backend, m_Configuration.Window);
-    m_Input = BackendFactory::CreateInput(m_Configuration.Backend);
+    // Apply the console log level from config (overrides the default set in Log::Init)
+    Log::SetConsoleLevel(config.ConsoleLogLevel);
+
+    // Create backends
+    m_Window = BackendFactory::CreateAppWindow(m_Configuration.Window);
+    m_Input = BackendFactory::CreateInput();
 
     RS_CORE_ASSERT(m_Window, "Failed to create window backend");
     RS_CORE_ASSERT(m_Input, "Failed to create input backend");
 
-    // -- Initialise RenderCommand backend ------------------------------------
-    auto api = BackendFactory::CreateRenderer(m_Configuration.Renderer);
+    // Initialise RenderCommand backend
+    auto api = BackendFactory::CreateRenderer();
     RS_CORE_ASSERT(api, "Failed to create renderer backend");
 
     RS::RenderCommand::Init(std::move(api));
 
     // -- Font system --------------------------------------------------------
     FontManager::SetProvider(CreateScope<STBTrueTypeProvider>());
-    FontManager::SetRenderer(BackendFactory::CreateFontRenderer(m_Configuration.Renderer));
+    FontManager::SetRenderer(BackendFactory::CreateFontRenderer());
     FontManager::LoadDefaultFont();
 
     // -- Populate EngineContext ---------------------------------------------

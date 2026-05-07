@@ -11,12 +11,12 @@ enum class PathBase {
     Assets        // Predefined "assets" directory inside the executable directory (e.g. "C:\MyApp\bin\assets")
 };
 
-// --- Base paths ---
+// Base paths
 std::filesystem::path GetExecutableDirectory();
 std::filesystem::path GetWorkingDirectory();
 std::filesystem::path GetAssetsDirectory();
 
-// --- Path utils ---
+// Path utils
 bool IsAbsolute(const std::filesystem::path& path);
 
 std::filesystem::path ResolvePath(
@@ -24,7 +24,7 @@ std::filesystem::path ResolvePath(
     PathBase base = PathBase::Assets
 );
 
-// --- Convenience ---
+// Convenience
 std::string ResolvePathStr(
     const std::string& path,
     PathBase base = PathBase::Assets

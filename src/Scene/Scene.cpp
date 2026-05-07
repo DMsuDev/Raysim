@@ -36,8 +36,7 @@ ImGuiLayer* Scene::SetupImGuiLayer()
 
     RS_CORE_TRACE("Scene '{}': setting up ImGuiLayer", m_Config.Name);
 
-    const auto& cfg = *m_Context->Config;
-    auto backend = BackendFactory::CreateImGuiBackend(cfg.Backend, cfg.Renderer);
+    auto backend = BackendFactory::CreateImGuiBackend();
 
     auto* layer = new ImGuiLayer(GetWindow(), std::move(backend));
     m_ImGuiLayer = layer;
