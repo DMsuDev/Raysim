@@ -13,6 +13,16 @@ include_guard()
 
 find_package(raylib CONFIG REQUIRED)
 
+# On desktop platforms, vcpkg typically builds raylib with
+# USE_EXTERNAL_GLFW=ON.
+#
+# Some vcpkg/raylib configurations may fail to propagate GLFW
+# as a transitive dependency, causing undefined GLFW symbols
+# at link time.
+#
+# Link glfw explicitly to ensure reliable desktop builds.
+find_package(glfw3 CONFIG QUIET)
+
 # ===========================================================================
 # Windowing (Raylib handles everything internally)
 # ===========================================================================
@@ -21,6 +31,7 @@ add_library(rs_windowing_raylib INTERFACE)
 
 target_link_libraries(rs_windowing_raylib INTERFACE
     raylib
+    $<$<BOOL:${glfw3_FOUND}>:glfw>
 )
 
 # ===========================================================================
