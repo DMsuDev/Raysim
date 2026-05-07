@@ -1,9 +1,12 @@
-# Raysim
+<p align="center">
+  <img src="docs/images/banner.png" alt="Raysim Banner" width="720" />
+</p>
 
 [![C++](https://img.shields.io/badge/Language-C%2B%2B-00599C?style=flat&logo=cplusplus&logoColor=white)](https://isocpp.org/)
 [![CMake](https://img.shields.io/badge/Build-CMake-064F8C?style=flat&logo=cmake&logoColor=white)](https://cmake.org/)
 ![Status](https://img.shields.io/badge/Status-Early%20Development-yellow?style=flat)
-[![Version](https://img.shields.io/badge/Version-0.6.1-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
+[![Version](https://img.shields.io/badge/Version-0.91.0-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
+[![License](https://img.shields.io/badge/Licencia-Apache%202.0-lightgrey?style=flat)](LICENSE)
 
 [English Readme](https://github.com/DMsuDev/Raysim/blob/main/README.md)
 • [Readme Español](https://github.com/DMsuDev/Raysim/blob/main/README.es.md)
@@ -14,36 +17,24 @@ Inspirado en **p5.js** y **Processing**, ofrece una API simple basada en clases 
 
 Útil para aprender programación gráfica, prototipar ideas o construir pequeños juegos y simulaciones.
 
-> **Nota:** Este proyecto está en **desarrollo temprano**. La API puede cambiar sin previo aviso y algunas funcionalidades aún están en implementación. Es mi primera vez desarrollando un framework en C++. ¡Comentarios y contribuciones son bienvenidos!
+> **Nota:** Este proyecto está en **desarrollo temprano**. La API puede cambiar sin previo aviso y algunas funcionalidades aún están en implementación. ¡Comentarios y contribuciones son bienvenidos!
 
 ## Demos Rápidos
 
-<!-- Screenshots o GIF.
-    TODO:
--->
+<p align="center">
+  <img src="docs/gif/Mouse2D.gif" alt="Mouse2D" width="480" /><br />
+  <b>Mouse2D</b>
+</p>
 
-<table>
-  <tr>
-    <td align="center">
-      <img src="docs/images/bouncing-balls.png" width="400" alt="Bouncing Balls" /><br />
-      <b>BouncingBalls</b>
-    </td>
-    <td align="center">
-      <img src="docs/images/lissajous-curves.png" width="400" alt="Lissajous Curves" /><br />
-      <b>LissajousCurves</b>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="docs/images/mouse-2d.png" width="400" alt="Mouse 2D" /><br />
-      <b>Mouse2D</b>
-    </td>
-    <td align="center">
-      <img src="docs/images/noise-landscape.png" width="400" alt="Noise Landscape" /><br />
-      <b>NoiseLandscape</b>
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <img src="docs/gif/NoiseLandscape.gif" alt="NoiseLandscape" width="480" /><br />
+  <b>NoiseLandscape</b>
+</p>
+
+<p align="center">
+  <img src="docs/gif/SceneShowcase.gif" alt="SceneShowcase" width="480" /><br />
+  <b>SceneShowcase</b>
+</p>
 
 | Ejemplo           | Descripción                                                                             |
 | ----------------- | --------------------------------------------------------------------------------------- |
@@ -51,6 +42,7 @@ Inspirado en **p5.js** y **Processing**, ofrece una API simple basada en clases 
 | `LissajousCurves` | Visualizador de curvas paramétricas con cambio de fase animado y presets de frecuencia. |
 | `Mouse2D`         | Seguimiento del mouse e interacción 2D.                                                 |
 | `NoiseLandscape`  | Terreno con desplazamiento generado proceduralmente usando varias funciones de ruido.   |
+| `SceneShowcase`   | Demo multi-escena navegable con ImGui: StarField, PlasmaArt y ClockMandala.             |
 
 ### Usando CMake Presets
 
@@ -193,7 +185,7 @@ void OnResume() override {
 <details>
 <summary>Scene</summary>
 
-En la version 0.6.0 se introdujo un nuevo sistema de escenas para permitir una arquitectura basada en escenas más robusta y flexible. El sistema de escenas proporciona una forma estructurada de organizar el código de tu aplicación en diferentes escenas (menú principal, juego, pantalla de pausa, etc.) con su propio ciclo de vida y acceso a los subsistemas del motor.
+El sistema de escenas proporciona una forma estructurada de organizar tu aplicación en escenas independientes (menú principal, juego, pantalla de pausa, etc.), cada una con su propio ciclo de vida y acceso a los subsistemas del motor.
 
 **¿Cómo crear una escena?**
 
@@ -212,20 +204,22 @@ Luego, registra la escena en tu aplicación usando `RegisterScene`:
 app->RegisterScene<MiEscena>();
 ```
 
-Hay que registrar la escena antes de poder usarla. Esto permite cambiar a esa escena por nombre o tipo en cualquier momento.
-Para definir la escena inicial, puedes usar `SetInitialScene<MiEscena>()` o `ChangeScene<MiEscena>()` en tu función `CreateApplication()`:
+Hay que registrar la escena antes de poder usarla. Usa `ChangeScene<T>()` para activarla:
 
 ```cpp
 RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
 {
-    auto* app = new Application();
+    RS::ApplicationConfig config;
+    config.Window.Title = "Mi App";
+
+    auto* app = new RS::Application(config);
     app->RegisterScene<MiEscena>();
-    app->SetInitialScene<MiEscena>(); // Establece MiEscena como la escena inicial
+    app->ChangeScene<MiEscena>();
     return app;
 }
 ```
 
-Esto permite cambiar a esa escena por nombre o tipo en cualquier momento.
+Puedes cambiar a cualquier escena registrada en cualquier momento llamando a `ChangeScene<T>()` o por nombre/ID a través de `SceneManager`.
 
 </details>
 
@@ -273,10 +267,37 @@ específicos de raylib están confinados a esta capa y nunca se filtran al códi
 
 </details>
 
+<details>
+<summary>Integración con ImGui</summary>
+
+Un `ImGuiLayer` está integrado para overlays de debug y paneles de UI. Agrégalo al layer stack de una escena e implementa `OnUIRender()` en cualquier subclase de `Layer` para dibujar widgets de ImGui.
+
+```cpp
+class MiOverlay : public Layer {
+public:
+    MiOverlay() : Layer("MiOverlay") {}
+    void OnUIRender() override {
+        ImGui::Begin("Debug");
+        ImGui::Text("Hola desde ImGui!");
+        ImGui::End();
+    }
+};
+```
+
+</details>
+
 ## Compilación
 
 Requisitos mínimos: **CMake 3.28**, **C++20** y **Ninja**.
 Las dependencias se gestionan mediante [vcpkg](https://vcpkg.io/) (incluido como submódulo).
+
+### Configuración inicial
+
+```bash
+# Inicializa vcpkg e instala las dependencias
+./tools/setup_all.sh       # Linux / macOS
+.\tools\setup_all.ps1      # Windows (PowerShell)
+```
 
 ### Usando CMake Presets
 
@@ -297,7 +318,7 @@ cmake --build build --config Release
 
 ## Inicio Rápido
 
-Crea una escena heredando de `Scene` y sobreescribe los métodos del ciclo de vida. Luego regístrala con tu aplicación usando `RegisterScene<T>()` o `ChangeScene<T>()`, después de `SetInitialScene<T>()` para definir la escena inicial.
+Crea una escena heredando de `Scene` y sobreescribe los métodos del ciclo de vida. Configura la app con `ApplicationConfig`, registra tu escena y llama a `ChangeScene<T>()` para activarla.
 
 ```cpp
 #include "Raysim/Raysim.hpp"
@@ -309,26 +330,20 @@ class MyScene : public Scene {
     RS_SCENE(MyScene)
 
 private:
-    Vector2 position = {400, 300};
-    Vector2 velocity = {150, 100};
-
-    void OnAttach() override {
-           GetWindow().SetTitle("Mi Primera App Raysim");
-           GetWindow().SetSize(800, 600);
-        Time::SetTargetFPS(60);
-    }
+    Math::Vec2 position = {400, 300};
+    Math::Vec2 velocity = {150, 100};
 
     void OnFixedUpdate(float fixedDt) override {
         position += velocity * fixedDt;
 
-            float width  = static_cast<float>(GetWindow().GetWidth());
-            float height = static_cast<float>(GetWindow().GetHeight());
+        float width  = static_cast<float>(GetWindow().GetWidth());
+        float height = static_cast<float>(GetWindow().GetHeight());
 
-        if (position.x < 20 || position.x > width - 20)  velocity.x *= -1;
+        if (position.x < 20 || position.x > width  - 20) velocity.x *= -1;
         if (position.y < 20 || position.y > height - 20) velocity.y *= -1;
     }
 
-    void OnDraw(float /*alpha*/) override {
+    void OnDraw(float alpha) override {
         GetRenderer().ClearScreen(Colors::DarkBlue);
         Shapes::DrawCircle(position.x, position.y, 20.0f, Colors::RayWhite);
     }
@@ -336,16 +351,25 @@ private:
 
 RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
 {
-    auto* app = new Application();
+    RS::ApplicationConfig config;
+    config.Window.Title  = "Mi Primera App Raysim";
+    config.Window.Width  = 800;
+    config.Window.Height = 600;
+
+    auto* app = new RS::Application(config);
     app->RegisterScene<MyScene>();
-    app->SetInitialScene<MyScene>();
+    app->ChangeScene<MyScene>();
     return app;
 }
 ```
 
-> **Nota:** La semilla es auto-aleatoria al inicio. Llama a `SetRandomSeed(valor)` en `OnAttach()` solo si necesitas reproducibilidad.
+> **Tip:** La semilla es auto-aleatoria al inicio. Llama a `SetRandomSeed(valor)` en `OnAttach()` solo si necesitas reproducibilidad.
 
 ## Licencia
 
 Este proyecto está licenciado bajo la **Apache License 2.0**.
 Consulta el archivo [LICENSE](LICENSE) para más detalles.
+
+<p align="center">
+  <img src="docs/images/footer.png" alt="Raysim Footer" width="600" />
+</p>
