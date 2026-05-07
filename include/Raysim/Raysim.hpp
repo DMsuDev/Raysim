@@ -1,5 +1,5 @@
 /**********************************************************************************************
- *   Raysim - A simple 2D graphics engine
+ *   Raysim - A C++ framework for 2D graphics and interactive applications
  *
  *   LICENSE: Apache License, Version 2.0
  *
