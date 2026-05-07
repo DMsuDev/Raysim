@@ -16,6 +16,16 @@ rs_enable_coverage(Raysim)
 rs_enable_optimizations(Raysim)
 rs_enable_lto(Raysim)
 
+# Shared library symbol visibility
+# RS_BUILD_SHARED: PUBLIC so consumers know to use dllimport
+# RS_BUILD_DLL:    PRIVATE so only the library itself sets dllexport
+target_compile_definitions(Raysim
+    PUBLIC
+        $<$<BOOL:${RS_BUILD_SHARED}>:RS_BUILD_SHARED>
+    PRIVATE
+        $<$<BOOL:${RS_BUILD_SHARED}>:RS_BUILD_DLL>
+)
+
 # Add precompiled headers for faster compilation
 if(RS_ENABLE_PCH)
     target_precompile_headers(Raysim PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/pch.hpp)
@@ -55,7 +65,6 @@ set(RAYSIM_SOURCES
     # Backend: Raylib implementations
     ${SRC_DIR}/Backend/Raylib/RaylibInput.cpp
     ${SRC_DIR}/Backend/Raylib/RaylibRendererAPI.cpp
-    ${SRC_DIR}/Backend/Raylib/RaylibTexture.cpp
     ${SRC_DIR}/Backend/Raylib/RaylibWindow.cpp
     ${SRC_DIR}/Backend/Raylib/RaylibFontRenderer.cpp
     ${SRC_DIR}/Backend/Raylib/RaylibImGuiBackend.cpp
@@ -86,8 +95,6 @@ target_include_directories(Raysim
     PRIVATE
         ${CMAKE_SOURCE_DIR}/src
         ${IMGUI_DIR}
-        ${IMGUI_DIR}/backends
-        ${RLIMGUI_DIR}
 )
 
 # ============================================================
@@ -98,19 +105,9 @@ target_link_libraries(Raysim
     PUBLIC
         imgui
         spdlog
-        $<$<BOOL:${RS_BUILD_SHARED}>:raylib>
-        $<$<BOOL:${RS_BUILD_SHARED}>:glfw>
-        $<$<BOOL:${RS_BUILD_SHARED}>:glad>
-        $<$<BOOL:${RS_BUILD_SHARED}>:imgui_glfw_opengl>
-        $<$<BOOL:${RS_BUILD_SHARED}>:rlimgui>
-        $<$<BOOL:${RS_BUILD_SHARED}>:stb>
+        rs_backend
     PRIVATE
         rs_warnings
-        $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:raylib>
-        $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:glfw>
-        $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:glad>
-        $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:imgui_glfw_opengl>
-        $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:rlimgui>
-        $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:stb>
+        stb
         $<$<PLATFORM_ID:Windows>:winmm>
 )
