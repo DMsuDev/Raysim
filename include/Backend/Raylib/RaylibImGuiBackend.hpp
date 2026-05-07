@@ -12,7 +12,7 @@ public:
     RaylibImGuiBackend()  = default;
     ~RaylibImGuiBackend() override = default;
 
-    void Init(Window& window) override;
+    void Init([[maybe_unused]] Window& window) override;
     void Shutdown() override;
     void BeginFrame() override;
     void EndFrame() override;
