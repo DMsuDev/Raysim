@@ -70,7 +70,7 @@ private:
     /// The ratio fx:fy determines the curve shape
     float frequencyY = 2.0f;
 
-    /// Phase shift (rotation) in radians [0, 2π]
+    /// Phase shift (rotation) in radians [0, 2*pi]
     float phaseShift = 0.0f;
     /// Rotation speed for the phase (radians per second), configurable via constructor
     float phaseRotationSpeed = 0.2f; // increased default speed

@@ -69,10 +69,15 @@ void Log::Init(bool async, LogFileMode fileMode)
         return;
 
     try {
-        // ---- Shared sinks (used by both loggers) ----------------------------
+        // Shared sinks (used by both loggers)
 
         auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+        // Trace in debug builds, Info in release
+#ifdef RS_BUILD_DEBUG
         consoleSink->set_level(spdlog::level::trace);
+#else
+        consoleSink->set_level(spdlog::level::info);
+#endif
         /// Console pattern: colored `[HH:MM:SS] [logger] message`.
         consoleSink->set_pattern("%^[%T] [%n] %v%$");
 
@@ -91,7 +96,7 @@ void Log::Init(bool async, LogFileMode fileMode)
 
         std::vector<spdlog::sink_ptr> sinks{ consoleSink, fileSink };
 
-        // ---- Create core & client loggers -----------------------------------
+        // Create core and client loggers
 
         auto createLogger = [&](const std::string& name) -> Shared<spdlog::logger>
         {

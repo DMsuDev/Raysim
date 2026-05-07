@@ -17,7 +17,7 @@ public:
     ~RaylibFontRenderer() override;
     RaylibFontRenderer& operator=(const RaylibFontRenderer&) = delete;
 
-    // --- FontRenderer -----------------------------------------------
+    // FontRenderer interface
 
     void Init()     override;
     void Shutdown() override;

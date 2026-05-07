@@ -18,7 +18,9 @@ class TerrainLayer
 public:
     TerrainLayer(float screenW, float screenH, int columnW = 3);
 
-    // --- Configuration ------------------------------------------------------
+    // ========================================================================
+    // Configuration
+    // ========================================================================
 
     void SetMode(NoiseMode mode)    { mode_ = mode; }
     void SetScrollX(float x)        { scrollX_ = x; }
@@ -30,7 +32,9 @@ public:
     /// Re-randomise the noise seed so the landscape changes completely.
     void Reseed();
 
-    // --- Drawing ------------------------------------------------------------
+    // ========================================================================
+    // Drawing
+    // ========================================================================
 
     /// Parallax far ridgeline (draw before foreground terrain).
     void DrawFarRidgeline(float skyH) const;
@@ -47,24 +51,34 @@ private:
     float     scrollX_   = 0.0f;
     NoiseMode mode_      = NoiseMode::FBM;
 
-    // --- Noise tuning -------------------------------------------------------
+    // ========================================================================
+    // Noise tuning
+    // ========================================================================
     static constexpr float NOISE_SCALE       = 0.003f;  // world-units -> noise space
     static constexpr float BG_SCALE          = 0.001f;  // background ridgeline frequency
     static constexpr float BG_PARALLAX       = 0.35f;   // parallax speed ratio
 
-    // --- Terrain layer counts -----------------------------------------------
+    // ========================================================================
+    // Terrain layer counts
+    // ========================================================================
     static constexpr int   UNDERGROUND_STEPS = 8;       // vertical dirt/rock bands
     static constexpr float CAP_HEIGHT        = 5.0f;    // surface cap strip height
 
-    // --- Colour palette (top surface) ---------------------------------------
+    // ========================================================================
+    // Colour palette (top surface)
+    // ========================================================================
     static constexpr RS::Color SNOW_COLOR  {220, 230, 245, 255};
     static constexpr RS::Color ROCK_COLOR  {110, 100,  90, 255};
     static constexpr RS::Color GRASS_COLOR { 58, 140,  48, 255};
 
-    // --- Underground gradient endpoints (light -> dark) ---------------------
+    // ========================================================================
+    // Underground gradient endpoints (light to dark)
+    // ========================================================================
     static constexpr RS::Color DIRT_LIGHT  {130,  95,  60, 255};
     static constexpr RS::Color DIRT_DARK   { 45,  30,  18, 255};
 
-    // --- Far ridgeline colour -----------------------------------------------
+    // ========================================================================
+    // Far ridgeline colour
+    // ========================================================================
     static constexpr RS::Color RIDGE_COLOR { 22,  28,  55, 190};
 };

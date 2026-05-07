@@ -41,11 +41,15 @@ private:
 
     std::vector<Star> stars_;
 
-    // --- Sky gradient endpoints (top -> horizon) ----------------------------
+    // ========================================================================
+    // Sky gradient endpoints (top to horizon)
+    // ========================================================================
     static constexpr RS::Color SKY_TOP     {  8, 10, 38, 255};
     static constexpr RS::Color SKY_BOTTOM  { 55, 22, 72, 255};
 
-    // --- Moon ---------------------------------------------------------------
+    // ========================================================================
+    // Moon
+    // ========================================================================
     static constexpr float MOON_X_RATIO = 0.80f;
     static constexpr float MOON_Y_RATIO = 0.20f;
     static constexpr RS::Color MOON_GLOW {255, 240, 175, 255}; // alpha set per halo

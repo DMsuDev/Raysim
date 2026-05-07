@@ -12,13 +12,6 @@ namespace RS
      * without a direct dependency on any concrete graphics API.
      * The RendererAPI instance is owned by RenderCommand and is initialized via Init().
      *
-     * Typical setup in Application:
-     * @code
-     * auto api = BackendFactory::CreateRenderer(RenderAPI::Raylib);
-     * auto rc  = RenderCommand();
-     * rc.Init(RS::CreateScope<RendererAPI>(std::move(api)));
-     * @endcode
-     *
      * @see RendererAPI
      */
     class RenderCommand

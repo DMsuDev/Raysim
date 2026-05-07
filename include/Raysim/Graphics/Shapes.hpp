@@ -60,7 +60,7 @@ namespace Shapes {
      * @param color Fill color
      * @param origin Which point of the rectangle is at (x, y)
      * @example
-     * // Draw 50×50 rectangle centered at (200, 150)
+     * // Draw 50x50 rectangle centered at (200, 150)
      * Shapes::DrawRect(200, 150, 50, 50, Color::Green(), OriginMode::Center);
      *
      * // Draw in bottom-left corner of screen
@@ -99,7 +99,7 @@ namespace Shapes {
      * @param thickness Border width in pixels
      * @param origin Which point of the rectangle is at (x, y)
      * @example
-     * // Draw 100×50 outline centered at (250, 200) with 2px border
+     * // Draw 100x50 outline centered at (250, 200) with 2px border
      * Shapes::DrawRectOutline(250, 200, 100, 50, Color::White(), 2.0f, OriginMode::Center);
      * @see OriginMode, DrawRect()
      */

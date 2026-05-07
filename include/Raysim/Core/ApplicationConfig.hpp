@@ -1,8 +1,7 @@
 #pragma once
 
-// --- Enums ---
-#include "Raysim/Core/BackendType.hpp"
 #include "Raysim/Core/WindowProperties.hpp"
+#include "Raysim/Core/Log.hpp"
 
 namespace RS
 {
@@ -17,8 +16,14 @@ namespace RS
     struct ApplicationConfig
     {
         WindowProps Window = WindowProps();            // Window properties (Title, Width, Height)
-        WindowBackend Backend = WindowBackend::Raylib; // Platform backend (window & input)
-        RenderAPI Renderer = RenderAPI::Raylib;        // Rendering API backend
+
+        // Minimum log level shown in the console.
+        // Defaults to Trace in debug builds and Info in release builds.
+#ifdef RS_BUILD_DEBUG
+        LogLevel ConsoleLogLevel = LogLevel::Trace;
+#else
+        LogLevel ConsoleLogLevel = LogLevel::Info;
+#endif
 
         ApplicationConfig() = default;
     };

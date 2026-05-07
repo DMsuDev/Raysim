@@ -12,13 +12,13 @@ namespace RS {
  * Each draw function uses TopLeft (classic raylib behavior) by default when
  * calling the basic overload, but you can specify an alternative origin.
  *
- * The origin modes form a 3×3 grid:
+ * The origin modes form a 3x3 grid:
  * ```
- * TopLeft    — TopCenter    — TopRight
+ * TopLeft    - TopCenter    - TopRight
  *    |             |             |
- * CenterLeft —  Center     — CenterRight
+ * CenterLeft -  Center     - CenterRight
  *    |             |             |
- * BottomLeft — BottomCenter — BottomRight
+ * BottomLeft - BottomCenter - BottomRight
  * ```
  *
  * @note Default behavior (when not specifying origin) depends on the backend/renderer.
