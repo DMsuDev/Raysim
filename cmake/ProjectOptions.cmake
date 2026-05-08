@@ -55,10 +55,22 @@ endif()
 # Sanitizer consistency
 # ===========================================================================
 
-# RS_ENABLE_SANITIZERS is a convenience switch that turns on ASAN + UBSAN.
+# RS_ENABLE_SANITIZERS=ON is a convenience switch: enables ASan + UBSan.
 if(RS_ENABLE_SANITIZERS)
   set(RS_ENABLE_ASAN  ON CACHE BOOL "" FORCE)
   set(RS_ENABLE_UBSAN ON CACHE BOOL "" FORCE)
+endif()
+
+# Reverse: if any individual sanitizer is requested, activate the master flag
+# so the rest of the build system knows sanitizers are in use.
+if(RS_ENABLE_ASAN OR RS_ENABLE_UBSAN OR RS_ENABLE_TSAN OR
+   RS_ENABLE_MSAN OR RS_ENABLE_LSAN)
+  if(NOT RS_ENABLE_SANITIZERS)
+    set(RS_ENABLE_SANITIZERS ON CACHE BOOL "" FORCE)
+    message(STATUS
+      "[Sanitizers] RS_ENABLE_SANITIZERS enabled automatically "
+      "because one or more individual sanitizers are ON.")
+  endif()
 endif()
 
 # LTO is incompatible with sanitizers; disable it automatically.
