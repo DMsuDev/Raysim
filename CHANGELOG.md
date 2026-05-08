@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.91.1] - 2026-05-08
+
+### Fixed
+
+- `$<LINK_GROUP:RESCAN>` generator expression replaced with a plain `raylib glfw` link on MSVC — the GNU-style `--start-group`/`--end-group` linker feature is not supported by the MSVC linker, causing configure errors on Visual Studio generators
+- MSVC warning **D9025** (`/W1` overridden by `/w`) in third-party targets — `rs_third_party_setup()` now passes `/W0` instead of `/w` to correctly suppress the warning level
+- MSVC warning **C4996** (`fopen` deprecation) in `STBTrueTypeProvider.cpp` — `_CRT_SECURE_NO_WARNINGS` is now defined locally for that translation unit only (stb is third-party code)
+- MSVC warning **C4100** (unreferenced parameter `window`) in `RaylibImGuiBackend::Init`
+
+### Changed
+
+- `glfw3` added back as an optional vcpkg dependency for the `raylib` backend; `cmake/Backends/raylib.cmake` links `glfw` alongside `raylib` when found (improves compatibility on some configurations)
+- Sanitizer CMake module (`Sanitizers.cmake`) extended with improved MSVC support
+
 ## [0.91.0] - 2026-05-07
 
 ### Added
