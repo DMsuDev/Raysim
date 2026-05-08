@@ -4,8 +4,8 @@
 
 [![C++](https://img.shields.io/badge/Language-C%2B%2B-00599C?style=flat&logo=cplusplus&logoColor=white)](https://isocpp.org/)
 [![CMake](https://img.shields.io/badge/Build-CMake-064F8C?style=flat&logo=cmake&logoColor=white)](https://cmake.org/)
-![Status](https://img.shields.io/badge/Status-Early%20Development-yellow?style=flat)
-[![Version](https://img.shields.io/badge/Version-0.91.0-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
+![Status](https://img.shields.io/badge/Status-Alpha-orange?style=flat)
+[![Version](https://img.shields.io/badge/Version-0.91.1-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
 [![License](https://img.shields.io/badge/Licencia-Apache%202.0-lightgrey?style=flat)](LICENSE)
 
 [English Readme](https://github.com/DMsuDev/Raysim/blob/main/README.md)
@@ -13,11 +13,11 @@
 
 Raysim es un framework de C++ para gráficos 2D y aplicaciones interactivas, construido sobre [raylib](https://www.raylib.com/).
 
-Inspirado en **p5.js** y **Processing**, ofrece una API simple basada en clases para dibujar formas, manejar entrada, gestionar el tiempo y ejecutar simulaciones con paso de tiempo fijo. Los headers del backend nunca se exponen al código del usuario, todo el acceso pasa por interfaces abstractas limpias.
+Inspirado arquitectonicamente en el [**Hazel Engine de The Cherno**](https://github.com/TheCherno/Hazel), ofrece una API limpia basada en clases para dibujar formas, manejar entrada, gestionar el tiempo y ejecutar simulaciones con paso de tiempo fijo.
 
 Útil para aprender programación gráfica, prototipar ideas o construir pequeños juegos y simulaciones.
 
-> **Nota:** Este proyecto está en **desarrollo temprano**. La API puede cambiar sin previo aviso y algunas funcionalidades aún están en implementación. ¡Comentarios y contribuciones son bienvenidos!
+> **Nota:** Este proyecto está en **Alpha**. La API puede cambiar sin previo aviso y algunas funcionalidades aún están en implementación. ¡Comentarios y contribuciones son bienvenidos!
 
 ## Demos Rápidos
 
@@ -253,17 +253,20 @@ Puedes cambiar a cualquier escena registrada en cualquier momento llamando a `Ch
 <details>
 <summary>Interfaces y Backend</summary>
 
-Las tres interfaces abstractas desacoplan el código del usuario de la librería subyacente:
+Cinco interfaces abstractas desacoplan el código del usuario de la librería subyacente:
 
-| Interfaz      | Responsabilidad                                           |
-| ------------- | --------------------------------------------------------- |
-| `RendererAPI` | Inicio/fin de frame, limpieza de pantalla, control VSync. |
-| `Window`      | Título, tamaño, fullscreen, relación de aspecto.          |
-| `Input`       | Teclado, botones del mouse, posición del cursor, scroll.  |
+| Interfaz       | Responsabilidad                                              |
+| -------------- | ------------------------------------------------------------ |
+| `RendererAPI`  | Inicio/fin de frame, limpieza de pantalla, control VSync.    |
+| `Window`       | Título, tamaño, fullscreen, relación de aspecto.             |
+| `Input`        | Teclado, botones del mouse, posición del cursor, scroll.     |
+| `ImGuiBackend` | Inicialización, apagado y ciclo de vida por frame de ImGui.  |
+| `FontRenderer` | Carga de fuentes, medición de glifos y renderizado de texto. |
 
 El backend de `Raylib` es la única implementación incluida. `RaylibRendererAPI`,
-`RaylibWindow` y `RaylibInput` satisfacen cada interfaz. Todos los headers
-específicos de raylib están confinados a esta capa y nunca se filtran al código del usuario.
+`RaylibWindow`, `RaylibInput`, `RaylibImGuiBackend` y `RaylibFontRenderer`
+satisfacen cada interfaz. Todos los headers específicos del backend están
+confinados a esta capa y nunca se filtran al código del usuario.
 
 </details>
 
@@ -291,6 +294,8 @@ public:
 Requisitos mínimos: **CMake 3.28**, **C++20** y **Ninja**.
 Las dependencias se gestionan mediante [vcpkg](https://vcpkg.io/) (incluido como submódulo).
 
+> **macOS:** El soporte para macOS aún no ha sido probado. El sistema de compilación y las dependencias deberían funcionar en teoría, pero la compatibilidad no está garantizada y pueden existir problemas sin descubrir.
+
 ### Configuración inicial
 
 ```bash
@@ -309,10 +314,34 @@ cmake --preset release            # Configurar Release (Ninja)
 cmake --build --preset release    # Compilar Release
 ```
 
+> **Sanitizers:** El preset `debug` habilita ASan y UBSan por defecto. El soporte de sanitizers es **experimental** y aún está en fase de pruebas, pueden aparecer problemas según el toolchain o la plataforma. En MinGW, los sanitizers se deshabilitan automáticamente.
+
 ### CMake Manual
 
+> **Nota:** Al no usar presets, debes pasar el archivo de toolchain de vcpkg manualmente para que CMake pueda encontrar las dependencias instaladas.
+
+Los comandos correctos dependen del generador que elijas. **Ninja** (single-config) y **Visual Studio** (multi-config) manejan el tipo de compilación de forma diferente, mezclar sus flags es una fuente común de errores.
+
+#### Con Ninja (recomendado, funciona en todas las plataformas)
+
+Ninja requiere que el tipo de compilación se defina en el momento de **configuración** con `-DCMAKE_BUILD_TYPE`. El flag `--config` no se usa al compilar.
+
 ```bash
-cmake -B build -DCMAKE_BUILD_TYPE=Release -DRS_BUILD_EXAMPLES=ON
+cmake -B build -G Ninja \
+  -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DRS_BUILD_EXAMPLES=ON
+cmake --build build
+```
+
+#### Con Visual Studio (solo Windows)
+
+Visual Studio es un generador multi-config: ignora `-DCMAKE_BUILD_TYPE` y en su lugar requiere `--config` en el momento de **compilación**. También debes especificar la arquitectura con `-A x64`.
+
+```bash
+cmake -B build -G "Visual Studio 17 2022" -A x64 \
+  -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake \
+  -DRS_BUILD_EXAMPLES=ON
 cmake --build build --config Release
 ```
 

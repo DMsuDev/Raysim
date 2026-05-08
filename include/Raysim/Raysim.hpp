@@ -23,8 +23,8 @@
 
 #define RAYSIM_VERSION_MAJOR 0
 #define RAYSIM_VERSION_MINOR 91
-#define RAYSIM_VERSION_PATCH 0
-#define RAYSIM_VERSION "0.91.0"
+#define RAYSIM_VERSION_PATCH 1
+#define RAYSIM_VERSION "0.91.1"
 
 // Function specifiers in case library is build/used as a shared library
 // NOTE: Microsoft specifiers to tell compiler that symbols are imported/exported from a .dll
