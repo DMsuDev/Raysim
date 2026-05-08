@@ -5,7 +5,7 @@
 
 namespace RS::Backend {
 
-void RaylibImGuiBackend::Init(Window& window)
+void RaylibImGuiBackend::Init(Window& /*window*/)
 {
     RS_PROFILE_FUNCTION();
     RS_CORE_ASSERT(!m_Initialized, "RaylibImGuiBackend::Init called twice without Shutdown");
