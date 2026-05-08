@@ -13,14 +13,10 @@ include_guard()
 
 find_package(raylib CONFIG REQUIRED)
 
-# On desktop platforms, vcpkg typically builds raylib with
-# USE_EXTERNAL_GLFW=ON.
-#
-# Some vcpkg/raylib configurations may fail to propagate GLFW
-# as a transitive dependency, causing undefined GLFW symbols
-# at link time.
-#
-# Link glfw explicitly to ensure reliable desktop builds.
+# vcpkg builds raylib with USE_EXTERNAL_GLFW=ON. CMake places GLFW before
+# raylib in the link command, which breaks single-pass linkers (debug/no-LTO).
+# LINK_GROUP:RESCAN wraps both in --start-group/--end-group to allow
+# multiple passes.
 find_package(glfw3 CONFIG QUIET)
 
 # ===========================================================================
@@ -29,10 +25,19 @@ find_package(glfw3 CONFIG QUIET)
 
 add_library(rs_windowing_raylib INTERFACE)
 
-target_link_libraries(rs_windowing_raylib INTERFACE
-    raylib
-    $<$<BOOL:${glfw3_FOUND}>:glfw>
-)
+if(glfw3_FOUND)
+    # LINK_GROUP:RESCAN uses --start-group/--end-group, only supported by GNU-style linkers (Linux/macOS).
+    # On Windows (MSVC) link both libraries directly without the group wrapper.
+    if(MSVC)
+        target_link_libraries(rs_windowing_raylib INTERFACE raylib glfw)
+    else()
+        target_link_libraries(rs_windowing_raylib INTERFACE
+            "$<LINK_GROUP:RESCAN,raylib,glfw>"
+        )
+    endif()
+else()
+    target_link_libraries(rs_windowing_raylib INTERFACE raylib)
+endif()
 
 # ===========================================================================
 # Graphics (Raylib handles OpenGL internally - no GLAD needed)
