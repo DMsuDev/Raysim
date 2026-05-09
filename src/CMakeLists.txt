@@ -46,8 +46,6 @@ set(RAYSIM_SOURCES
     ${SRC_DIR}/Debug/Instrumentor.cpp
     ${SRC_DIR}/Core/Log.cpp
 
-    ${SRC_DIR}/Renderer/RenderCommand.cpp
-
     # Core managers
     ${SRC_DIR}/Core/BackendFactory.cpp
     ${SRC_DIR}/Core/Time.cpp
