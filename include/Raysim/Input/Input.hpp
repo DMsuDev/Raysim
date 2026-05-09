@@ -4,7 +4,7 @@
 #include "Raysim/Input/MouseCodes.hpp"
 #include "Raysim/Input/GamepadCodes.hpp"
 
-#include "Raysim/Math/Types/Vec2.hpp"
+#include "Raysim/Math/Types/Vector2.hpp"
 
 namespace RS {
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Raysim/Math/Types/Vec2.hpp"
+#include "Raysim/Math/Types/Vector2.hpp"
 
 #include <cstdint>
 

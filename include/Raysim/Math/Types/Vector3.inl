@@ -19,7 +19,7 @@
  *
  **********************************************************************************************/
 
-// This file is included at the bottom of Vec3.hpp -- do not include it directly.
+// This file is included at the bottom of Vector3.hpp -- do not include it directly.
 
 #pragma once
 
@@ -36,17 +36,17 @@ namespace RS::Math {
 //==============================================================================
 
 template <typename T>
-constexpr Vec3<T>::Vec3(T X, T Y, T Z) noexcept
+constexpr Vector3<T>::Vector3(T X, T Y, T Z) noexcept
     : x(X), y(Y), z(Z) {}
 
 template <typename T>
-constexpr Vec3<T>::Vec3(T s) noexcept
+constexpr Vector3<T>::Vector3(T s) noexcept
     : x(s), y(s), z(s) {}
 
 template <typename T>
 template <typename U>
-constexpr Vec3<T>::operator Vec3<U>() const noexcept {
-    return Vec3<U>{
+constexpr Vector3<T>::operator Vector3<U>() const noexcept {
+    return Vector3<U>{
         static_cast<U>(x),
         static_cast<U>(y),
         static_cast<U>(z)
@@ -58,30 +58,30 @@ constexpr Vec3<T>::operator Vec3<U>() const noexcept {
 //==============================================================================
 
 template <typename T>
-T Vec3<T>::Length() const noexcept {
+T Vector3<T>::Length() const noexcept {
     return static_cast<T>(std::sqrt(static_cast<double>(LengthSquared())));
 }
 
 template <typename T>
-constexpr T Vec3<T>::LengthSquared() const noexcept {
+constexpr T Vector3<T>::LengthSquared() const noexcept {
     return x*x + y*y + z*z;
 }
 
 template <typename T>
-Vec3<T> Vec3<T>::Normalized() const noexcept {
+Vector3<T> Vector3<T>::Normalized() const noexcept {
     const T len = Length();
-    if (len > T(1e-6)) return Vec3<T>{x / len, y / len, z / len};
-    return Vec3<T>{};
+    if (len > T(1e-6)) return Vector3<T>{x / len, y / len, z / len};
+    return Vector3<T>{};
 }
 
 template <typename T>
-constexpr T Vec3<T>::Dot(const Vec3& rhs) const noexcept {
+constexpr T Vector3<T>::Dot(const Vector3& rhs) const noexcept {
     return x * rhs.x + y * rhs.y + z * rhs.z;
 }
 
 template <typename T>
-constexpr Vec3<T> Vec3<T>::Cross(const Vec3& rhs) const noexcept {
-    return Vec3<T>{
+constexpr Vector3<T> Vector3<T>::Cross(const Vector3& rhs) const noexcept {
+    return Vector3<T>{
         y * rhs.z - z * rhs.y,
         z * rhs.x - x * rhs.z,
         x * rhs.y - y * rhs.x
@@ -89,25 +89,25 @@ constexpr Vec3<T> Vec3<T>::Cross(const Vec3& rhs) const noexcept {
 }
 
 template <typename T>
-constexpr Vec3<T> Vec3<T>::Project(const Vec3& axis) const noexcept {
+constexpr Vector3<T> Vector3<T>::Project(const Vector3& axis) const noexcept {
     const T denom = axis.LengthSquared();
     if (denom > T(1e-12)) return axis * (Dot(axis) / denom);
-    return Vec3<T>{};
+    return Vector3<T>{};
 }
 
 template <typename T>
-constexpr Vec3<T> Vec3<T>::Rejection(const Vec3& axis) const noexcept {
+constexpr Vector3<T> Vector3<T>::Rejection(const Vector3& axis) const noexcept {
     return *this - Project(axis);
 }
 
 template <typename T>
-constexpr Vec3<T> Vec3<T>::Reflect(const Vec3& normal) const noexcept {
+constexpr Vector3<T> Vector3<T>::Reflect(const Vector3& normal) const noexcept {
     return *this - normal * (T(2) * Dot(normal));
 }
 
 template <typename T>
-Vec3<T> Vec3<T>::RotatedBy(const Vec3& axis, Angle angle) const noexcept {
-    const Vec3<T> k = axis.Normalized();
+Vector3<T> Vector3<T>::RotatedBy(const Vector3& axis, Angle angle) const noexcept {
+    const Vector3<T> k = axis.Normalized();
     const float rad = angle.AsRadians();
     const float c   = std::cos(rad);
     const float s   = std::sin(rad);
@@ -118,17 +118,17 @@ Vec3<T> Vec3<T>::RotatedBy(const Vec3& axis, Angle angle) const noexcept {
 }
 
 template <typename T>
-T Vec3<T>::Distance(const Vec3& rhs) const noexcept {
+T Vector3<T>::Distance(const Vector3& rhs) const noexcept {
     return (*this - rhs).Length();
 }
 
 template <typename T>
-constexpr T Vec3<T>::DistanceSquared(const Vec3& rhs) const noexcept {
+constexpr T Vector3<T>::DistanceSquared(const Vector3& rhs) const noexcept {
     return (*this - rhs).LengthSquared();
 }
 
 template <typename T>
-void Vec3<T>::ClampLength(T maxLen) noexcept {
+void Vector3<T>::ClampLength(T maxLen) noexcept {
     const T lenSq = LengthSquared();
     if (lenSq > maxLen * maxLen) {
         const T scale = maxLen / static_cast<T>(std::sqrt(static_cast<double>(lenSq)));
@@ -139,22 +139,22 @@ void Vec3<T>::ClampLength(T maxLen) noexcept {
 }
 
 template <typename T>
-void Vec3<T>::Normalize() noexcept {
+void Vector3<T>::Normalize() noexcept {
     const T len = Length();
     if (len > T(1e-6)) { *this /= len; return; }
-    RS_CORE_WARN("Vec3::Normalize() called on a near-zero vector -- skipping.");
+    RS_CORE_WARN("Vector3::Normalize() called on a near-zero vector -- skipping.");
 }
 
 template <typename T>
-void Vec3<T>::NormalizeSafe(T epsilon) noexcept {
+void Vector3<T>::NormalizeSafe(T epsilon) noexcept {
     const T len = Length();
     if (len > epsilon) { *this /= len; return; }
-    RS_CORE_WARN("Vec3::NormalizeSafe() -- near-zero vector set to zero.");
+    RS_CORE_WARN("Vector3::NormalizeSafe() -- near-zero vector set to zero.");
     x = y = z = T(0);
 }
 
 template <typename T>
-constexpr bool Vec3<T>::IsZero(T epsilon) const noexcept {
+constexpr bool Vector3<T>::IsZero(T epsilon) const noexcept {
     return std::abs(x) < epsilon
         && std::abs(y) < epsilon
         && std::abs(z) < epsilon;
@@ -165,33 +165,33 @@ constexpr bool Vec3<T>::IsZero(T epsilon) const noexcept {
 //==============================================================================
 
 template <typename T>
-T Vec3<T>::Distance(const Vec3& a, const Vec3& b) noexcept {
+T Vector3<T>::Distance(const Vector3& a, const Vector3& b) noexcept {
     return (b - a).Length();
 }
 
 template <typename T>
-constexpr T Vec3<T>::DistanceSquared(const Vec3& a, const Vec3& b) noexcept {
+constexpr T Vector3<T>::DistanceSquared(const Vector3& a, const Vector3& b) noexcept {
     return (b - a).LengthSquared();
 }
 
 template <typename T>
-Vec3<T> Vec3<T>::FromAngleXY(Angle angle) noexcept {
+Vector3<T> Vector3<T>::FromAngleXY(Angle angle) noexcept {
     const float rad = angle.AsRadians();
-    return Vec3<T>{static_cast<T>(std::cos(rad)), static_cast<T>(std::sin(rad)), T(0)};
+    return Vector3<T>{static_cast<T>(std::cos(rad)), static_cast<T>(std::sin(rad)), T(0)};
 }
 
 template <typename T>
-Vec3<T> Vec3<T>::FromAngleXZ(Angle angle) noexcept {
+Vector3<T> Vector3<T>::FromAngleXZ(Angle angle) noexcept {
     const float rad = angle.AsRadians();
-    return Vec3<T>{static_cast<T>(std::cos(rad)), T(0), static_cast<T>(std::sin(rad))};
+    return Vector3<T>{static_cast<T>(std::cos(rad)), T(0), static_cast<T>(std::sin(rad))};
 }
 
 template <typename T>
-Vec3<T> Vec3<T>::FromSpherical(Angle polar, Angle azimuth, T radius) noexcept {
+Vector3<T> Vector3<T>::FromSpherical(Angle polar, Angle azimuth, T radius) noexcept {
     const float p = polar.AsRadians();
     const float a = azimuth.AsRadians();
     const float sp = std::sin(p);
-    return Vec3<T>{
+    return Vector3<T>{
         static_cast<T>(radius) * static_cast<T>(sp * std::cos(a)),
         static_cast<T>(radius) * static_cast<T>(std::cos(p)),
         static_cast<T>(radius) * static_cast<T>(sp * std::sin(a))
@@ -199,7 +199,7 @@ Vec3<T> Vec3<T>::FromSpherical(Angle polar, Angle azimuth, T radius) noexcept {
 }
 
 template <typename T>
-Angle Vec3<T>::AngleBetween(const Vec3& a, const Vec3& b) noexcept {
+Angle Vector3<T>::AngleBetween(const Vector3& a, const Vector3& b) noexcept {
     const T la2 = a.LengthSquared();
     const T lb2 = b.LengthSquared();
     if (la2 > T(1e-12) && lb2 > T(1e-12)) {
@@ -215,43 +215,43 @@ Angle Vec3<T>::AngleBetween(const Vec3& a, const Vec3& b) noexcept {
 //==============================================================================
 
 template <typename T>
-constexpr Vec3<T>& Vec3<T>::operator+=(const Vec3& rhs) noexcept {
+constexpr Vector3<T>& Vector3<T>::operator+=(const Vector3& rhs) noexcept {
     x += rhs.x; y += rhs.y; z += rhs.z;
     return *this;
 }
 
 template <typename T>
-constexpr Vec3<T>& Vec3<T>::operator-=(const Vec3& rhs) noexcept {
+constexpr Vector3<T>& Vector3<T>::operator-=(const Vector3& rhs) noexcept {
     x -= rhs.x; y -= rhs.y; z -= rhs.z;
     return *this;
 }
 
 template <typename T>
-constexpr Vec3<T>& Vec3<T>::operator*=(T scalar) noexcept {
+constexpr Vector3<T>& Vector3<T>::operator*=(T scalar) noexcept {
     x *= scalar; y *= scalar; z *= scalar;
     return *this;
 }
 
 template <typename T>
-constexpr Vec3<T>& Vec3<T>::operator/=(T scalar) noexcept {
+constexpr Vector3<T>& Vector3<T>::operator/=(T scalar) noexcept {
     RS_CORE_ASSERT(scalar != T(0) && scalar == scalar,
-                   "Vec3::operator/=: division by zero or NaN scalar.");
+                   "Vector3::operator/=: division by zero or NaN scalar.");
     x /= scalar; y /= scalar; z /= scalar;
     return *this;
 }
 
 template <typename T>
-constexpr Vec3<T> Vec3<T>::operator-() const noexcept {
-    return Vec3<T>{-x, -y, -z};
+constexpr Vector3<T> Vector3<T>::operator-() const noexcept {
+    return Vector3<T>{-x, -y, -z};
 }
 
 template <typename T>
-constexpr bool Vec3<T>::operator==(const Vec3& rhs) const noexcept {
+constexpr bool Vector3<T>::operator==(const Vector3& rhs) const noexcept {
     return x == rhs.x && y == rhs.y && z == rhs.z;
 }
 
 template <typename T>
-constexpr bool Vec3<T>::operator!=(const Vec3& rhs) const noexcept {
+constexpr bool Vector3<T>::operator!=(const Vector3& rhs) const noexcept {
     return !(*this == rhs);
 }
 
@@ -260,28 +260,28 @@ constexpr bool Vec3<T>::operator!=(const Vec3& rhs) const noexcept {
 //==============================================================================
 
 template <typename T>
-constexpr Vec3<T> Vec3<T>::Zero() noexcept {
-    return Vec3<T>{T(0), T(0), T(0)};
+constexpr Vector3<T> Vector3<T>::Zero() noexcept {
+    return Vector3<T>{T(0), T(0), T(0)};
 }
 
 template <typename T>
-constexpr Vec3<T> Vec3<T>::One() noexcept {
-    return Vec3<T>{T(1), T(1), T(1)};
+constexpr Vector3<T> Vector3<T>::One() noexcept {
+    return Vector3<T>{T(1), T(1), T(1)};
 }
 
 template <typename T>
-constexpr Vec3<T> Vec3<T>::UnitX() noexcept {
-    return Vec3<T>{T(1), T(0), T(0)};
+constexpr Vector3<T> Vector3<T>::UnitX() noexcept {
+    return Vector3<T>{T(1), T(0), T(0)};
 }
 
 template <typename T>
-constexpr Vec3<T> Vec3<T>::UnitY() noexcept {
-    return Vec3<T>{T(0), T(1), T(0)};
+constexpr Vector3<T> Vector3<T>::UnitY() noexcept {
+    return Vector3<T>{T(0), T(1), T(0)};
 }
 
 template <typename T>
-constexpr Vec3<T> Vec3<T>::UnitZ() noexcept {
-    return Vec3<T>{T(0), T(0), T(1)};
+constexpr Vector3<T> Vector3<T>::UnitZ() noexcept {
+    return Vector3<T>{T(0), T(0), T(1)};
 }
 
 } // namespace RS::Math

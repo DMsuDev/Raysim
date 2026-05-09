@@ -29,11 +29,11 @@
 namespace RS::Math {
 
 /**
- * @struct Vec2
+ * @struct Vector2
  * @brief 2D vector with arithmetic and geometric operations
  */
 template <typename T>
-struct Vec2 {
+struct Vector2 {
     // Components of the vector
     T x{0}; ///< X component of the vector
     T y{0}; ///< Y component of the vector
@@ -41,23 +41,23 @@ struct Vec2 {
     /**
      * @brief Default constructor (zero vector)
      */
-    constexpr Vec2() noexcept = default;
+    constexpr Vector2() noexcept = default;
     /**
      * @brief Constructor with explicit x and y values
      * @param X X component
      * @param Y Y component
      */
-    constexpr Vec2(T X, T Y) noexcept;
+    constexpr Vector2(T X, T Y) noexcept;
     /**
      * @brief Constructor that sets both components to the same value
      * @param s Value for both x and y
      */
-    explicit constexpr Vec2(T s) noexcept;
+    explicit constexpr Vector2(T s) noexcept;
 
     /**
-     * @brief Explicitly converts this vector to another Vec2 type.
+     * @brief Explicitly converts this vector to another Vector2 type.
      *
-     * Enables explicit conversion from `Vec2<T>` to `Vec2<U>`, allowing safe and
+     * Enables explicit conversion from `Vector2<T>` to `Vector2<U>`, allowing safe and
      * intentional casting between different numeric types (e.g., float -> int,
      * double -> float). Each component is individually converted using
      * `static_cast<U>`.
@@ -67,15 +67,15 @@ struct Vec2 {
      *
      * Example:
      *
-     *     Vec2<float> vf(1.5f, 2.8f);
-     *     Vec2<int>   vi = static_cast<Vec2<int>>(vf);
+     *     Vector2<float> vf(1.5f, 2.8f);
+     *     Vector2<int>   vi = static_cast<Vector2<int>>(vf);
      *     // vi == {1, 2}
      *
      * @tparam U Target component type (e.g., int, float, double).
-     * @return A new `Vec2<U>` with both components converted to type `U`.
+     * @return A new `Vector2<U>` with both components converted to type `U`.
      */
     template <typename U>
-    explicit constexpr operator Vec2<U>() const noexcept;
+    explicit constexpr operator Vector2<U>() const noexcept;
 
 //==============================================================================
 // Math
@@ -108,7 +108,7 @@ struct Vec2 {
      *
      * @return Unit-length vector in the same direction, or {0,0} if the vector is zero.
      */
-    [[nodiscard]] Vec2 Normalized() const noexcept;
+    [[nodiscard]] Vector2 Normalized() const noexcept;
 
     /**
      * @brief Computes the signed angle from this vector to another.
@@ -122,7 +122,7 @@ struct Vec2 {
      * @param rhs Target vector to measure the angle to.
      * @return Signed angle in radians from this vector to `rhs`.
      */
-    [[nodiscard]] Angle AngleTo(const Vec2<T>& rhs) const noexcept;
+    [[nodiscard]] Angle AngleTo(const Vector2<T>& rhs) const noexcept;
 
     /**
      * @brief Returns the angle of this vector from the positive x-axis.
@@ -150,7 +150,7 @@ struct Vec2 {
      * @param phi Rotation angle in radians.
      * @return Rotated vector.
      */
-    [[nodiscard]] Vec2 RotatedBy(Angle phi) const noexcept;
+    [[nodiscard]] Vector2 RotatedBy(Angle phi) const noexcept;
 
     /**
      * @brief Projects this vector onto the given axis.
@@ -165,7 +165,7 @@ struct Vec2 {
      * @param axis Vector defining the projection axis.
      * @return Projection of this vector onto `axis`, or {0,0} if `axis` is zero.
      */
-    [[nodiscard]] constexpr Vec2 Project(const Vec2& axis) const noexcept;
+    [[nodiscard]] constexpr Vector2 Project(const Vector2& axis) const noexcept;
 
     /**
      * @brief Returns a vector perpendicular to this one.
@@ -176,7 +176,7 @@ struct Vec2 {
      *
      * @return A vector perpendicular to this one, rotated 90° counter‑clockwise.
      */
-    [[nodiscard]] constexpr Vec2 Perpendicular() const noexcept;
+    [[nodiscard]] constexpr Vector2 Perpendicular() const noexcept;
 
     /**
      * @brief Computes the dot (scalar) product with another vector.
@@ -188,7 +188,7 @@ struct Vec2 {
      * @param rhs Vector to compute the dot product with.
      * @return Scalar dot product: x * rhs.x + y * rhs.y.
      */
-    [[nodiscard]] constexpr T Dot(const Vec2& rhs) const noexcept;
+    [[nodiscard]] constexpr T Dot(const Vector2& rhs) const noexcept;
 
     /**
      * @brief Computes the 2D cross product (perpendicular magnitude) with another vector.
@@ -201,7 +201,7 @@ struct Vec2 {
      * @param rhs Vector to compute the cross product with.
      * @return Signed scalar cross product: x * rhs.y - y * rhs.x.
      */
-    [[nodiscard]] constexpr T Cross(const Vec2& rhs) const noexcept;
+    [[nodiscard]] constexpr T Cross(const Vector2& rhs) const noexcept;
 
     /**
      * @brief Computes the Euclidean distance between this vector and `rhs`.
@@ -213,7 +213,7 @@ struct Vec2 {
      * @param rhs Other vector (point) to measure distance to.
      * @return Euclidean distance between the two vectors.
      */
-    [[nodiscard]] T Distance(const Vec2& rhs) const noexcept;
+    [[nodiscard]] T Distance(const Vector2& rhs) const noexcept;
 
     /**
      * @brief Computes the squared distance between this vector and `rhs`.
@@ -224,7 +224,7 @@ struct Vec2 {
      * @param rhs Other vector (point) to measure squared distance to.
      * @return Squared Euclidean distance between the two vectors.
      */
-    [[nodiscard]] constexpr T DistanceSquared(const Vec2& rhs) const noexcept;
+    [[nodiscard]] constexpr T DistanceSquared(const Vector2& rhs) const noexcept;
 
     /**
      * @brief Returns this vector reflected across a given normal.
@@ -238,7 +238,7 @@ struct Vec2 {
      * @param normal Normalized vector defining the reflection plane.
      * @return Reflected vector.
      */
-    [[nodiscard]] constexpr Vec2 Reflect(const Vec2& normal) const noexcept;
+    [[nodiscard]] constexpr Vector2 Reflect(const Vector2& normal) const noexcept;
 
     /**
      * @brief Computes the rejection of this vector from the given axis.
@@ -253,7 +253,7 @@ struct Vec2 {
      * @param axis Vector defining the projection axis.
      * @return Component of this vector perpendicular to `axis`.
      */
-    [[nodiscard]] constexpr Vec2 Rejection(const Vec2& axis) const noexcept;
+    [[nodiscard]] constexpr Vector2 Rejection(const Vector2& axis) const noexcept;
 
     /**
      * @brief Clamps the vector's magnitude to a maximum value.
@@ -312,7 +312,7 @@ struct Vec2 {
      * @param b Second point.
      * @return Euclidean distance between a and b.
      */
-    [[nodiscard]] static T Distance(const Vec2& a, const Vec2& b) noexcept;
+    [[nodiscard]] static T Distance(const Vector2& a, const Vector2& b) noexcept;
 
     /**
      * @brief Computes the squared Euclidean distance between two points.
@@ -324,7 +324,7 @@ struct Vec2 {
      * @param b Second point.
      * @return Squared distance between a and b.
      */
-    [[nodiscard]] static constexpr T DistanceSquared(const Vec2& a, const Vec2& b) noexcept;
+    [[nodiscard]] static constexpr T DistanceSquared(const Vector2& a, const Vector2& b) noexcept;
 
     /**
      * @brief Creates a unit vector from an angle in radians.
@@ -335,7 +335,7 @@ struct Vec2 {
      * @param angle Angle in radians.
      * @return Unit vector pointing in the direction of the given angle.
      */
-    [[nodiscard]] static constexpr Vec2 FromAngle(float angle) noexcept;
+    [[nodiscard]] static constexpr Vector2 FromAngle(float angle) noexcept;
 
     /**
      * @brief Computes the unsigned angle between two vectors.
@@ -349,7 +349,7 @@ struct Vec2 {
      * @param b Second vector.
      * @return Unsigned angle between a and b.
      */
-    [[nodiscard]] static Angle AngleBetween(const Vec2& a, const Vec2& b) noexcept;
+    [[nodiscard]] static Angle AngleBetween(const Vector2& a, const Vector2& b) noexcept;
 
 //==============================================================================
 // Operators
@@ -360,21 +360,21 @@ struct Vec2 {
      * @param rhs Vector to add.
      * @return Reference to this vector after addition.
      */
-    constexpr Vec2& operator+=(const Vec2& rhs) noexcept;
+    constexpr Vector2& operator+=(const Vector2& rhs) noexcept;
 
     /**
      * @brief Subtracts `rhs` from this vector in-place.
      * @param rhs Vector to subtract.
      * @return Reference to this vector after subtraction.
      */
-    constexpr Vec2& operator-=(const Vec2& rhs) noexcept;
+    constexpr Vector2& operator-=(const Vector2& rhs) noexcept;
 
     /**
      * @brief Multiplies this vector by a scalar in-place.
      * @param scalar Scalar factor.
      * @return Reference to this vector after scaling.
      */
-    constexpr Vec2& operator*=(T scalar) noexcept;
+    constexpr Vector2& operator*=(T scalar) noexcept;
 
     /**
      * @brief Divides this vector by a scalar in-place.
@@ -384,13 +384,13 @@ struct Vec2 {
      * @param scalar Scalar divisor.
      * @return Reference to this vector after division.
      */
-    constexpr Vec2& operator/=(T scalar) noexcept;
+    constexpr Vector2& operator/=(T scalar) noexcept;
 
     /**
      * @brief Returns the negation of this vector.
      * @return Vector with both components negated.
      */
-    [[nodiscard]] constexpr Vec2 operator-() const noexcept;
+    [[nodiscard]] constexpr Vector2 operator-() const noexcept;
 
     /**
      * @brief Checks whether this vector is equal to `rhs`.
@@ -401,14 +401,14 @@ struct Vec2 {
      * @param rhs Vector to compare against.
      * @return True if both components are equal.
      */
-    [[nodiscard]] constexpr bool operator==(const Vec2& rhs) const noexcept;
+    [[nodiscard]] constexpr bool operator==(const Vector2& rhs) const noexcept;
 
     /**
      * @brief Checks whether this vector is not equal to `rhs`.
      * @param rhs Vector to compare against.
      * @return True if any component differs.
      */
-    [[nodiscard]] constexpr bool operator!=(const Vec2& rhs) const noexcept;
+    [[nodiscard]] constexpr bool operator!=(const Vector2& rhs) const noexcept;
 
     /**
      * @brief Accesses a component by index (0 = x, 1 = y).
@@ -428,36 +428,36 @@ struct Vec2 {
 
     /**
      * @brief Returns the zero vector {0, 0}.
-     * @return Vec2 with both components set to zero.
+     * @return Vector2 with both components set to zero.
      */
-    [[nodiscard]] static constexpr Vec2 Zero()  noexcept;
+    [[nodiscard]] static constexpr Vector2 Zero()  noexcept;
 
     /**
      * @brief Returns the one vector {1, 1}.
-     * @return Vec2 with both components set to one.
+     * @return Vector2 with both components set to one.
      */
-    [[nodiscard]] static constexpr Vec2 One()   noexcept;
+    [[nodiscard]] static constexpr Vector2 One()   noexcept;
 
     /**
      * @brief Returns the unit vector along the x-axis {1, 0}.
-     * @return Vec2 pointing in the positive x direction.
+     * @return Vector2 pointing in the positive x direction.
      */
-    [[nodiscard]] static constexpr Vec2 UnitX() noexcept;
+    [[nodiscard]] static constexpr Vector2 UnitX() noexcept;
 
     /**
      * @brief Returns the unit vector along the y-axis {0, 1}.
-     * @return Vec2 pointing in the positive y direction.
+     * @return Vector2 pointing in the positive y direction.
      */
-    [[nodiscard]] static constexpr Vec2 UnitY() noexcept;
+    [[nodiscard]] static constexpr Vector2 UnitY() noexcept;
 };
 
 // Define the most common types
-using Vec2i = Vec2<int>;
-using Vec2f = Vec2<float>;
-using Vec2d = Vec2<double>;
-using Vec2u = Vec2<unsigned int>;
-using Vec2u16 = Vec2<std::uint16_t>;
-using Vec2u32 = Vec2<std::uint32_t>;
+using Vec2i = Vector2<int>;
+using Vec2f = Vector2<float>;
+using Vec2d = Vector2<double>;
+using Vec2u = Vector2<unsigned int>;
+using Vec2u16 = Vector2<std::uint16_t>;
+using Vec2u32 = Vector2<std::uint32_t>;
 
 //==============================================================================
 // Non-member arithmetic operators
@@ -470,7 +470,7 @@ using Vec2u32 = Vec2<std::uint32_t>;
  * @return New vector equal to `lhs + rhs`.
  */
 template <typename T>
-[[nodiscard]] constexpr Vec2<T> operator+(Vec2<T> lhs, const Vec2<T>& rhs) noexcept { lhs += rhs; return lhs; }
+[[nodiscard]] constexpr Vector2<T> operator+(Vector2<T> lhs, const Vector2<T>& rhs) noexcept { lhs += rhs; return lhs; }
 
 /**
  * @brief Component-wise subtraction of two vectors.
@@ -479,7 +479,7 @@ template <typename T>
  * @return New vector equal to `lhs - rhs`.
  */
 template <typename T>
-[[nodiscard]] constexpr Vec2<T> operator-(Vec2<T> lhs, const Vec2<T>& rhs) noexcept { lhs -= rhs; return lhs; }
+[[nodiscard]] constexpr Vector2<T> operator-(Vector2<T> lhs, const Vector2<T>& rhs) noexcept { lhs -= rhs; return lhs; }
 
 /**
  * @brief Multiplies a vector by a scalar (vector on the left).
@@ -488,7 +488,7 @@ template <typename T>
  * @return New scaled vector.
  */
 template <typename T>
-[[nodiscard]] constexpr Vec2<T> operator*(Vec2<T> lhs, T scalar) noexcept { lhs *= scalar; return lhs; }
+[[nodiscard]] constexpr Vector2<T> operator*(Vector2<T> lhs, T scalar) noexcept { lhs *= scalar; return lhs; }
 
 /**
  * @brief Multiplies a scalar by a vector (scalar on the left).
@@ -497,7 +497,7 @@ template <typename T>
  * @return New scaled vector.
  */
 template <typename T>
-[[nodiscard]] constexpr Vec2<T> operator*(T scalar, Vec2<T> rhs) noexcept { rhs *= scalar; return rhs; }
+[[nodiscard]] constexpr Vector2<T> operator*(T scalar, Vector2<T> rhs) noexcept { rhs *= scalar; return rhs; }
 
 /**
  * @brief Divides a vector by a scalar.
@@ -509,7 +509,7 @@ template <typename T>
  * @return New divided vector.
  */
 template <typename T>
-[[nodiscard]] constexpr Vec2<T> operator/(Vec2<T> lhs, T scalar) noexcept { lhs /= scalar; return lhs; }
+[[nodiscard]] constexpr Vector2<T> operator/(Vector2<T> lhs, T scalar) noexcept { lhs /= scalar; return lhs; }
 
 /**
  * @brief Writes the vector to an output stream in the format `(x, y)`.
@@ -518,10 +518,10 @@ template <typename T>
  * @return Reference to `os`.
  */
 template <typename T>
-inline std::ostream& operator<<(std::ostream& os, const Vec2<T>& v) {
+inline std::ostream& operator<<(std::ostream& os, const Vector2<T>& v) {
     return os << "(" << v.x << ", " << v.y << ")";
 }
 
 } // namespace RS::Math
 
-#include "Raysim/Math/Types/Vec2.inl"
+#include "Raysim/Math/Types/Vector2.inl"

@@ -29,7 +29,7 @@
 namespace RS::Math {
 
 /**
- * @struct Vec3
+ * @struct Vector3
  * @brief 3D vector with arithmetic and geometric operations.
  *
  * Represents a 3D vector for positions, velocities, and directions in 3D space.
@@ -39,16 +39,16 @@ namespace RS::Math {
  *
  * Example:
  * @code
- *     Vec3f a(1.0f, 0.0f, 0.0f);
- *     Vec3f b(0.0f, 1.0f, 0.0f);
+ *     Vector3f a(1.0f, 0.0f, 0.0f);
+ *     Vector3f b(0.0f, 1.0f, 0.0f);
  *
- *     Vec3f c   = a.Cross(b);                        // {0, 0, 1}
+ *     Vector3f c   = a.Cross(b);                        // {0, 0, 1}
  *     float dot = a.Dot(b);                           // 0
- *     Vec3f r   = a.RotatedBy(Vec3f::UnitZ(), 90.0_deg); // ~{0, 1, 0}
+ *     Vector3f r   = a.RotatedBy(Vector3f::UnitZ(), 90.0_deg); // ~{0, 1, 0}
  * @endcode
  */
 template <typename T>
-struct Vec3 {
+struct Vector3 {
     T x{0}, y{0}, z{0}; ///< Components of the vector.
 
     //==========================================================================
@@ -60,7 +60,7 @@ struct Vec3 {
      *
      * Initializes all components to zero.
      */
-    constexpr Vec3() noexcept = default;
+    constexpr Vector3() noexcept = default;
 
     /**
      * @brief Constructs a vector with explicit x, y, z values.
@@ -68,24 +68,24 @@ struct Vec3 {
      * @param Y Y component.
      * @param Z Z component.
      */
-    constexpr Vec3(T X, T Y, T Z) noexcept;
+    constexpr Vector3(T X, T Y, T Z) noexcept;
 
     /**
      * @brief Constructs a vector with all components set to the same value.
      * @param s Value for x, y and z.
      */
-    explicit constexpr Vec3(T s) noexcept;
+    explicit constexpr Vector3(T s) noexcept;
 
     /**
-     * @brief Explicitly converts this vector to another Vec3 type.
+     * @brief Explicitly converts this vector to another Vector3 type.
      *
      * Each component is individually converted using `static_cast<U>`.
      *
      * @tparam U Target component type.
-     * @return A new `Vec3<U>` with components cast to type `U`.
+     * @return A new `Vector3<U>` with components cast to type `U`.
      */
     template <typename U>
-    explicit constexpr operator Vec3<U>() const noexcept;
+    explicit constexpr operator Vector3<U>() const noexcept;
 
 //==============================================================================
 // Math
@@ -117,7 +117,7 @@ struct Vec3 {
      *
      * @return Unit-length vector, or {0,0,0} if the vector is near-zero.
      */
-    [[nodiscard]] Vec3 Normalized() const noexcept;
+    [[nodiscard]] Vector3 Normalized() const noexcept;
 
     /**
      * @brief Computes the dot (scalar) product with another vector.
@@ -128,7 +128,7 @@ struct Vec3 {
      * @param rhs Right-hand operand.
      * @return Scalar dot product: x*rhs.x + y*rhs.y + z*rhs.z.
      */
-    [[nodiscard]] constexpr T Dot(const Vec3& rhs) const noexcept;
+    [[nodiscard]] constexpr T Dot(const Vector3& rhs) const noexcept;
 
     /**
      * @brief Computes the 3D cross product with another vector.
@@ -140,7 +140,7 @@ struct Vec3 {
      * @param rhs Right-hand operand.
      * @return Cross product vector: this x rhs.
      */
-    [[nodiscard]] constexpr Vec3 Cross(const Vec3& rhs) const noexcept;
+    [[nodiscard]] constexpr Vector3 Cross(const Vector3& rhs) const noexcept;
 
     /**
      * @brief Projects this vector onto the given axis.
@@ -153,7 +153,7 @@ struct Vec3 {
      * @param axis Projection axis.
      * @return Projection of this vector onto `axis`.
      */
-    [[nodiscard]] constexpr Vec3 Project(const Vec3& axis) const noexcept;
+    [[nodiscard]] constexpr Vector3 Project(const Vector3& axis) const noexcept;
 
     /**
      * @brief Computes the rejection of this vector from the given axis.
@@ -164,7 +164,7 @@ struct Vec3 {
      * @param axis Projection axis.
      * @return Component of this vector perpendicular to `axis`.
      */
-    [[nodiscard]] constexpr Vec3 Rejection(const Vec3& axis) const noexcept;
+    [[nodiscard]] constexpr Vector3 Rejection(const Vector3& axis) const noexcept;
 
     /**
      * @brief Returns this vector reflected across a surface normal.
@@ -175,7 +175,7 @@ struct Vec3 {
      * @param normal Normalized surface normal.
      * @return Reflected vector.
      */
-    [[nodiscard]] constexpr Vec3 Reflect(const Vec3& normal) const noexcept;
+    [[nodiscard]] constexpr Vector3 Reflect(const Vector3& normal) const noexcept;
 
     /**
      * @brief Rotates this vector around an arbitrary axis using Rodrigues' formula.
@@ -187,7 +187,7 @@ struct Vec3 {
      * @param angle Rotation angle.
      * @return Rotated vector.
      */
-    [[nodiscard]] Vec3 RotatedBy(const Vec3& axis, Angle angle) const noexcept;
+    [[nodiscard]] Vector3 RotatedBy(const Vector3& axis, Angle angle) const noexcept;
 
     /**
      * @brief Computes the Euclidean distance from this vector to `rhs`.
@@ -198,7 +198,7 @@ struct Vec3 {
      * @param rhs Other point.
      * @return Euclidean distance.
      */
-    [[nodiscard]] T Distance(const Vec3& rhs) const noexcept;
+    [[nodiscard]] T Distance(const Vector3& rhs) const noexcept;
 
     /**
      * @brief Computes the squared distance from this vector to `rhs`.
@@ -208,7 +208,7 @@ struct Vec3 {
      * @param rhs Other point.
      * @return Squared Euclidean distance.
      */
-    [[nodiscard]] constexpr T DistanceSquared(const Vec3& rhs) const noexcept;
+    [[nodiscard]] constexpr T DistanceSquared(const Vector3& rhs) const noexcept;
 
     /**
      * @brief Clamps the vector's magnitude to a maximum value.
@@ -256,7 +256,7 @@ struct Vec3 {
      * @param b Second point.
      * @return Euclidean distance between a and b.
      */
-    [[nodiscard]] static T Distance(const Vec3& a, const Vec3& b) noexcept;
+    [[nodiscard]] static T Distance(const Vector3& a, const Vector3& b) noexcept;
 
     /**
      * @brief Computes the squared Euclidean distance between two points.
@@ -264,7 +264,7 @@ struct Vec3 {
      * @param b Second point.
      * @return Squared distance between a and b.
      */
-    [[nodiscard]] static constexpr T DistanceSquared(const Vec3& a, const Vec3& b) noexcept;
+    [[nodiscard]] static constexpr T DistanceSquared(const Vector3& a, const Vector3& b) noexcept;
 
     /**
      * @brief Creates a unit vector from an angle in the XY plane.
@@ -274,7 +274,7 @@ struct Vec3 {
      * @param angle Angle in the XY plane.
      * @return Unit vector on the XY plane.
      */
-    [[nodiscard]] static Vec3 FromAngleXY(Angle angle) noexcept;
+    [[nodiscard]] static Vector3 FromAngleXY(Angle angle) noexcept;
 
     /**
      * @brief Creates a unit vector from an angle in the XZ plane.
@@ -284,7 +284,7 @@ struct Vec3 {
      * @param angle Angle in the XZ plane.
      * @return Unit vector on the XZ plane.
      */
-    [[nodiscard]] static Vec3 FromAngleXZ(Angle angle) noexcept;
+    [[nodiscard]] static Vector3 FromAngleXZ(Angle angle) noexcept;
 
     /**
      * @brief Creates a vector from spherical coordinates.
@@ -301,7 +301,7 @@ struct Vec3 {
      * @param radius  Length of the resulting vector (default 1).
      * @return Vector in Cartesian coordinates.
      */
-    [[nodiscard]] static Vec3 FromSpherical(Angle polar, Angle azimuth, T radius = T(1)) noexcept;
+    [[nodiscard]] static Vector3 FromSpherical(Angle polar, Angle azimuth, T radius = T(1)) noexcept;
 
     /**
      * @brief Computes the unsigned angle between two vectors.
@@ -313,7 +313,7 @@ struct Vec3 {
      * @param b Second vector.
      * @return Unsigned angle between a and b.
      */
-    [[nodiscard]] static Angle AngleBetween(const Vec3& a, const Vec3& b) noexcept;
+    [[nodiscard]] static Angle AngleBetween(const Vector3& a, const Vector3& b) noexcept;
 
 //==============================================================================
 // Operators
@@ -324,21 +324,21 @@ struct Vec3 {
      * @param rhs Vector to add.
      * @return Reference to this vector after addition.
      */
-    constexpr Vec3& operator+=(const Vec3& rhs) noexcept;
+    constexpr Vector3& operator+=(const Vector3& rhs) noexcept;
 
     /**
      * @brief Subtracts `rhs` from this vector in-place.
      * @param rhs Vector to subtract.
      * @return Reference to this vector after subtraction.
      */
-    constexpr Vec3& operator-=(const Vec3& rhs) noexcept;
+    constexpr Vector3& operator-=(const Vector3& rhs) noexcept;
 
     /**
      * @brief Multiplies this vector by a scalar in-place.
      * @param scalar Scalar factor.
      * @return Reference to this vector after scaling.
      */
-    constexpr Vec3& operator*=(T scalar) noexcept;
+    constexpr Vector3& operator*=(T scalar) noexcept;
 
     /**
      * @brief Divides this vector by a scalar in-place.
@@ -349,13 +349,13 @@ struct Vec3 {
      * @param scalar Scalar divisor.
      * @return Reference to this vector after division.
      */
-    constexpr Vec3& operator/=(T scalar) noexcept;
+    constexpr Vector3& operator/=(T scalar) noexcept;
 
     /**
      * @brief Returns the negation of this vector.
      * @return Vector with all components negated.
      */
-    [[nodiscard]] constexpr Vec3 operator-() const noexcept;
+    [[nodiscard]] constexpr Vector3 operator-() const noexcept;
 
     /**
      * @brief Checks whether this vector is equal to `rhs`.
@@ -366,14 +366,14 @@ struct Vec3 {
      * @param rhs Vector to compare against.
      * @return True if all components are equal.
      */
-    [[nodiscard]] constexpr bool operator==(const Vec3& rhs) const noexcept;
+    [[nodiscard]] constexpr bool operator==(const Vector3& rhs) const noexcept;
 
     /**
      * @brief Checks whether this vector is not equal to `rhs`.
      * @param rhs Vector to compare against.
      * @return True if any component differs.
      */
-    [[nodiscard]] constexpr bool operator!=(const Vec3& rhs) const noexcept;
+    [[nodiscard]] constexpr bool operator!=(const Vector3& rhs) const noexcept;
 
     /**
      * @brief Accesses a component by index (0 = x, 1 = y, 2 = z).
@@ -393,40 +393,40 @@ struct Vec3 {
 
     /**
      * @brief Returns the zero vector {0, 0, 0}.
-     * @return Vec3 with all components set to zero.
+     * @return Vector3 with all components set to zero.
      */
-    [[nodiscard]] static constexpr Vec3 Zero()  noexcept;
+    [[nodiscard]] static constexpr Vector3 Zero()  noexcept;
 
     /**
      * @brief Returns the one vector {1, 1, 1}.
-     * @return Vec3 with all components set to one.
+     * @return Vector3 with all components set to one.
      */
-    [[nodiscard]] static constexpr Vec3 One()   noexcept;
+    [[nodiscard]] static constexpr Vector3 One()   noexcept;
 
     /**
      * @brief Returns the unit vector along the x-axis {1, 0, 0}.
-     * @return Vec3 pointing in the positive x direction.
+     * @return Vector3 pointing in the positive x direction.
      */
-    [[nodiscard]] static constexpr Vec3 UnitX() noexcept;
+    [[nodiscard]] static constexpr Vector3 UnitX() noexcept;
 
     /**
      * @brief Returns the unit vector along the y-axis {0, 1, 0}.
-     * @return Vec3 pointing in the positive y direction.
+     * @return Vector3 pointing in the positive y direction.
      */
-    [[nodiscard]] static constexpr Vec3 UnitY() noexcept;
+    [[nodiscard]] static constexpr Vector3 UnitY() noexcept;
 
     /**
      * @brief Returns the unit vector along the z-axis {0, 0, 1}.
-     * @return Vec3 pointing in the positive z direction.
+     * @return Vector3 pointing in the positive z direction.
      */
-    [[nodiscard]] static constexpr Vec3 UnitZ() noexcept;
+    [[nodiscard]] static constexpr Vector3 UnitZ() noexcept;
 };
 
 // Common type aliases
-using Vec3i = Vec3<int>;
-using Vec3f = Vec3<float>;
-using Vec3d = Vec3<double>;
-using Vec3u = Vec3<unsigned int>;
+using Vec3i = Vector3<int>;
+using Vec3f = Vector3<float>;
+using Vec3d = Vector3<double>;
+using Vec3u = Vector3<unsigned int>;
 
 //==============================================================================
 // Non-member arithmetic operators
@@ -439,7 +439,7 @@ using Vec3u = Vec3<unsigned int>;
  * @return New vector equal to `lhs + rhs`.
  */
 template <typename T>
-[[nodiscard]] constexpr Vec3<T> operator+(Vec3<T> lhs, const Vec3<T>& rhs) noexcept { lhs += rhs; return lhs; }
+[[nodiscard]] constexpr Vector3<T> operator+(Vector3<T> lhs, const Vector3<T>& rhs) noexcept { lhs += rhs; return lhs; }
 
 /**
  * @brief Component-wise subtraction of two vectors.
@@ -448,7 +448,7 @@ template <typename T>
  * @return New vector equal to `lhs - rhs`.
  */
 template <typename T>
-[[nodiscard]] constexpr Vec3<T> operator-(Vec3<T> lhs, const Vec3<T>& rhs) noexcept { lhs -= rhs; return lhs; }
+[[nodiscard]] constexpr Vector3<T> operator-(Vector3<T> lhs, const Vector3<T>& rhs) noexcept { lhs -= rhs; return lhs; }
 
 /**
  * @brief Multiplies a vector by a scalar (vector on the left).
@@ -457,7 +457,7 @@ template <typename T>
  * @return New scaled vector.
  */
 template <typename T>
-[[nodiscard]] constexpr Vec3<T> operator*(Vec3<T> lhs, T scalar) noexcept { lhs *= scalar; return lhs; }
+[[nodiscard]] constexpr Vector3<T> operator*(Vector3<T> lhs, T scalar) noexcept { lhs *= scalar; return lhs; }
 
 /**
  * @brief Multiplies a scalar by a vector (scalar on the left).
@@ -466,7 +466,7 @@ template <typename T>
  * @return New scaled vector.
  */
 template <typename T>
-[[nodiscard]] constexpr Vec3<T> operator*(T scalar, Vec3<T> rhs) noexcept { rhs *= scalar; return rhs; }
+[[nodiscard]] constexpr Vector3<T> operator*(T scalar, Vector3<T> rhs) noexcept { rhs *= scalar; return rhs; }
 
 /**
  * @brief Divides a vector by a scalar.
@@ -478,7 +478,7 @@ template <typename T>
  * @return New divided vector.
  */
 template <typename T>
-[[nodiscard]] constexpr Vec3<T> operator/(Vec3<T> lhs, T scalar) noexcept { lhs /= scalar; return lhs; }
+[[nodiscard]] constexpr Vector3<T> operator/(Vector3<T> lhs, T scalar) noexcept { lhs /= scalar; return lhs; }
 
 /**
  * @brief Writes the vector to an output stream in the format `(x, y, z)`.
@@ -487,10 +487,10 @@ template <typename T>
  * @return Reference to `os`.
  */
 template <typename T>
-inline std::ostream& operator<<(std::ostream& os, const Vec3<T>& v) {
+inline std::ostream& operator<<(std::ostream& os, const Vector3<T>& v) {
     return os << "(" << v.x << ", " << v.y << ", " << v.z << ")";
 }
 
 } // namespace RS::Math
 
-#include "Raysim/Math/Types/Vec3.inl" // NOLINT(misc-header-include-cycle)
+#include "Raysim/Math/Types/Vector3.inl" // NOLINT(misc-header-include-cycle)

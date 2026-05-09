@@ -19,7 +19,7 @@
  *
  **********************************************************************************************/
 
-#include "Raysim/Math/Types/Vec2.hpp"   // NOLINT(misc-header-include-cycle)
+#include "Raysim/Math/Types/Vector2.hpp"   // NOLINT(misc-header-include-cycle)
 #include "Raysim/Math/Utils/MathUtils.hpp"
 #include "Raysim/Core/Assert.hpp"
 
@@ -32,15 +32,15 @@ namespace RS::Math {
 //==============================================================================
 
 template <typename T>
-constexpr Vec2<T>::Vec2(T X, T Y) noexcept : x(X), y(Y) {}
+constexpr Vector2<T>::Vector2(T X, T Y) noexcept : x(X), y(Y) {}
 
 template <typename T>
-constexpr Vec2<T>::Vec2(T s) noexcept : x(s), y(s) {}
+constexpr Vector2<T>::Vector2(T s) noexcept : x(s), y(s) {}
 
 template <typename T>
 template <typename U>
-constexpr Vec2<T>::operator Vec2<U>() const noexcept {
-    return Vec2<U>{ static_cast<U>(x), static_cast<U>(y) };
+constexpr Vector2<T>::operator Vector2<U>() const noexcept {
+    return Vector2<U>{ static_cast<U>(x), static_cast<U>(y) };
 }
 
 //==============================================================================
@@ -48,24 +48,24 @@ constexpr Vec2<T>::operator Vec2<U>() const noexcept {
 //==============================================================================
 
 template <typename T>
-T Vec2<T>::Length() const noexcept {
+T Vector2<T>::Length() const noexcept {
     return static_cast<T>(std::sqrt(static_cast<double>(LengthSquared())));
 }
 
 template <typename T>
-constexpr T Vec2<T>::LengthSquared() const noexcept {
+constexpr T Vector2<T>::LengthSquared() const noexcept {
     return x * x + y * y;
 }
 
 template <typename T>
-Vec2<T> Vec2<T>::Normalized() const noexcept {
+Vector2<T> Vector2<T>::Normalized() const noexcept {
     const T len = Length();
     if (len > T(1e-6)) return { x / len, y / len };
-    return Vec2<T>{};
+    return Vector2<T>{};
 }
 
 template <typename T>
-Angle Vec2<T>::AngleTo(const Vec2<T>& rhs) const noexcept {
+Angle Vector2<T>::AngleTo(const Vector2<T>& rhs) const noexcept {
     if (IsZero() || rhs.IsZero()) return Angle::Zero();
     return Angle::Radians(std::atan2(
         static_cast<float>(Cross(rhs)),
@@ -73,7 +73,7 @@ Angle Vec2<T>::AngleTo(const Vec2<T>& rhs) const noexcept {
 }
 
 template <typename T>
-Angle Vec2<T>::ToAngle() const noexcept {
+Angle Vector2<T>::ToAngle() const noexcept {
     if (IsZero()) return Angle::Zero();
     return Angle::Radians(std::atan2(
         static_cast<float>(y),
@@ -81,7 +81,7 @@ Angle Vec2<T>::ToAngle() const noexcept {
 }
 
 template <typename T>
-Vec2<T> Vec2<T>::RotatedBy(Angle phi) const noexcept {
+Vector2<T> Vector2<T>::RotatedBy(Angle phi) const noexcept {
     const float rad = phi.AsRadians();
     const T c = static_cast<T>(std::cos(rad));
     const T s = static_cast<T>(std::sin(rad));
@@ -89,51 +89,51 @@ Vec2<T> Vec2<T>::RotatedBy(Angle phi) const noexcept {
 }
 
 template <typename T>
-constexpr Vec2<T> Vec2<T>::Project(const Vec2<T>& axis) const noexcept {
+constexpr Vector2<T> Vector2<T>::Project(const Vector2<T>& axis) const noexcept {
     const T d = axis.LengthSquared();
-    if (d <= T(1e-12)) return Vec2<T>{};
+    if (d <= T(1e-12)) return Vector2<T>{};
     return axis * (Dot(axis) / d);
 }
 
 template <typename T>
-constexpr Vec2<T> Vec2<T>::Perpendicular() const noexcept {
+constexpr Vector2<T> Vector2<T>::Perpendicular() const noexcept {
     return { -y, x };
 }
 
 template <typename T>
-constexpr T Vec2<T>::Dot(const Vec2<T>& rhs) const noexcept {
+constexpr T Vector2<T>::Dot(const Vector2<T>& rhs) const noexcept {
     return x * rhs.x + y * rhs.y;
 }
 
 template <typename T>
-constexpr T Vec2<T>::Cross(const Vec2<T>& rhs) const noexcept {
+constexpr T Vector2<T>::Cross(const Vector2<T>& rhs) const noexcept {
     return x * rhs.y - y * rhs.x;
 }
 
 template <typename T>
-T Vec2<T>::Distance(const Vec2<T>& rhs) const noexcept {
+T Vector2<T>::Distance(const Vector2<T>& rhs) const noexcept {
     return static_cast<T>(std::sqrt(static_cast<double>(DistanceSquared(rhs))));
 }
 
 template <typename T>
-constexpr T Vec2<T>::DistanceSquared(const Vec2<T>& rhs) const noexcept {
+constexpr T Vector2<T>::DistanceSquared(const Vector2<T>& rhs) const noexcept {
     const T dx = x - rhs.x;
     const T dy = y - rhs.y;
     return dx * dx + dy * dy;
 }
 
 template <typename T>
-constexpr Vec2<T> Vec2<T>::Reflect(const Vec2<T>& normal) const noexcept {
+constexpr Vector2<T> Vector2<T>::Reflect(const Vector2<T>& normal) const noexcept {
     return *this - normal * (T(2) * Dot(normal));
 }
 
 template <typename T>
-constexpr Vec2<T> Vec2<T>::Rejection(const Vec2<T>& axis) const noexcept {
+constexpr Vector2<T> Vector2<T>::Rejection(const Vector2<T>& axis) const noexcept {
     return *this - Project(axis);
 }
 
 template <typename T>
-void Vec2<T>::ClampLength(T maxLen) noexcept {
+void Vector2<T>::ClampLength(T maxLen) noexcept {
     const T lenSq = LengthSquared();
     if (lenSq > maxLen * maxLen) {
         const T scale = maxLen / static_cast<T>(std::sqrt(static_cast<double>(lenSq)));
@@ -143,21 +143,21 @@ void Vec2<T>::ClampLength(T maxLen) noexcept {
 }
 
 template <typename T>
-void Vec2<T>::Normalize() noexcept {
+void Vector2<T>::Normalize() noexcept {
     const T len = Length();
     if (len > T(1e-6)) { x /= len; y /= len; }
 }
 
 template <typename T>
-void Vec2<T>::NormalizeSafe(T epsilon) noexcept {
+void Vector2<T>::NormalizeSafe(T epsilon) noexcept {
     const T len = Length();
     if (len > epsilon) { x /= len; y /= len; return; }
-    RS_CORE_WARN("Vec2::NormalizeSafe() -- vector is near-zero, zeroing out.");
+    RS_CORE_WARN("Vector2::NormalizeSafe() -- vector is near-zero, zeroing out.");
     x = y = T(0);
 }
 
 template <typename T>
-constexpr bool Vec2<T>::IsZero(T epsilon) const noexcept {
+constexpr bool Vector2<T>::IsZero(T epsilon) const noexcept {
     const T ax = x < T(0) ? -x : x;
     const T ay = y < T(0) ? -y : y;
     return ax < epsilon && ay < epsilon;
@@ -168,22 +168,22 @@ constexpr bool Vec2<T>::IsZero(T epsilon) const noexcept {
 //==============================================================================
 
 template <typename T>
-T Vec2<T>::Distance(const Vec2<T>& a, const Vec2<T>& b) noexcept {
+T Vector2<T>::Distance(const Vector2<T>& a, const Vector2<T>& b) noexcept {
     return a.Distance(b);
 }
 
 template <typename T>
-constexpr T Vec2<T>::DistanceSquared(const Vec2<T>& a, const Vec2<T>& b) noexcept {
+constexpr T Vector2<T>::DistanceSquared(const Vector2<T>& a, const Vector2<T>& b) noexcept {
     return a.DistanceSquared(b);
 }
 
 template <typename T>
-constexpr Vec2<T> Vec2<T>::FromAngle(float angle) noexcept {
+constexpr Vector2<T> Vector2<T>::FromAngle(float angle) noexcept {
     return { static_cast<T>(std::cos(angle)), static_cast<T>(std::sin(angle)) };
 }
 
 template <typename T>
-Angle Vec2<T>::AngleBetween(const Vec2<T>& a, const Vec2<T>& b) noexcept {
+Angle Vector2<T>::AngleBetween(const Vector2<T>& a, const Vector2<T>& b) noexcept {
     const T mag2 = a.LengthSquared() * b.LengthSquared();
     if (mag2 > T(1e-12)) {
         const float inv = 1.0f / std::sqrt(static_cast<float>(mag2));
@@ -198,40 +198,40 @@ Angle Vec2<T>::AngleBetween(const Vec2<T>& a, const Vec2<T>& b) noexcept {
 //==============================================================================
 
 template <typename T>
-constexpr Vec2<T>& Vec2<T>::operator+=(const Vec2<T>& rhs) noexcept {
+constexpr Vector2<T>& Vector2<T>::operator+=(const Vector2<T>& rhs) noexcept {
     x += rhs.x; y += rhs.y; return *this;
 }
 
 template <typename T>
-constexpr Vec2<T>& Vec2<T>::operator-=(const Vec2<T>& rhs) noexcept {
+constexpr Vector2<T>& Vector2<T>::operator-=(const Vector2<T>& rhs) noexcept {
     x -= rhs.x; y -= rhs.y; return *this;
 }
 
 template <typename T>
-constexpr Vec2<T>& Vec2<T>::operator*=(T scalar) noexcept {
+constexpr Vector2<T>& Vector2<T>::operator*=(T scalar) noexcept {
     x *= scalar; y *= scalar; return *this;
 }
 
 template <typename T>
-constexpr Vec2<T>& Vec2<T>::operator/=(T scalar) noexcept {
+constexpr Vector2<T>& Vector2<T>::operator/=(T scalar) noexcept {
     RS_CORE_ASSERT(scalar != T(0) && scalar == scalar,
-                   "Vec2::operator/=: division by zero or NaN scalar.");
+                   "Vector2::operator/=: division by zero or NaN scalar.");
     *this *= (T(1) / scalar);
     return *this;
 }
 
 template <typename T>
-constexpr Vec2<T> Vec2<T>::operator-() const noexcept {
+constexpr Vector2<T> Vector2<T>::operator-() const noexcept {
     return { -x, -y };
 }
 
 template <typename T>
-constexpr bool Vec2<T>::operator==(const Vec2<T>& rhs) const noexcept {
+constexpr bool Vector2<T>::operator==(const Vector2<T>& rhs) const noexcept {
     return x == rhs.x && y == rhs.y;
 }
 
 template <typename T>
-constexpr bool Vec2<T>::operator!=(const Vec2<T>& rhs) const noexcept {
+constexpr bool Vector2<T>::operator!=(const Vector2<T>& rhs) const noexcept {
     return !(*this == rhs);
 }
 
@@ -239,9 +239,9 @@ constexpr bool Vec2<T>::operator!=(const Vec2<T>& rhs) const noexcept {
 // Common vectors
 //==============================================================================
 
-template <typename T> constexpr Vec2<T> Vec2<T>::Zero()  noexcept { return { T(0), T(0) }; }
-template <typename T> constexpr Vec2<T> Vec2<T>::One()   noexcept { return { T(1), T(1) }; }
-template <typename T> constexpr Vec2<T> Vec2<T>::UnitX() noexcept { return { T(1), T(0) }; }
-template <typename T> constexpr Vec2<T> Vec2<T>::UnitY() noexcept { return { T(0), T(1) }; }
+template <typename T> constexpr Vector2<T> Vector2<T>::Zero()  noexcept { return { T(0), T(0) }; }
+template <typename T> constexpr Vector2<T> Vector2<T>::One()   noexcept { return { T(1), T(1) }; }
+template <typename T> constexpr Vector2<T> Vector2<T>::UnitX() noexcept { return { T(1), T(0) }; }
+template <typename T> constexpr Vector2<T> Vector2<T>::UnitY() noexcept { return { T(0), T(1) }; }
 
 } // namespace RS::Math
