@@ -22,7 +22,7 @@ public:
 
     void ClearScreen(const Color& color)   override;
     /// Overload to allow clearing with a linear RGB color vector [0,1]
-    void ClearScreen(const Math::Vec3& color) override;
+    void ClearScreen(const Math::Vec3f& color) override;
     void Clear() override;
 };
 

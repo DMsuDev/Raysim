@@ -16,10 +16,10 @@ namespace {
         FontManager::RenderText(handle, text, x, y, fontSize, spacing, color);
     }
 
-    static Math::Vec2 MeasureTextDimensions(const std::string& text, float fontSize, float spacing)
+    static Math::Vec2f MeasureTextDimensions(const std::string& text, float fontSize, float spacing)
     {
         FontHandle handle = FontManager::GetDefaultHandle();
-        Math::Vec2 dims = FontManager::MeasureText(handle, text, spacing);
+        Math::Vec2f dims = FontManager::MeasureText(handle, text, spacing);
         // Scale measured result to the requested fontSize
         const Font* font = FontManager::GetFont(handle);
         float scale = (font && font->GetSize() > 0) ? (fontSize / static_cast<float>(font->GetSize())) : 1.0f;
@@ -53,8 +53,8 @@ void Text::RenderText(const std::string& text, float x, float y, int fontSize, c
     RS_ASSERT(!text.empty(), "Text cannot be empty");
     RS_ASSERT(fontSize > 0, "Font size must be positive: {}", fontSize);
 
-    Math::Vec2 dims = MeasureTextDimensions(text, static_cast<float>(fontSize), 0.0f);
-    Math::Vec2 originVec = OriginToVector(origin);
+    Math::Vec2f dims = MeasureTextDimensions(text, static_cast<float>(fontSize), 0.0f);
+    Math::Vec2f originVec = OriginToVector(origin);
     float adjustedX = x - (originVec.x * dims.x);
     float adjustedY = y - (originVec.y * dims.y);
 
@@ -65,8 +65,8 @@ void Text::RenderTextEx(const std::string& text, float x, float y, float fontSiz
     RS_ASSERT(!text.empty(), "Text cannot be empty");
     RS_ASSERT(fontSize > 0, "Font size must be positive: {}", fontSize);
 
-    Math::Vec2 dims = MeasureTextDimensions(text, fontSize, spacing);
-    Math::Vec2 originVec = OriginToVector(origin);
+    Math::Vec2f dims = MeasureTextDimensions(text, fontSize, spacing);
+    Math::Vec2f originVec = OriginToVector(origin);
     float adjustedX = x - (originVec.x * dims.x);
     float adjustedY = y - (originVec.y * dims.y);
 
@@ -83,8 +83,8 @@ void Text::RenderTextInRectangle(const std::string& text, float x, float y, floa
     RS_ASSERT(w > 0, "Rectangle width must be positive: {}", w);
     RS_ASSERT(h > 0, "Rectangle height must be positive: {}", h);
 
-    Math::Vec2 dims = MeasureTextDimensions(text, fontSize, spacing);
-    Math::Vec2 originVec = OriginToVector(origin);
+    Math::Vec2f dims = MeasureTextDimensions(text, fontSize, spacing);
+    Math::Vec2f originVec = OriginToVector(origin);
 
     float drawX = x + (w - dims.x) * originVec.x;
     float drawY = y + (h - dims.y) * originVec.y;

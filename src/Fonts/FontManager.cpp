@@ -270,7 +270,7 @@ void FontManager::UnloadAll()
 // Metrics
 // ============================================================================
 
-Math::Vec2 FontManager::MeasureText(
+Math::Vec2f FontManager::MeasureText(
     FontHandle         handle,
     const std::string& text,
     float              spacing)
@@ -280,7 +280,7 @@ Math::Vec2 FontManager::MeasureText(
         // Fallback: delegate to renderer which knows about the built-in font
         if (s_TextRenderer)
             return s_TextRenderer->MeasureDefaultText(text, 20.0f);
-        return Math::Vec2{ static_cast<float>(text.size()) * 10.0f, 20.0f };
+        return Math::Vec2f{ static_cast<float>(text.size()) * 10.0f, 20.0f };
     }
 
     if (!s_TextProvider) return {0.0f, 0.0f};

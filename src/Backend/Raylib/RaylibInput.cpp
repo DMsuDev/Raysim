@@ -45,14 +45,14 @@ KeyCode RaylibInput::GetLastKeyPressed() const {
 // MOUSE INPUT
 // ============================================================================
 
-Math::Vec2 RaylibInput::GetMousePosition() const {
+Math::Vec2f RaylibInput::GetMousePosition() const {
     ::Vector2 pos = ::GetMousePosition();
-    return Math::Vec2{pos.x, pos.y};
+    return Math::Vec2f{pos.x, pos.y};
 }
 
-Math::Vec2 RaylibInput::GetMouseDelta() const {
+Math::Vec2f RaylibInput::GetMouseDelta() const {
     ::Vector2 delta = ::GetMouseDelta();
-    return Math::Vec2{delta.x, delta.y};
+    return Math::Vec2f{delta.x, delta.y};
 }
 
 bool RaylibInput::IsMouseButtonDown(MouseButton button) const {

@@ -41,10 +41,10 @@ public:
     // -- Mouse ---------------------------------------------------------------
 
     /// Current mouse position in screen coordinates.
-    virtual Math::Vec2 GetMousePosition() const = 0;
+    virtual Math::Vec2f GetMousePosition() const = 0;
 
     /// Mouse movement delta since the last frame.
-    virtual Math::Vec2 GetMouseDelta() const = 0;
+    virtual Math::Vec2f GetMouseDelta() const = 0;
 
     /// Returns true if the mouse button is currently held down.
     virtual bool IsMouseButtonDown(MouseButton button) const = 0;

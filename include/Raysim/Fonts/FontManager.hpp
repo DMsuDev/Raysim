@@ -124,7 +124,7 @@ public:
      * @param spacing  Extra pixels between characters (default 0).
      * @return Tight bounding box as Vec2{width, height}.
      */
-    static Math::Vec2 MeasureText(
+    static Math::Vec2f MeasureText(
         FontHandle         handle,
         const std::string& text,
         float              spacing = 0.0f);

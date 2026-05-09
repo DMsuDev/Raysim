@@ -108,7 +108,7 @@ std::string RS::Color::ToHex(bool includeAlpha) const {
     return std::string(buffer, len);
 }
 
-RS::Math::Vec3 RS::Color::ToHSV() const
+RS::Math::Vec3f RS::Color::ToHSV() const
 {
     // Normalize RGB values to [0, 1]
     float _r = this->r * (1.0f / 255.0f);
