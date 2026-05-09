@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Raysim/Fonts/Types/Font.hpp"
-#include "Raysim/Math/Types/Vec2.hpp"
+#include "Raysim/Math/Types/Vector2.hpp"
 
 #include <string>
 #include <cstdint>

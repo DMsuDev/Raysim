@@ -1,7 +1,7 @@
 #include "pch.hpp"
 
 #include "Raysim/Graphics/Color.hpp"
-#include "Raysim/Math/Types/Vec3.hpp"
+#include "Raysim/Math/Types/Vector3.hpp"
 
 #include "Backend/Raylib/RaylibRendererAPI.hpp"
 
