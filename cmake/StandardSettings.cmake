@@ -14,6 +14,14 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Disable automatic C++20 module scanning (CMake 3.28+).
+# This project does not use C++20 named modules, so scanning is unnecessary.
+# Leaving it enabled forces GCC to add -fmodules-ts and pre-scan all headers,
+# which can slow builds or increase memory usage.
+# More info: https://cmake.org/cmake/help/latest/manual/cmake-cxxmodules.7.html
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+
+
 # Set a default build type if none was specified
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'Debug' as none was specified.")
