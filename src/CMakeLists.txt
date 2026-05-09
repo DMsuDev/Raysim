@@ -40,7 +40,6 @@ set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 # Source files for the main library
 set(RAYSIM_SOURCES
     # Graphics
-    ${SRC_DIR}/Graphics/Color.cpp
     ${SRC_DIR}/Graphics/Shapes.cpp
     ${SRC_DIR}/Graphics/Texts.cpp
 
