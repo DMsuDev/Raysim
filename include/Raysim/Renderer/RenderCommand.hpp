@@ -36,7 +36,7 @@ namespace RS
         }
 
         static void ClearScreen(const Color &color) { m_API->ClearScreen(color); }
-        static void ClearScreen(const Math::Vec3 &color) { m_API->ClearScreen(color); }
+        static void ClearScreen(const Math::Vec3f &color) { m_API->ClearScreen(color); }
         static void Clear() { m_API->Clear(); }
 
     private:

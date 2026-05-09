@@ -11,7 +11,7 @@ using namespace RS;
 class MouseInfoLayer : public Layer
 {
 public:
-    MouseInfoLayer(const Math::Vec2& mousePos, const Math::Vec2& smoothedPos)
+    MouseInfoLayer(const Math::Vec2f& mousePos, const Math::Vec2f& smoothedPos)
         : Layer("MouseInfoLayer"), m_MousePos(mousePos), m_SmoothedPos(smoothedPos) {}
 
     void OnUIRender() override
@@ -31,8 +31,8 @@ public:
     }
 
 private:
-    const Math::Vec2& m_MousePos;
-    const Math::Vec2& m_SmoothedPos;
+    const Math::Vec2f& m_MousePos;
+    const Math::Vec2f& m_SmoothedPos;
 };
 
 /// Top-right: FPS counter
@@ -141,8 +141,8 @@ private:
     int GetWidth()  { return GetWindow().GetWidth(); }
     int GetHeight() { return GetWindow().GetHeight(); }
 
-    Math::Vec2 mousePos{0.0f, 0.0f};
-    Math::Vec2 mouseSmoothedPos{0.0f, 0.0f};
+    Math::Vec2f mousePos{0.0f, 0.0f};
+    Math::Vec2f mouseSmoothedPos{0.0f, 0.0f};
     float squareSpeed = 10.0f;
 
     bool leftDown_   = false;

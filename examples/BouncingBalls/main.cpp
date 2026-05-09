@@ -11,8 +11,8 @@ using namespace RS;
 //==============================================================================
 
 struct Ball {
-    Math::Vec2 position;
-    Math::Vec2 velocity;
+    Math::Vec2f position;
+    Math::Vec2f velocity;
     float   radius;
     Color   color;
     bool    isMoving = true;
@@ -41,7 +41,7 @@ private:
     bool showStats_         = true;
 
     //--- Mouse state (set in Update, consumed in FixedUpdate) --------
-    Math::Vec2 mousePos_        = {};
+    Math::Vec2f mousePos_        = {};
     bool    rightMouseDown_  = false;
     bool    middleMouseDown_ = false;
 
@@ -100,14 +100,14 @@ private:
     void ApplyMouseForce(float dt, bool attract) {
         for (auto& ball : balls_) {
 
-            Math::Vec2 delta = mousePos_ - ball.position;
+            Math::Vec2f delta = mousePos_ - ball.position;
             float   distance = delta.Length();
 
             if (distance < INFLUENCE_RADIUS && distance > MIN_INFLUENCE) {
                 float t        = distance / INFLUENCE_RADIUS;
                 float forceMag = MOUSE_FORCE * (1.0f - t * t) * (attract ? 1.0f : -1.0f);
                 ball.velocity += delta.Normalized() * (forceMag * dt);
-                ball.velocity.Limit(MAX_VELOCITY);
+                ball.velocity.ClampLength(MAX_VELOCITY);
                 ball.isMoving = true;
             }
         }
@@ -116,12 +116,12 @@ private:
     void ResolveBallCollisions() {
         for (size_t i = 0; i < balls_.size(); ++i) {
             for (size_t j = i + 1; j < balls_.size(); ++j) {
-                Math::Vec2 delta   = balls_[j].position - balls_[i].position;
+                Math::Vec2f delta   = balls_[j].position - balls_[i].position;
                 float   dist    = delta.Length();
                 float   minDist = balls_[i].radius + balls_[j].radius;
 
                 if (dist < minDist && dist > 0.0f) {
-                    Math::Vec2 normal  = delta / dist;
+                    Math::Vec2f normal  = delta / dist;
                     float   overlap = (minDist - dist) * 0.5f;
 
                     balls_[i].position -= normal * overlap;
@@ -142,7 +142,7 @@ private:
 #pragma region Drawing
 
     void DrawBackground() {
-        Math::Vec2 center{ GetWindow().GetWidth() * 0.5f, GetWindow().GetHeight() * 0.45f };
+        Math::Vec2f center{ GetWindow().GetWidth() * 0.5f, GetWindow().GetHeight() * 0.45f };
         float   maxR = Math::MaxValue(GetWindow().GetWidth(), GetWindow().GetHeight()) * 0.95f;
         Color   base{18, 24, 38};
 

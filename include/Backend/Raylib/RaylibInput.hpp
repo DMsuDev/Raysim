@@ -32,8 +32,8 @@ public:
     // MOUSE INPUT
     // ============================================================================
 
-    Math::Vec2 GetMousePosition() const override;
-    Math::Vec2 GetMouseDelta() const override;
+    Math::Vec2f GetMousePosition() const override;
+    Math::Vec2f GetMouseDelta() const override;
     bool IsMouseButtonDown(MouseButton button) const override;
     bool IsMouseButtonPressed(MouseButton button) const override;
     bool IsMouseButtonReleased(MouseButton button) const override;

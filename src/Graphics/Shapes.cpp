@@ -81,7 +81,7 @@ void Shapes::DrawTriangleOutline(float x1, float y1, float x2, float y2, float x
 void Shapes::DrawPolygon(float x, float y, int sides, float radius, float rotation, const Color& color) {
     RS_ASSERT(sides >= 3, "Polygon must have at least 3 sides, got: {}", sides);
     RS_ASSERT(radius > 0, "Polygon radius must be positive: {}", radius);
-    Math::Vec2 center = {x, y};
+    Math::Vec2f center = {x, y};
     ::DrawPoly({center.x, center.y}, sides, radius, rotation, ToRL(color));
 }
 
@@ -105,13 +105,13 @@ void Shapes::DrawPoint(float x, float y, float size, const Color& color) {
 void Shapes::DrawRect(float x, float y, float w, float h, const Color& color, OriginMode origin) {
     RS_ASSERT(w > 0 && h > 0, "Rectangle dimensions must be positive");
     ::Rectangle rec = {x, y, w, h};
-    Math::Vec2 originVec = OriginToVector(origin);
+    Math::Vec2f originVec = OriginToVector(origin);
     ::DrawRectanglePro(rec, {originVec.x * w, originVec.y * h}, 0.0f, ToRL(color));
 }
 
 void Shapes::DrawRectOutline(float x, float y, float w, float h, const Color& color, float thickness, OriginMode origin) {
     RS_ASSERT(w > 0 && h > 0, "Rectangle dimensions must be positive");
-    Math::Vec2 originVec = OriginToVector(origin);
+    Math::Vec2f originVec = OriginToVector(origin);
     // Calculate the adjusted top-left position for DrawRectangleLinesEx
     float adjustedX = x - (originVec.x * w);
     float adjustedY = y - (originVec.y * h);
@@ -122,7 +122,7 @@ void Shapes::DrawRectOutline(float x, float y, float w, float h, const Color& co
 void Shapes::DrawRectRounded(float x, float y, float w, float h, float roundness, const Color& color, OriginMode origin) {
     RS_ASSERT(w > 0 && h > 0, "Rectangle dimensions must be positive");
     roundness = std::clamp(roundness, 0.0f, 1.0f);
-    Math::Vec2 originVec = OriginToVector(origin);
+    Math::Vec2f originVec = OriginToVector(origin);
     // Calculate the adjusted top-left position
     float adjustedX = x - (originVec.x * w);
     float adjustedY = y - (originVec.y * h);
@@ -136,7 +136,7 @@ void Shapes::DrawRectRounded(float x, float y, float w, float h, float roundness
 
 void Shapes::DrawCircle(float x, float y, float radius, const Color& color, OriginMode origin) {
     RS_ASSERT(radius > 0, "Circle radius must be positive: {}", radius);
-    Math::Vec2 originVec = OriginToVector(origin);
+    Math::Vec2f originVec = OriginToVector(origin);
     // For circles, origin is calculated based on bounding box (radius * 2)
     float adjustedX = x - (originVec.x * radius * 2.0f) + radius;
     float adjustedY = y - (originVec.y * radius * 2.0f) + radius;
@@ -145,7 +145,7 @@ void Shapes::DrawCircle(float x, float y, float radius, const Color& color, Orig
 
 void Shapes::DrawCircleOutline(float x, float y, float radius, const Color& color, OriginMode origin) {
     RS_ASSERT(radius > 0, "Circle radius must be positive: {}", radius);
-    Math::Vec2 originVec = OriginToVector(origin);
+    Math::Vec2f originVec = OriginToVector(origin);
     // For circles, origin is calculated based on bounding box (radius * 2)
     float adjustedX = x - (originVec.x * radius * 2.0f) + radius;
     float adjustedY = y - (originVec.y * radius * 2.0f) + radius;

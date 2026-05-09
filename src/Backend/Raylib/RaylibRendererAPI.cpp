@@ -14,7 +14,7 @@ void RaylibRendererAPI::ClearScreen(const Color& color)
     ::ClearBackground(::Color{color.r, color.g, color.b, color.a});
 }
 
-void RaylibRendererAPI::ClearScreen(const Math::Vec3& color)
+void RaylibRendererAPI::ClearScreen(const Math::Vec3f& color)
 {
     auto toByte = [](float v) -> unsigned char {
         float clamped = (v < 0.0f) ? 0.0f : (v > 1.0f) ? 1.0f : v;

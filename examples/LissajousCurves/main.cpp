@@ -76,7 +76,7 @@ private:
     float phaseRotationSpeed = 0.2f; // increased default speed
     bool animatePhase = false;
 
-    std::vector<Math::Vec2> curvePoints;
+    std::vector<Math::Vec2f> curvePoints;
     int resolution = 1200;
     std::vector<float> paramT;
 
@@ -184,7 +184,7 @@ private:
         float idxF   = t * static_cast<float>(curvePoints.size() - 1);
         int   idx    = static_cast<int>(std::floor(idxF));
         int   next   = std::min(idx + 1, static_cast<int>(curvePoints.size()) - 1);
-        Math::Vec2 pos  = Math::Lerp(curvePoints[idx], curvePoints[next], idxF - idx);
+        Math::Vec2f pos  = Math::Lerp(curvePoints[idx], curvePoints[next], idxF - idx);
         Shapes::DrawCircle(pos.x, pos.y, 10, Colors::RayYellow, OriginMode::Center);
     }
 
@@ -246,7 +246,7 @@ private:
             float t = paramT[i];
             float x = curveRadius * std::sin(smoothFrequencyX * t + phaseShift);
             float y = curveRadius * std::sin(smoothFrequencyY * t);
-            curvePoints[i] = Math::Vec2(centerX + x, centerY + y);
+            curvePoints[i] = Math::Vec2f(centerX + x, centerY + y);
         }
     }
 

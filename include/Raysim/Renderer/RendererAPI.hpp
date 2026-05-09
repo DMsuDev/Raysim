@@ -102,7 +102,7 @@ public:
      *
      * @param color RGB colour vector (linear space).
      */
-    virtual void ClearScreen(const Math::Vec3& color) = 0;
+    virtual void ClearScreen(const Math::Vec3f& color) = 0;
 
     /**
      * @brief Clear all buffers (color, depth, stencil) to their default values.

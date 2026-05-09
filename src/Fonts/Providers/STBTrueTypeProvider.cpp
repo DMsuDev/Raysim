@@ -176,7 +176,7 @@ bool STBTrueTypeProvider::LoadFont(
     return true;
 }
 
-Math::Vec2 STBTrueTypeProvider::MeasureText(
+Math::Vec2f STBTrueTypeProvider::MeasureText(
     const Font&        font,
     const std::string& text,
     float              spacing) const
@@ -199,7 +199,7 @@ Math::Vec2 STBTrueTypeProvider::MeasureText(
         first = false;
     }
 
-    return Math::Vec2{ width, font.GetLineHeight() };
+    return Math::Vec2f{ width, font.GetLineHeight() };
 }
 
 } // namespace RS::Fonts

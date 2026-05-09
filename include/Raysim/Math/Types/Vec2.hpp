@@ -1,6 +1,27 @@
+/**********************************************************************************************
+ *   Raysim - A C++ framework for 2D graphics and interactive applications
+ *
+ *   LICENSE: Apache License, Version 2.0
+ *
+ *            Copyright 2026 Dayron Mustelier (@DMsuDev)
+ *
+ *   Raysim is licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *             http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ *
+ **********************************************************************************************/
+
 #pragma once
 
-#include "../Utils/MathUtils.hpp"
+#include "Raysim/Math/Types/Angle.hpp"
 
 #include <cstdint>
 #include <ostream>
@@ -10,38 +31,51 @@ namespace RS::Math {
 /**
  * @struct Vec2
  * @brief 2D vector with arithmetic and geometric operations
- *
- * Represents a 2D vector with floating-point components for positions, velocities,
- * and directions. Includes common operations like dot product, normalization, and projection.
  */
+template <typename T>
 struct Vec2 {
-    float x{0.0f}, y{0.0f};
+    // Components of the vector
+    T x{0}; ///< X component of the vector
+    T y{0}; ///< Y component of the vector
 
+    /**
+     * @brief Default constructor (zero vector)
+     */
     constexpr Vec2() noexcept = default;
-    constexpr Vec2(float in_x, float in_y) noexcept : x(in_x), y(in_y) {}
-    explicit constexpr Vec2(float s) noexcept : x(s), y(s) {}
+    /**
+     * @brief Constructor with explicit x and y values
+     * @param X X component
+     * @param Y Y component
+     */
+    constexpr Vec2(T X, T Y) noexcept;
+    /**
+     * @brief Constructor that sets both components to the same value
+     * @param s Value for both x and y
+     */
+    explicit constexpr Vec2(T s) noexcept;
 
-//==============================================================================
-// Operators
-//==============================================================================
-
-    constexpr Vec2 operator+(const Vec2& o) const noexcept { return {x + o.x, y + o.y}; }
-    constexpr Vec2 operator-(const Vec2& o) const noexcept { return {x - o.x, y - o.y}; }
-    constexpr Vec2 operator*(float s)          const noexcept { return {x * s, y * s}; }
-    constexpr Vec2 operator/(float s)          const noexcept { return (s != 0.0f && s == s) ? (*this * (1.0f/s)) : Vec2{}; }
-
-    constexpr Vec2 operator-() const noexcept { return {-x, -y}; }
-
-    constexpr Vec2& operator+=(const Vec2& o) noexcept { x += o.x; y += o.y; return *this; }
-    constexpr Vec2& operator-=(const Vec2& o) noexcept { x -= o.x; y -= o.y; return *this; }
-    constexpr Vec2& operator*=(float s) noexcept { x *= s; y *= s; return *this; }
-    constexpr Vec2& operator/=(float s) noexcept { if (s != 0.0f && s == s) *this *= (1.0f/s); return *this; }
-
-    constexpr bool operator==(const Vec2& o) const noexcept { return x == o.x && y == o.y; }
-    constexpr bool operator!=(const Vec2& o) const noexcept { return !(*this == o); }
-
-    constexpr float& operator[](size_t i) noexcept{ return (&x)[i]; }
-    constexpr const float& operator[](size_t i) const noexcept{ return (&x)[i]; }
+    /**
+     * @brief Explicitly converts this vector to another Vec2 type.
+     *
+     * Enables explicit conversion from `Vec2<T>` to `Vec2<U>`, allowing safe and
+     * intentional casting between different numeric types (e.g., float -> int,
+     * double -> float). Each component is individually converted using
+     * `static_cast<U>`.
+     *
+     * This is useful when interacting with APIs or subsystems that require a
+     * specific numeric type.
+     *
+     * Example:
+     *
+     *     Vec2<float> vf(1.5f, 2.8f);
+     *     Vec2<int>   vi = static_cast<Vec2<int>>(vf);
+     *     // vi == {1, 2}
+     *
+     * @tparam U Target component type (e.g., int, float, double).
+     * @return A new `Vec2<U>` with both components converted to type `U`.
+     */
+    template <typename U>
+    explicit constexpr operator Vec2<U>() const noexcept;
 
 //==============================================================================
 // Math
@@ -49,176 +83,445 @@ struct Vec2 {
 
     /**
      * @brief Calculate vector magnitude (length)
+     *
+     * If you are not interested in the actual length, but only in comparisons, consider using `LengthSquared()`.
+     *
      * @return Euclidean length of the vector
      */
-    float Length() const noexcept { return std::hypot(x, y); }
+    [[nodiscard]] T Length() const noexcept;
+
     /**
      * @brief Calculate squared magnitude (faster, avoids sqrt)
+     *
+     * For performance-sensitive code where you only need to compare lengths,
+     * using `LengthSquared()` is more efficient than `Length()`, as it avoids the costly square root operation.
+     *
      * @return Squared length of the vector
      */
-    constexpr float LengthSquared() const noexcept { return x * x + y * y; }
+    [[nodiscard]] constexpr T LengthSquared() const noexcept;
 
     /**
-     * @brief Dot product (scalar result)
-     * @param rhs Right-hand vector
-     * @return Dot product of this and rhs
+     * @brief Returns a normalized copy of the vector.
+     *
+     * Produces a vector with the same direction but a length of 1.
+     * If the vector has zero length, a zero vector is returned.
+     *
+     * @return Unit-length vector in the same direction, or {0,0} if the vector is zero.
      */
-    constexpr float Dot(const Vec2& rhs) const noexcept { return x * rhs.x + y * rhs.y; }
-    /**
-     * @brief 2D cross product (scalar result)
-     * @param rhs Right-hand vector
-     * @return Scalar z of the 3D cross product (this x rhs)
-     */
-    constexpr float Cross(const Vec2& rhs) const noexcept { return x * rhs.y - y * rhs.x; }
+    [[nodiscard]] Vec2 Normalized() const noexcept;
 
     /**
-     * @brief Limit magnitude to maximum value
-     * @param max Maximum allowed magnitude
+     * @brief Computes the signed angle from this vector to another.
+     *
+     * Returns the smallest signed angular difference between this vector and `rhs`.
+     * The angle is measured in radians, positive for counter‑clockwise rotation and
+     * negative for clockwise rotation.
+     *
+     * If either vector has zero length, the returned angle is 0.
+     *
+     * @param rhs Target vector to measure the angle to.
+     * @return Signed angle in radians from this vector to `rhs`.
      */
-    void Limit(float max) noexcept
-    {
-        float m2 = LengthSquared();
-        if (m2 > max * max) {
-            float m = std::sqrt(m2);
-            *this *= (max / m);
-        }
-    }
-    /**
-     * @brief Set magnitude to specific value (preserves direction)
-     * @param m New magnitude to set
-     */
-    void SetMag(float m) noexcept
-    {
-        float len = Length();
-        if (len > 1e-6f) {
-            *this = (*this / len) * m;
-        }
-    }
+    [[nodiscard]] Angle AngleTo(const Vec2<T>& rhs) const noexcept;
 
     /**
-     * @brief Calculate angle from vector to positive x-axis (radians)
-     * @return Angle in radians in range (-pi, pi]
+     * @brief Returns the angle of this vector from the positive x-axis.
+     *
+     * The angle is measured in radians, in the range (-pi, pi].
+     * If the vector has zero length, the returned angle is 0.
+     *
+     * @return Angle in radians from the positive x-axis to this vector.
      */
-    float Heading() const noexcept { return std::atan2(y, x); }
+    [[nodiscard]] Angle ToAngle() const noexcept;
 
     /**
-     * @brief Perpendicular vector (rotated 90 deg counterclockwise)
-     * @return Perpendicular vector
+     * @brief Returns a new vector obtained by rotating this one by the given angle.
+     *
+     * The rotation is performed around the origin using the standard 2D rotation
+     * matrix:
+     *
+     *     x' = x * cos(phi) - y * sin(phi)
+     *     y' = x * sin(phi) + y * cos(phi)
+     *
+     * The angle is expressed in radians. Positive values rotate the vector
+     * counter‑clockwise, negative values clockwise. The vector's magnitude is
+     * preserved.
+     *
+     * @param phi Rotation angle in radians.
+     * @return Rotated vector.
      */
-    constexpr Vec2 Perp() const noexcept { return {-y, x}; }
+    [[nodiscard]] Vec2 RotatedBy(Angle phi) const noexcept;
 
     /**
-     * @brief Return normalized vector
-     * @return Unit vector in the same direction or zero vector if length is ~0
+     * @brief Projects this vector onto the given axis.
+     *
+     * Computes the vector projection of this vector onto `axis`. The result is the
+     * component of this vector that lies in the direction of `axis`. If `axis` has
+     * zero length, the returned vector is {0,0}.
+     *
+     * Mathematically:
+     *     proj_axis(this) = (Dot(axis) / axis.LengthSquared()) * axis
+     *
+     * @param axis Vector defining the projection axis.
+     * @return Projection of this vector onto `axis`, or {0,0} if `axis` is zero.
      */
-    Vec2 Normalized() const noexcept
-    {
-        float m = Length();
-        return (m > 1e-6f) ? *this / m : Vec2{};
-    }
+    [[nodiscard]] constexpr Vec2 Project(const Vec2& axis) const noexcept;
 
     /**
-     * @brief Normalize this vector in-place, returns false if length is too small
-     * @return true if normalized, false if length was too small
+     * @brief Returns a vector perpendicular to this one.
+     *
+     * Computes a 90‑degree counter‑clockwise rotation of the vector. The resulting
+     * vector has the same magnitude but is orthogonal to the original. For a vector
+     * (x, y), the perpendicular vector is (-y, x).
+     *
+     * @return A vector perpendicular to this one, rotated 90° counter‑clockwise.
      */
-    bool NormalizeSafe() noexcept
-    {
-        float len = Length();
-        if (len <= 1e-6f) return false;
-        *this /= len;
-        return true;
-    }
+    [[nodiscard]] constexpr Vec2 Perpendicular() const noexcept;
 
     /**
-     * @brief Normalize this vector in-place (no return)
+     * @brief Computes the dot (scalar) product with another vector.
+     *
+     * The dot product measures how aligned two vectors are. It is positive when
+     * both vectors point in a similar direction, negative when they point in
+     * opposite directions, and zero when they are perpendicular.
+     *
+     * @param rhs Vector to compute the dot product with.
+     * @return Scalar dot product: x * rhs.x + y * rhs.y.
      */
-    void Normalize() noexcept { float m = Length(); if (m > 1e-6f) *this /= m; }
+    [[nodiscard]] constexpr T Dot(const Vec2& rhs) const noexcept;
 
     /**
-     * @brief Rotate by angle (radians)
-     * @param angle Rotation angle in radians (counterclockwise)
-     * @return Rotated vector
+     * @brief Computes the 2D cross product (perpendicular magnitude) with another vector.
+     *
+     * In 2D, the cross product is a scalar representing the signed magnitude of the
+     * perpendicular vector that would result from a 3D cross product. A positive
+     * value indicates that `rhs` is to the left (counter‑clockwise) of this vector,
+     * and a negative value indicates it is to the right (clockwise).
+     *
+     * @param rhs Vector to compute the cross product with.
+     * @return Signed scalar cross product: x * rhs.y - y * rhs.x.
      */
-    Vec2 Rotate(float angle) const noexcept
-    {
-        float c = std::cos(angle), s = std::sin(angle);
-        float nx = x*c - y*s;
-        float ny = x*s + y*c;
-        return {nx, ny};
-    }
+    [[nodiscard]] constexpr T Cross(const Vec2& rhs) const noexcept;
+
     /**
-     * @brief Project this vector onto another
-     * @param onto Vector to project onto
-     * @return Projection of this onto `onto`
+     * @brief Computes the Euclidean distance between this vector and `rhs`.
+     *
+     * Equivalent to the length of (this - rhs). Useful for measuring the distance
+     * between two points in 2D space. If you only need to compare distances,
+     * consider using DistanceSquared() for better performance.
+     *
+     * @param rhs Other vector (point) to measure distance to.
+     * @return Euclidean distance between the two vectors.
      */
-    constexpr Vec2 Project(const Vec2& onto) const noexcept
-    {
-        float d = onto.LengthSquared();
-        return (d > 1e-6f) ? onto * (Dot(onto) / d) : Vec2{};
-    }
+    [[nodiscard]] T Distance(const Vec2& rhs) const noexcept;
+
     /**
-     * @brief Reflect this vector across a surface normal
-     * @param n Surface normal (should be normalized)
-     * @return Reflected vector
+     * @brief Computes the squared distance between this vector and `rhs`.
+     *
+     * More efficient than Distance(), as it avoids the square root. Suitable for
+     * performance‑critical code where only relative distances matter.
+     *
+     * @param rhs Other vector (point) to measure squared distance to.
+     * @return Squared Euclidean distance between the two vectors.
      */
-    constexpr Vec2 Reflect(const Vec2& n) const noexcept
-    {
-        return *this - n * (2.0f * Dot(n));
-    }
+    [[nodiscard]] constexpr T DistanceSquared(const Vec2& rhs) const noexcept;
+
+    /**
+     * @brief Returns this vector reflected across a given normal.
+     *
+     * The normal vector must be normalized. The reflection is computed as:
+     *
+     *     reflected = v - 2 * Dot(v, normal) * normal
+     *
+     * Commonly used in physics (bounces, collisions) and lighting calculations.
+     *
+     * @param normal Normalized vector defining the reflection plane.
+     * @return Reflected vector.
+     */
+    [[nodiscard]] constexpr Vec2 Reflect(const Vec2& normal) const noexcept;
+
+    /**
+     * @brief Computes the rejection of this vector from the given axis.
+     *
+     * The rejection is the component of this vector perpendicular to `axis`.
+     * Mathematically:
+     *
+     *     rejection = this - projection
+     *
+     * Useful for decomposing motion, collision resolution, and separating axes.
+     *
+     * @param axis Vector defining the projection axis.
+     * @return Component of this vector perpendicular to `axis`.
+     */
+    [[nodiscard]] constexpr Vec2 Rejection(const Vec2& axis) const noexcept;
+
+    /**
+     * @brief Clamps the vector's magnitude to a maximum value.
+     *
+     * If the vector's length exceeds `maxLen`, it is scaled down to match it.
+     * If the vector is zero, it remains unchanged.
+     *
+     * @param maxLen Maximum allowed length.
+     */
+    void ClampLength(T maxLen) noexcept;
+
+    /**
+     * @brief Normalizes this vector in-place.
+     *
+     * If the vector has non-zero length, it is scaled to unit length. If the
+     * magnitude is extremely small, the vector is left unchanged to avoid
+     * numerical instability.
+     */
+    void Normalize() noexcept;
+
+    /**
+     * @brief Safely normalizes this vector in-place.
+     *
+     * If the vector has non-zero length, it becomes a unit vector. If the vector
+     * is too close to zero length, it becomes {0,0} to avoid division by zero
+     * and NaN propagation.
+     *
+     * @param epsilon Threshold below which the vector is considered zero.
+     */
+    void NormalizeSafe(T epsilon = T(1e-6)) noexcept;
+
+    /**
+     * @brief Checks whether the vector is effectively zero.
+     *
+     * Useful for avoiding division by zero, normalization errors, and unstable
+     * calculations. Uses an epsilon threshold instead of exact comparison.
+     *
+     * @param epsilon Tolerance for zero comparison.
+     * @return True if |x| and |y| are both below epsilon.
+     */
+    [[nodiscard]] constexpr bool IsZero(T epsilon = T(1e-6)) const noexcept;
+
 
 //==============================================================================
 // Static utilities
 //==============================================================================
 
     /**
-     * @brief Calculate distance between two points
-     * @param a First point
-     * @param b Second point
-     * @return Euclidean distance between a and b
+     * @brief Computes the Euclidean distance between two points.
+     *
+     * Equivalent to (b - a).Length(). Provided for convenience when neither vector
+     * is conceptually the “owner” of the operation. If you only need to compare
+     * distances, consider using DistanceSquared() for better performance.
+     *
+     * @param a First point.
+     * @param b Second point.
+     * @return Euclidean distance between a and b.
      */
-    static float Distance(const Vec2& a, const Vec2& b) noexcept { return (b - a).Length(); }
-    /**
-     * @brief Calculate squared distance between two points (faster, avoids sqrt)
-     * @param a First point
-     * @param b Second point
-     * @return Squared distance between a and b
-     */
-    static float DistanceSquared(const Vec2& a, const Vec2& b) noexcept { return (b - a).LengthSquared(); }
+    [[nodiscard]] static T Distance(const Vec2& a, const Vec2& b) noexcept;
 
     /**
-     * @brief Create unit vector from angle
-     * @param angle Angle in radians from positive x-axis (counterclockwise)
-     * @return Unit vector at the specified angle
+     * @brief Computes the squared Euclidean distance between two points.
+     *
+     * More efficient than Distance(), as it avoids the square root. Suitable for
+     * performance‑critical code where only relative distances matter.
+     *
+     * @param a First point.
+     * @param b Second point.
+     * @return Squared distance between a and b.
      */
-    static Vec2 FromAngle(float angle) noexcept { return {std::cos(angle), std::sin(angle)}; }
+    [[nodiscard]] static constexpr T DistanceSquared(const Vec2& a, const Vec2& b) noexcept;
 
     /**
-     * @brief Angle between two vectors (0..pi)
-     * @param a First vector
-     * @param b Second vector
-     * @return Angle in radians between a and b
+     * @brief Creates a unit vector from an angle in radians.
+     *
+     * The angle is measured from the positive x-axis, counter‑clockwise. The
+     * resulting vector has length 1.
+     *
+     * @param angle Angle in radians.
+     * @return Unit vector pointing in the direction of the given angle.
      */
-    static float AngleBetween(const Vec2& a, const Vec2& b) noexcept {
-        float dot = a.Dot(b);
-        float mag = std::sqrt(a.LengthSquared() * b.LengthSquared());
-        if (mag < 1e-6f) return 0.0f;
-        return std::acos(dot / mag);
-    }
+    [[nodiscard]] static constexpr Vec2 FromAngle(float angle) noexcept;
+
+    /**
+     * @brief Computes the unsigned angle between two vectors.
+     *
+     * The result is always in the range [0, pi]. If either vector has zero length,
+     * the returned angle is 0. Computed using the normalized dot product:
+     *
+     *     angle = acos( Dot(a, b) / (|a| * |b|) )
+     *
+     * @param a First vector.
+     * @param b Second vector.
+     * @return Unsigned angle between a and b.
+     */
+    [[nodiscard]] static Angle AngleBetween(const Vec2& a, const Vec2& b) noexcept;
+
+//==============================================================================
+// Operators
+//==============================================================================
+
+    /**
+     * @brief Adds `rhs` to this vector in-place.
+     * @param rhs Vector to add.
+     * @return Reference to this vector after addition.
+     */
+    constexpr Vec2& operator+=(const Vec2& rhs) noexcept;
+
+    /**
+     * @brief Subtracts `rhs` from this vector in-place.
+     * @param rhs Vector to subtract.
+     * @return Reference to this vector after subtraction.
+     */
+    constexpr Vec2& operator-=(const Vec2& rhs) noexcept;
+
+    /**
+     * @brief Multiplies this vector by a scalar in-place.
+     * @param scalar Scalar factor.
+     * @return Reference to this vector after scaling.
+     */
+    constexpr Vec2& operator*=(T scalar) noexcept;
+
+    /**
+     * @brief Divides this vector by a scalar in-place.
+     *
+     * If `scalar` is zero or NaN, the vector is left unchanged.
+     *
+     * @param scalar Scalar divisor.
+     * @return Reference to this vector after division.
+     */
+    constexpr Vec2& operator/=(T scalar) noexcept;
+
+    /**
+     * @brief Returns the negation of this vector.
+     * @return Vector with both components negated.
+     */
+    [[nodiscard]] constexpr Vec2 operator-() const noexcept;
+
+    /**
+     * @brief Checks whether this vector is equal to `rhs`.
+     *
+     * Performs exact component-wise comparison. For floating-point types consider
+     * an epsilon-based comparison when appropriate.
+     *
+     * @param rhs Vector to compare against.
+     * @return True if both components are equal.
+     */
+    [[nodiscard]] constexpr bool operator==(const Vec2& rhs) const noexcept;
+
+    /**
+     * @brief Checks whether this vector is not equal to `rhs`.
+     * @param rhs Vector to compare against.
+     * @return True if any component differs.
+     */
+    [[nodiscard]] constexpr bool operator!=(const Vec2& rhs) const noexcept;
+
+    /**
+     * @brief Accesses a component by index (0 = x, 1 = y).
+     *
+     * No bounds checking is performed.
+     *
+     * @param i Component index (0 or 1).
+     * @return Reference to the component.
+     */
+    constexpr T&       operator[](size_t i)       noexcept { return (&x)[i]; }
+    /// @copydoc operator[](size_t)
+    constexpr const T& operator[](size_t i) const noexcept { return (&x)[i]; }
 
 //==============================================================================
 // Common vectors
 //==============================================================================
 
-    static constexpr Vec2 Zero() noexcept  { return {0.0f, 0.0f}; }
-    static constexpr Vec2 One() noexcept   { return {1.0f, 1.0f}; }
-    static constexpr Vec2 UnitX() noexcept { return {1.0f, 0.0f}; }
-    static constexpr Vec2 UnitY() noexcept { return {0.0f, 1.0f}; }
+    /**
+     * @brief Returns the zero vector {0, 0}.
+     * @return Vec2 with both components set to zero.
+     */
+    [[nodiscard]] static constexpr Vec2 Zero()  noexcept;
+
+    /**
+     * @brief Returns the one vector {1, 1}.
+     * @return Vec2 with both components set to one.
+     */
+    [[nodiscard]] static constexpr Vec2 One()   noexcept;
+
+    /**
+     * @brief Returns the unit vector along the x-axis {1, 0}.
+     * @return Vec2 pointing in the positive x direction.
+     */
+    [[nodiscard]] static constexpr Vec2 UnitX() noexcept;
+
+    /**
+     * @brief Returns the unit vector along the y-axis {0, 1}.
+     * @return Vec2 pointing in the positive y direction.
+     */
+    [[nodiscard]] static constexpr Vec2 UnitY() noexcept;
 };
 
-constexpr Vec2 operator*(float s, const Vec2& v) noexcept { return v * s; }
+// Define the most common types
+using Vec2i = Vec2<int>;
+using Vec2f = Vec2<float>;
+using Vec2d = Vec2<double>;
+using Vec2u = Vec2<unsigned int>;
+using Vec2u16 = Vec2<std::uint16_t>;
+using Vec2u32 = Vec2<std::uint32_t>;
 
-inline std::ostream& operator<<(std::ostream& os, const Vec2& v) {
+//==============================================================================
+// Non-member arithmetic operators
+//==============================================================================
+
+/**
+ * @brief Component-wise addition of two vectors.
+ * @param lhs Left-hand side vector.
+ * @param rhs Right-hand side vector.
+ * @return New vector equal to `lhs + rhs`.
+ */
+template <typename T>
+[[nodiscard]] constexpr Vec2<T> operator+(Vec2<T> lhs, const Vec2<T>& rhs) noexcept { lhs += rhs; return lhs; }
+
+/**
+ * @brief Component-wise subtraction of two vectors.
+ * @param lhs Left-hand side vector.
+ * @param rhs Right-hand side vector.
+ * @return New vector equal to `lhs - rhs`.
+ */
+template <typename T>
+[[nodiscard]] constexpr Vec2<T> operator-(Vec2<T> lhs, const Vec2<T>& rhs) noexcept { lhs -= rhs; return lhs; }
+
+/**
+ * @brief Multiplies a vector by a scalar (vector on the left).
+ * @param lhs Vector to scale.
+ * @param scalar Scalar factor.
+ * @return New scaled vector.
+ */
+template <typename T>
+[[nodiscard]] constexpr Vec2<T> operator*(Vec2<T> lhs, T scalar) noexcept { lhs *= scalar; return lhs; }
+
+/**
+ * @brief Multiplies a scalar by a vector (scalar on the left).
+ * @param scalar Scalar factor.
+ * @param rhs Vector to scale.
+ * @return New scaled vector.
+ */
+template <typename T>
+[[nodiscard]] constexpr Vec2<T> operator*(T scalar, Vec2<T> rhs) noexcept { rhs *= scalar; return rhs; }
+
+/**
+ * @brief Divides a vector by a scalar.
+ *
+ * If `scalar` is zero or NaN, the original vector is returned unchanged.
+ *
+ * @param lhs Vector to divide.
+ * @param scalar Scalar divisor.
+ * @return New divided vector.
+ */
+template <typename T>
+[[nodiscard]] constexpr Vec2<T> operator/(Vec2<T> lhs, T scalar) noexcept { lhs /= scalar; return lhs; }
+
+/**
+ * @brief Writes the vector to an output stream in the format `(x, y)`.
+ * @param os Output stream.
+ * @param v Vector to write.
+ * @return Reference to `os`.
+ */
+template <typename T>
+inline std::ostream& operator<<(std::ostream& os, const Vec2<T>& v) {
     return os << "(" << v.x << ", " << v.y << ")";
 }
 
 } // namespace RS::Math
+
+#include "Raysim/Math/Types/Vec2.inl"

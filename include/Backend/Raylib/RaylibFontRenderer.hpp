@@ -35,7 +35,7 @@ public:
         float              spacing,
         const Color&       color) override;
 
-    Math::Vec2 MeasureDefaultText(const std::string& text, float fontSize) const override;
+    Math::Vec2f MeasureDefaultText(const std::string& text, float fontSize) const override;
 
 private:
     struct AtlasTexture;

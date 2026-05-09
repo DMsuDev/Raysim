@@ -18,7 +18,7 @@ public:
         uint32_t           charCount,
         Font&              outFont) override;
 
-    Math::Vec2 MeasureText(
+    Math::Vec2f MeasureText(
         const Font&        font,
         const std::string& text,
         float              spacing = 0.0f) const override;

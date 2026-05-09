@@ -3,7 +3,7 @@
 #include "Raysim/Core/Base.hpp"
 #include "Raysim/Core/WindowProperties.hpp"
 
-#include "Raysim/Math/Types/Vec2i.hpp"
+#include "Raysim/Math/Types/Vec2.hpp"
 
 namespace RS {
 

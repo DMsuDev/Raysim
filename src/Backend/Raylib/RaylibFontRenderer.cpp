@@ -145,10 +145,10 @@ void RaylibFontRenderer::ReleaseFontAtlas(FontHandle handle)
 // Measurement
 // ============================================================================
 
-Math::Vec2 RaylibFontRenderer::MeasureDefaultText(const std::string& text, float fontSize) const
+Math::Vec2f RaylibFontRenderer::MeasureDefaultText(const std::string& text, float fontSize) const
 {
     const int w = ::MeasureText(text.c_str(), static_cast<int>(fontSize));
-    return Math::Vec2{ static_cast<float>(w), fontSize };
+    return Math::Vec2f{ static_cast<float>(w), fontSize };
 }
 
 // ============================================================================

@@ -40,7 +40,7 @@ public:
      * @param spacing Extra pixels added between each character (default 0).
      * @return Pixel dimensions as Vec2{width, height}.
      */
-    virtual Math::Vec2 MeasureText(
+    virtual Math::Vec2f MeasureText(
         const Font&        font,
         const std::string& text,
         float              spacing = 0.0f) const = 0;

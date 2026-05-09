@@ -54,7 +54,7 @@ enum class OriginMode {
 /// auto v = OriginToVector(OriginMode::Center);  // Returns {0.5f, 0.5f}
 /// auto v = OriginToVector(OriginMode::TopLeft); // Returns {0.0f, 0.0f}
 /// @endcode
-[[nodiscard]] constexpr Math::Vec2 OriginToVector(OriginMode origin) noexcept
+[[nodiscard]] constexpr Math::Vec2f OriginToVector(OriginMode origin) noexcept
 {
     float x = 0.0f;
     float y = 0.0f;

@@ -81,7 +81,7 @@ public:
      * @param fontSize  Font size in pixels.
      * @return Bounding box as Vec2{width, height}.
      */
-    virtual Math::Vec2 MeasureDefaultText(const std::string& text, float fontSize) const
+    virtual Math::Vec2f MeasureDefaultText(const std::string& text, float fontSize) const
     {
         // Conservative approximation: ~0.5 * fontSize per char
         return { static_cast<float>(text.size()) * fontSize * 0.5f, fontSize };
