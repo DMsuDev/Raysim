@@ -28,7 +28,7 @@ target_compile_definitions(Raysim
 
 # Add precompiled headers for faster compilation
 if(RS_ENABLE_PCH)
-    target_precompile_headers(Raysim PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/pch.hpp)
+    target_precompile_headers(Raysim PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/rspch.hpp)
 endif()
 
 # ============================================================================

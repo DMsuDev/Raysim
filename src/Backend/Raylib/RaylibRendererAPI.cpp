@@ -1,4 +1,4 @@
-#include "pch.hpp"
+#include "rspch.hpp"
 
 #include "Raysim/Graphics/Color.hpp"
 #include "Raysim/Math/Types/Vector3.hpp"
