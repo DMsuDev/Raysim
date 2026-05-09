@@ -40,7 +40,7 @@ namespace RS
         static void Clear() { m_API->Clear(); }
 
     private:
-        static Scope<RendererAPI> m_API;
+        inline static Scope<RendererAPI> m_API;
     };
 
 } // namespace RS
