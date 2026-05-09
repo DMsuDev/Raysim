@@ -55,7 +55,7 @@ constexpr float Angle::AsDegrees() const noexcept {
 //==============================================================================
 
 constexpr Angle Angle::WrapSigned() const noexcept {
-    // Wrap to [-π, π) using a constexpr-friendly fmod approximation.
+    // Wrap to [-pi, pi) using a constexpr-friendly fmod approximation.
     // For runtime paths std::fmod is fine; for constexpr we rely on the fact
     // that most compilers evaluate it at compile time for constant expressions.
     const float wrapped = m_radians - TWO_PI * static_cast<int>(m_radians / TWO_PI);

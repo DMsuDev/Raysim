@@ -1,9 +1,8 @@
 #include "pch.hpp"
 
 #include "Raysim/Math/Random.hpp"
+#include "Raysim/Math/Utils/MathUtils.hpp"
 
-#include <cmath>
-#include <algorithm>
 #include <cstdint>
 #include <random>
 
@@ -84,7 +83,7 @@ bool Bool() {
 }
 
 bool Bool(float probability) {
-    return Float() < std::clamp(probability, 0.0f, 1.0f);
+    return Float() < Clamp(probability, 0.0f, 1.0f);
 }
 
 //==============================================================================
@@ -136,11 +135,6 @@ static int Hash3DInt(int x, int y, int z)
         static_cast<uint32_t>(z) * 83492791u));
 }
 
-/// Quintic interpolation (6t^5 - 15t^4 + 10t^3) - smoother than 3t^2 - 2t^3.
-static float Fade(float t)
-{
-    return t * t * t * (t * (t * 6.0f - 15.0f) + 10.0f);
-}
 
 /// Dot product of a pseudo-random gradient and distance vector.
 static float GradientDot2D(int hash, float dx, float dy)
@@ -160,21 +154,21 @@ static float GradientDot2D(int hash, float dx, float dy)
 
 float PerlinNoise(float x, float y)
 {
-    int xi = static_cast<int>(std::floor(x));
-    int yi = static_cast<int>(std::floor(y));
-    float xf = x - static_cast<float>(xi);
-    float yf = y - static_cast<float>(yi);
+    const int   xi = FloorToInt(x);
+    const int   yi = FloorToInt(y);
+    const float xf = Fract(x);
+    const float yf = Fract(y);
 
-    float u = Fade(xf);
-    float v = Fade(yf);
+    const float u = SmootherStep01(xf);
+    const float v = SmootherStep01(yf);
 
-    float n00 = GradientDot2D(Hash2DInt(xi,     yi    ), xf,        yf       );
-    float n10 = GradientDot2D(Hash2DInt(xi + 1, yi    ), xf - 1.0f, yf       );
-    float n01 = GradientDot2D(Hash2DInt(xi,     yi + 1), xf,        yf - 1.0f);
-    float n11 = GradientDot2D(Hash2DInt(xi + 1, yi + 1), xf - 1.0f, yf - 1.0f);
+    const float n00 = GradientDot2D(Hash2DInt(xi,     yi    ), xf,        yf       );
+    const float n10 = GradientDot2D(Hash2DInt(xi + 1, yi    ), xf - 1.0f, yf       );
+    const float n01 = GradientDot2D(Hash2DInt(xi,     yi + 1), xf,        yf - 1.0f);
+    const float n11 = GradientDot2D(Hash2DInt(xi + 1, yi + 1), xf - 1.0f, yf - 1.0f);
 
-    float nx0 = n00 + u * (n10 - n00);
-    float nx1 = n01 + u * (n11 - n01);
+    const float nx0 = n00 + u * (n10 - n00);
+    const float nx1 = n01 + u * (n11 - n01);
     return nx0 + v * (nx1 - nx0);
 }
 
@@ -184,16 +178,16 @@ float PerlinNoise(float x, float y)
 
 float PerlinNoise(float x, float y, float z)
 {
-    int xi = static_cast<int>(std::floor(x));
-    int yi = static_cast<int>(std::floor(y));
-    int zi = static_cast<int>(std::floor(z));
-    float xf = x - static_cast<float>(xi);
-    float yf = y - static_cast<float>(yi);
-    float zf = z - static_cast<float>(zi);
+    const int   xi = FloorToInt(x);
+    const int   yi = FloorToInt(y);
+    const int   zi = FloorToInt(z);
+    const float xf = Fract(x);
+    const float yf = Fract(y);
+    const float zf = Fract(z);
 
-    float u = Fade(xf);
-    float v = Fade(yf);
-    float w = Fade(zf);
+    const float u = SmootherStep01(xf);
+    const float v = SmootherStep01(yf);
+    const float w = SmootherStep01(zf);
 
     auto grad3d = [](int hash, float dx, float dy, float dz) {
         int h = hash & 15;
@@ -211,13 +205,13 @@ float PerlinNoise(float x, float y, float z)
     float n011 = grad3d(Hash3DInt(xi,     yi + 1, zi + 1), xf,        yf - 1.0f, zf - 1.0f);
     float n111 = grad3d(Hash3DInt(xi + 1, yi + 1, zi + 1), xf - 1.0f, yf - 1.0f, zf - 1.0f);
 
-    float nx00 = n000 + u * (n100 - n000);
-    float nx10 = n010 + u * (n110 - n010);
-    float nx01 = n001 + u * (n101 - n001);
-    float nx11 = n011 + u * (n111 - n011);
+    const float nx00 = n000 + u * (n100 - n000);
+    const float nx10 = n010 + u * (n110 - n010);
+    const float nx01 = n001 + u * (n101 - n001);
+    const float nx11 = n011 + u * (n111 - n011);
 
-    float nxy0 = nx00 + v * (nx10 - nx00);
-    float nxy1 = nx01 + v * (nx11 - nx01);
+    const float nxy0 = nx00 + v * (nx10 - nx00);
+    const float nxy1 = nx01 + v * (nx11 - nx01);
 
     return nxy0 + w * (nxy1 - nxy0);
 }
@@ -233,9 +227,9 @@ float SimplexNoise(float x, float y)
     constexpr float G2 = 0.21132486540518713f; // (3 - sqrt(3)) / 6
 
     // Skew input space to determine which simplex cell we're in
-    float s  = (x + y) * F2;
-    int   i  = static_cast<int>(std::floor(x + s));
-    int   j  = static_cast<int>(std::floor(y + s));
+    const float s = (x + y) * F2;
+    const int   i = FloorToInt(x + s);
+    const int   j = FloorToInt(y + s);
 
     // Unskew back to (x,y) space for the cell origin
     float unskew  = static_cast<float>(i + j) * G2;
@@ -274,10 +268,10 @@ float SimplexNoise(float x, float y)
 
 float CellularNoise(float x, float y)
 {
-    int xi = static_cast<int>(std::floor(x));
-    int yi = static_cast<int>(std::floor(y));
-    float xf = x - static_cast<float>(xi);
-    float yf = y - static_cast<float>(yi);
+    const int   xi = FloorToInt(x);
+    const int   yi = FloorToInt(y);
+    const float xf = Fract(x);
+    const float yf = Fract(y);
 
     // Compare squared distances to avoid 9 sqrt calls.
     float minDistSq = 4.0f; // (2.0)^2 maximum possible distance across a unit cell
@@ -298,7 +292,7 @@ float CellularNoise(float x, float y)
         }
     }
 
-    return std::clamp(std::sqrt(minDistSq), 0.0f, 1.0f);
+    return Clamp(Sqrt(minDistSq), 0.0f, 1.0f);
 }
 
 //==============================================================================
@@ -307,21 +301,21 @@ float CellularNoise(float x, float y)
 
 float ValueNoise(float x, float y)
 {
-    int xi = static_cast<int>(std::floor(x));
-    int yi = static_cast<int>(std::floor(y));
-    float xf = x - static_cast<float>(xi);
-    float yf = y - static_cast<float>(yi);
+    const int   xi = FloorToInt(x);
+    const int   yi = FloorToInt(y);
+    const float xf = Fract(x);
+    const float yf = Fract(y);
 
-    float u = Fade(xf);
-    float v = Fade(yf);
+    const float u = SmootherStep01(xf);
+    const float v = SmootherStep01(yf);
 
-    float v00 = Hash2DFloat(xi,     yi    );
-    float v10 = Hash2DFloat(xi + 1, yi    );
-    float v01 = Hash2DFloat(xi,     yi + 1);
-    float v11 = Hash2DFloat(xi + 1, yi + 1);
+    const float v00 = Hash2DFloat(xi,     yi    );
+    const float v10 = Hash2DFloat(xi + 1, yi    );
+    const float v01 = Hash2DFloat(xi,     yi + 1);
+    const float v11 = Hash2DFloat(xi + 1, yi + 1);
 
-    float vx0 = v00 + u * (v10 - v00);
-    float vx1 = v01 + u * (v11 - v01);
+    const float vx0 = v00 + u * (v10 - v00);
+    const float vx1 = v01 + u * (v11 - v01);
     return vx0 + v * (vx1 - vx0);
 }
 

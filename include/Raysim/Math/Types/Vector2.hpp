@@ -30,27 +30,49 @@ namespace RS::Math {
 
 /**
  * @struct Vector2
- * @brief 2D vector with arithmetic and geometric operations
+ * @brief 2D vector with arithmetic and geometric operations.
+ *
+ * Represents a 2D vector for positions, velocities, and directions in 2D space.
+ * Supports the standard arithmetic operators, component-wise operations, dot and
+ * cross products, projection, reflection, and rotation around the origin.
+ *
+ * Example:
+ * @code
+ *     Vector2f a(3.0f, 0.0f);
+ *     Vector2f b(0.0f, 4.0f);
+ *
+ *     float len  = a.Length();           // 3
+ *     float dist = a.Distance(b);        // 5
+ *     float dot  = a.Dot(b);             // 0
+ *     Vector2f r = a.RotatedBy(90.0_deg); // ~{0, 3}
+ * @endcode
  */
 template <typename T>
 struct Vector2 {
-    // Components of the vector
-    T x{0}; ///< X component of the vector
-    T y{0}; ///< Y component of the vector
+    T x{0}; ///< X component of the vector.
+    T y{0}; ///< Y component of the vector.
+
+//==============================================================================
+// Constructors
+//==============================================================================
 
     /**
-     * @brief Default constructor (zero vector)
+     * @brief Default constructor -- zero vector.
+     *
+     * Initializes both components to zero.
      */
     constexpr Vector2() noexcept = default;
+
     /**
-     * @brief Constructor with explicit x and y values
-     * @param X X component
-     * @param Y Y component
+     * @brief Constructs a vector with explicit x and y values.
+     * @param X X component.
+     * @param Y Y component.
      */
     constexpr Vector2(T X, T Y) noexcept;
+
     /**
-     * @brief Constructor that sets both components to the same value
-     * @param s Value for both x and y
+     * @brief Constructs a vector with both components set to the same value.
+     * @param s Value for both x and y.
      */
     explicit constexpr Vector2(T s) noexcept;
 
@@ -114,7 +136,7 @@ struct Vector2 {
      * @brief Computes the signed angle from this vector to another.
      *
      * Returns the smallest signed angular difference between this vector and `rhs`.
-     * The angle is measured in radians, positive for counter‑clockwise rotation and
+     * The angle is measured in radians, positive for counter-clockwise rotation and
      * negative for clockwise rotation.
      *
      * If either vector has zero length, the returned angle is 0.
@@ -144,7 +166,7 @@ struct Vector2 {
      *     y' = x * sin(phi) + y * cos(phi)
      *
      * The angle is expressed in radians. Positive values rotate the vector
-     * counter‑clockwise, negative values clockwise. The vector's magnitude is
+     * counter-clockwise, negative values clockwise. The vector's magnitude is
      * preserved.
      *
      * @param phi Rotation angle in radians.
@@ -170,11 +192,11 @@ struct Vector2 {
     /**
      * @brief Returns a vector perpendicular to this one.
      *
-     * Computes a 90‑degree counter‑clockwise rotation of the vector. The resulting
+     * Computes a 90-degree counter-clockwise rotation of the vector. The resulting
      * vector has the same magnitude but is orthogonal to the original. For a vector
      * (x, y), the perpendicular vector is (-y, x).
      *
-     * @return A vector perpendicular to this one, rotated 90° counter‑clockwise.
+     * @return A vector perpendicular to this one, rotated 90 degrees counter-clockwise.
      */
     [[nodiscard]] constexpr Vector2 Perpendicular() const noexcept;
 
@@ -195,7 +217,7 @@ struct Vector2 {
      *
      * In 2D, the cross product is a scalar representing the signed magnitude of the
      * perpendicular vector that would result from a 3D cross product. A positive
-     * value indicates that `rhs` is to the left (counter‑clockwise) of this vector,
+     * value indicates that `rhs` is to the left (counter-clockwise) of this vector,
      * and a negative value indicates it is to the right (clockwise).
      *
      * @param rhs Vector to compute the cross product with.
@@ -329,7 +351,7 @@ struct Vector2 {
     /**
      * @brief Creates a unit vector from an angle in radians.
      *
-     * The angle is measured from the positive x-axis, counter‑clockwise. The
+     * The angle is measured from the positive x-axis, counter-clockwise. The
      * resulting vector has length 1.
      *
      * @param angle Angle in radians.
