@@ -1,4 +1,4 @@
-#include "pch.hpp"
+#include "rspch.hpp"
 
 #include "Raysim/Scene/Scene.hpp"
 #include "Raysim/ImGui/ImGuiLayer.hpp"
