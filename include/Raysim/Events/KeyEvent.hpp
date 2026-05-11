@@ -34,18 +34,35 @@ namespace RS {
 
 /**
  * @class KeyEvent
- * @brief Abstract base for keyboard events, carrying the key code.
+ * @brief Base class for all keyboard-related events.
+ *
+ * Represents a keyboard action and carries both the abstract layout‑independent
+ * KeyCode and the backend‑specific physical ScanCode.
+ *
+ * - KeyCode: logical key identifier used by the engine (layout‑agnostic).
+ *
+ * - ScanCode: physical key identifier provided by the backend. This allows
+ *   distinguishing physical keys even when keyboard layout changes.
+ *
+ * If the backend does not provide a physical scan code, m_ScanCode is set to
+ * InvalidScanCode.
  */
 class KeyEvent : public Event
 {
 public:
-    [[nodiscard]] KeyCode GetKeyCode() const noexcept { return m_KeyCode; }
+    [[nodiscard]] KeyCode  GetKeyCode()  const noexcept { return m_KeyCode;  }
+
+    /// Physical key identifier supplied by the backend, or InvalidScanCode if unavailable.
+    [[nodiscard]] ScanCode GetScanCode() const noexcept { return m_ScanCode; }
 
     RS_EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
 
 protected:
-    explicit KeyEvent(KeyCode keycode) : m_KeyCode(keycode) {}
-    KeyCode m_KeyCode;
+    KeyEvent(KeyCode keycode, ScanCode scancode = InvalidScanCode)
+        : m_KeyCode(keycode), m_ScanCode(scancode) {}
+
+    KeyCode  m_KeyCode;
+    ScanCode m_ScanCode;
 };
 
 // ============================================================================
@@ -54,16 +71,21 @@ protected:
 
 /**
  * @class KeyPressedEvent
- * @brief Fired when a key transitions from not-pressed to pressed.
+ * @brief Fired when a key transitions from "not pressed" to "pressed".
  *
- * @p isRepeat is true when the OS auto-repeat mechanism re-fires the event
- * while the key is held down.
+ * This event is also generated repeatedly while the key is held down if the
+ * operating system's auto‑repeat feature is active.
+ *
+ * The `isRepeat` flag indicates whether the event is an initial press or an auto‑repeat.
  */
 class KeyPressedEvent final : public KeyEvent
 {
 public:
-    explicit KeyPressedEvent(KeyCode keycode, bool isRepeat = false)
-        : KeyEvent(keycode), m_IsRepeat(isRepeat) {}
+    /// @param keycode  Abstract key code (layout-independent).
+    /// @param isRepeat True when the OS auto-repeat mechanism re-fires the event.
+    /// @param scancode Physical key identifier from the backend (optional).
+    KeyPressedEvent(KeyCode keycode, bool isRepeat = false, ScanCode scancode = InvalidScanCode)
+        : KeyEvent(keycode, scancode), m_IsRepeat(isRepeat) {}
 
     [[nodiscard]] bool IsRepeat() const noexcept { return m_IsRepeat; }
 
@@ -71,6 +93,7 @@ public:
     {
         std::ostringstream ss;
         ss << "KeyPressedEvent: " << static_cast<int>(m_KeyCode)
+           << " sc=" << m_ScanCode
            << " (repeat=" << m_IsRepeat << ')';
         return ss.str();
     }
@@ -87,17 +110,24 @@ private:
 
 /**
  * @class KeyReleasedEvent
- * @brief Fired when a key transitions from pressed to not-pressed.
+ * @brief Fired when a key transitions from "pressed" to "not pressed".
+ *
+ * This event is emitted exactly once per key release and never repeats.
+ * It carries both the abstract KeyCode and the backend physical ScanCode.
  */
 class KeyReleasedEvent final : public KeyEvent
 {
 public:
-    explicit KeyReleasedEvent(KeyCode keycode) : KeyEvent(keycode) {}
+    /// @param keycode  Abstract key code (layout-independent).
+    /// @param scancode Physical key identifier from the backend (optional).
+    KeyReleasedEvent(KeyCode keycode, ScanCode scancode = InvalidScanCode)
+        : KeyEvent(keycode, scancode) {}
 
     [[nodiscard]] std::string ToString() const override
     {
         std::ostringstream ss;
-        ss << "KeyReleasedEvent: " << static_cast<int>(m_KeyCode);
+        ss << "KeyReleasedEvent: " << static_cast<int>(m_KeyCode)
+           << " sc=" << m_ScanCode;
         return ss.str();
     }
 
