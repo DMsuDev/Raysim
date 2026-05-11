@@ -308,14 +308,14 @@ public:
         // Phase control: P/O for direction, +/- for speed adjustment 0.3 units/sec
         if (GetInput().IsKeyDown(KeyCode::P)) phaseRotationSpeed = std::abs(phaseRotationSpeed);
         if (GetInput().IsKeyDown(KeyCode::O)) phaseRotationSpeed = -std::abs(phaseRotationSpeed);
-        if (GetInput().IsKeyDown(KeyCode::Equal) || GetInput().IsKeyDown(KeyCode::KP_Add))
+        if (GetInput().IsKeyDown(KeyCode::Equal) || GetInput().IsKeyDown(KeyCode::KPAdd))
             phaseRotationSpeed += 0.3f * dt;
-        if (GetInput().IsKeyDown(KeyCode::Minus) || GetInput().IsKeyDown(KeyCode::KP_Subtract))
+        if (GetInput().IsKeyDown(KeyCode::Minus) || GetInput().IsKeyDown(KeyCode::KPSubtract))
             phaseRotationSpeed -= 0.3f * dt;
 
         // Select presets with number keys 1-6
         for (int i = 0; i < 6; ++i) {
-            if (GetInput().IsKeyPressed(static_cast<KeyCode>(static_cast<int>(KeyCode::One) + i))) {
+            if (GetInput().IsKeyPressed(static_cast<KeyCode>(static_cast<int>(KeyCode::D1) + i))) {
                 currentPreset = i;
                 frequencyX = PRESETS[i].frequencyX;
                 frequencyY = PRESETS[i].frequencyY;

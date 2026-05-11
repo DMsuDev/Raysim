@@ -81,11 +81,11 @@ public:
     void OnUpdate(float dt) override
     {
         //--- Mode select ------------------------------------------------
-        if (GetInput().IsKeyPressed(KeyCode::One))   terrain_->SetMode(NoiseMode::Perlin);
-        if (GetInput().IsKeyPressed(KeyCode::Two))   terrain_->SetMode(NoiseMode::Simplex);
-        if (GetInput().IsKeyPressed(KeyCode::Three)) terrain_->SetMode(NoiseMode::Cellular);
-        if (GetInput().IsKeyPressed(KeyCode::Four))  terrain_->SetMode(NoiseMode::Value);
-        if (GetInput().IsKeyPressed(KeyCode::Five))  terrain_->SetMode(NoiseMode::FBM);
+        if (GetInput().IsKeyPressed(KeyCode::D1))    terrain_->SetMode(NoiseMode::Perlin);
+        if (GetInput().IsKeyPressed(KeyCode::D2))    terrain_->SetMode(NoiseMode::Simplex);
+        if (GetInput().IsKeyPressed(KeyCode::D3))    terrain_->SetMode(NoiseMode::Cellular);
+        if (GetInput().IsKeyPressed(KeyCode::D4))    terrain_->SetMode(NoiseMode::Value);
+        if (GetInput().IsKeyPressed(KeyCode::D5))    terrain_->SetMode(NoiseMode::FBM);
 
         //--- Scroll control ---------------------------------------------
         if (GetInput().IsKeyPressed(KeyCode::Space)) autoScroll_ = !autoScroll_;
