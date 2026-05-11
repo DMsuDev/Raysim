@@ -42,6 +42,7 @@ set(RAYSIM_SOURCES
     # Graphics
     ${SRC_DIR}/Graphics/Shapes.cpp
     ${SRC_DIR}/Graphics/Texts.cpp
+    ${SRC_DIR}/Renderer/RenderCommand.cpp
 
     ${SRC_DIR}/Debug/Instrumentor.cpp
     ${SRC_DIR}/Core/Log.cpp
@@ -86,7 +87,8 @@ target_sources(Raysim PRIVATE ${RAYSIM_SOURCES})
 # Set the target include directories
 target_include_directories(Raysim
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>.
+        $<BUILD_INTERFACE:${IMGUI_DIR}>
         $<INSTALL_INTERFACE:include>
 
     PRIVATE
@@ -100,10 +102,16 @@ target_include_directories(Raysim
 
 target_link_libraries(Raysim
     PUBLIC
-        imgui
-        spdlog
-        rs_backend
+        spdlog # header-only INTERFACE
+        # Static build: imgui + rs_backend propagate to the consumer EXE (it links the static libs).
+        $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:imgui>
+        $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:rs_backend>
     PRIVATE
+        # Shared build: imgui + rs_backend are embedded in the DLL only.
+        # MinGW exports all symbols by default, so consumer EXEs resolve ImGui::*
+        # and raylib symbols from the DLL at runtime, no second copy of GImGui.
+        $<$<BOOL:${RS_BUILD_SHARED}>:imgui>
+        $<$<BOOL:${RS_BUILD_SHARED}>:rs_backend>
         rs_warnings
         stb
         $<$<PLATFORM_ID:Windows>:winmm>
