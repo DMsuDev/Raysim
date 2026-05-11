@@ -3,6 +3,8 @@
 #include "Backend/Raylib/RaylibWindow.hpp"
 #include "Raysim/Math/Types/Vector2.hpp"
 
+#include "Raysim/Events/Events.hpp"
+
 #include <raylib.h>
 
 namespace RS::Backend {

@@ -34,6 +34,8 @@ namespace RS {
 
 class Window;
 class Input;
+class Event;
+class EventBus;
 
 // ============================================================================
 // Command-line arguments wrapper
@@ -161,12 +163,17 @@ private:
     ApplicationConfig   m_Configuration;  // Application configuration
     Scope<Window>       m_Window;         // The main window
     Scope<Input>        m_Input;          // Input backend
+    Scope<EventBus>     m_EventBus;       // Global pub/sub event bus
 
     Scope<SceneManager> m_SceneManager;
     EngineContext m_EngineContext;
 
     // Rebuild m_EngineContext from current backend pointers.
     void RebuildContext();
+
+    // Engine-level event handler called for every event the Window dispatches.
+    // Handles WindowClose / WindowResize, then forwards to the SceneManager.
+    void OnEvent(Event& e);
 
     bool m_Running   = true;  // Application running state
     bool m_Minimized = false; // Is window minimized?

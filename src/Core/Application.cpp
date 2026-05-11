@@ -5,6 +5,12 @@
 #include "Raysim/Graphics/Color.hpp"
 #include "Raysim/Input/KeyCodes.hpp"
 
+// --- Events ---
+#include "Raysim/Events/Events.hpp"
+
+// --- Input ---
+#include "Raysim/Input/Input.hpp"
+
 // --- Core system headers ---
 #include "Raysim/Renderer/RenderCommand.hpp"
 #include "Raysim/Input/Input.hpp"
@@ -33,6 +39,7 @@ Application::Application(const ApplicationConfig& config)
     // Create backends
     m_Window = BackendFactory::CreateAppWindow(m_Configuration.Window);
     m_Input = BackendFactory::CreateInput();
+    m_EventBus = CreateScope<EventBus>();
 
     RS_CORE_ASSERT(m_Window, "Failed to create window backend");
     RS_CORE_ASSERT(m_Input, "Failed to create input backend");
@@ -42,6 +49,9 @@ Application::Application(const ApplicationConfig& config)
     RS_CORE_ASSERT(api, "Failed to create renderer backend");
 
     RS::RenderCommand::Init(std::move(api));
+
+    // -- Event callback ----------------------------------------------------
+    m_Window->SetEventCallback([this](Event& e) { OnEvent(e); });
 
     // -- Font system --------------------------------------------------------
     FontManager::SetProvider(CreateScope<STBTrueTypeProvider>());
@@ -83,6 +93,42 @@ void Application::RebuildContext()
     m_EngineContext.Config      = &m_Configuration;
     m_EngineContext.MainWindow  = m_Window.get();
     m_EngineContext.InputSystem = m_Input.get();
+    m_EngineContext.Bus         = m_EventBus.get();
+}
+
+// ============================================================================
+// Event handling
+// ============================================================================
+
+void Application::OnEvent(Event& e)
+{
+    EventDispatcher dispatcher(e);
+
+    // Engine handles close and resize at the application level first.
+    dispatcher.Dispatch<WindowCloseEvent>([this](WindowCloseEvent&)
+    {
+        RS_CORE_DEBUG("WindowCloseEvent received, shutting down.");
+        m_Running = false;
+        return true; // consumed
+    });
+
+    dispatcher.Dispatch<WindowResizeEvent>([this](WindowResizeEvent& re)
+    {
+        m_Minimized = (re.GetWidth() == 0 || re.GetHeight() == 0);
+        return false; // let scene observe it too
+    });
+
+    // Forward to active scene (scene -> its layer stack in reverse order).
+    if (!e.Handled && m_SceneManager)
+        m_SceneManager->OnEvent(e);
+
+    // Feed event-driven input backends (polling backends no-op this).
+    if (m_Input)
+        m_Input->OnEvent(e);
+
+    // Broadcast to all bus subscribers (not stoppable by Handled).
+    if (m_EventBus)
+        m_EventBus->Publish(e);
 }
 
 // ============================================================================

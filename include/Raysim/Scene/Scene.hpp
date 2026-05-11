@@ -1,8 +1,30 @@
+/**********************************************************************************************
+ *   Raysim - A C++ framework for 2D graphics and interactive applications
+ *
+ *   LICENSE: Apache License, Version 2.0
+ *
+ *            Copyright 2026 Dayron Mustelier (@DMsuDev)
+ *
+ *   Raysim is licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *             http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ *
+ **********************************************************************************************/
+
 #pragma once
 
 #include "Raysim/Core/EngineContext.hpp"
 #include "Raysim/Core/LayerStack.hpp"
 #include "Raysim/Renderer/RenderCommand.hpp"
+#include "Raysim/Events/Event.hpp"
 
 namespace RS {
 
@@ -139,6 +161,17 @@ public:
         }
     }
 
+    /// @brief Dispatch an event to this scene.
+    ///
+    /// First calls the user-overridable OnEvent(), then propagates to the
+    /// LayerStack in reverse order. Stops early if any handler sets e.Handled.
+    void OnEvent(Event& e, Key)
+    {
+        OnEvent(e);
+        if (!e.Handled)
+            m_LayerStack.DispatchEvent(e);
+    }
+
 // ===========================================================================
 // Public Information Accessors
 // ===========================================================================
@@ -190,6 +223,13 @@ protected:
     /// Use it to resume animations, restart timers, etc.
     virtual void OnResume() { }
 
+    /// @brief Called when an event is dispatched to this scene.
+    ///
+    /// Override to intercept events before they reach the LayerStack. Return
+    /// without setting e.Handled to let layers below also process the event.
+    /// @param e  The event. Use EventDispatcher for type-safe handling.
+    virtual void OnEvent([[maybe_unused]] Event& e) {}
+
 // ===========================================================================
 // Layer management
 // ===========================================================================
@@ -226,7 +266,7 @@ protected:
     ///       This accessor exists only for API consistency and backward compatibility,
     ///       so scenes can write GetRenderer().ClearScreen(...) instead of
     ///       RS::RenderCommand::ClearScreen(...) directly.
-    inline RenderCommand& GetRenderer() noexcept { static RenderCommand s_Instance; return s_Instance; }
+    RenderCommand& GetRenderer() noexcept;
 
 private:
 

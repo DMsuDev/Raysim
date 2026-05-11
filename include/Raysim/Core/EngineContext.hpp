@@ -12,6 +12,7 @@ namespace RS
     class SceneManager;
     class RenderCommand;
     class Input;
+    class EventBus;
 
     /**
      * @struct EngineContext
@@ -27,6 +28,7 @@ namespace RS
         SceneManager *Scenes = nullptr;      // Scene management and transitions
         Window *MainWindow = nullptr;        // Main window
         Input *InputSystem = nullptr;        // Input polling
+        EventBus *Bus = nullptr;             // Global pub/sub event bus
     };
 
 } // namespace RS

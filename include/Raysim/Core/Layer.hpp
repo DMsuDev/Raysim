@@ -4,6 +4,8 @@
 
 namespace RS {
 
+class Event; // Forward declaration of Event class
+
 /**
  * @brief Abstract base class representing an application "layer".
  *
@@ -38,6 +40,22 @@ public:
      * invoked when the layer is removed from the stack or before destruction.
      */
     virtual void OnDetach() {}
+
+// ========================================================================
+// Event Callback
+// ========================================================================
+
+    /**
+     * @brief Called when an event is dispatched to this layer.
+     *
+     * Events propagate through the LayerStack in reverse order (top-most layer
+     * first). A layer can stop propagation by setting `e.Handled = true` inside
+     * this callback (or by returning true from an EventDispatcher::Dispatch call,
+     * which sets Handled automatically).
+     *
+     * @param e  The event to process. Cast with EventDispatcher for type safety.
+     */
+    virtual void OnEvent([[maybe_unused]] Event& e) {}
 
 // ========================================================================
 // Update and Render Callbacks
