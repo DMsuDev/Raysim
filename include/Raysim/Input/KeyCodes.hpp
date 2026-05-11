@@ -1,83 +1,171 @@
+/**********************************************************************************************
+ *   Raysim - A C++ framework for 2D graphics and interactive applications
+ *
+ *   LICENSE: Apache License, Version 2.0
+ *
+ *            Copyright 2026 Dayron Mustelier (@DMsuDev)
+ *
+ *   Raysim is licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *             http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ *
+ **********************************************************************************************/
+
 #pragma once
 
 #include <cstdint>
-#include <ostream>
 
-namespace RS
+namespace RS {
+
+/**
+ * @enum KeyCode
+ * @brief Backend‑agnostic keyboard key codes.
+ *
+ * Defines a layout‑independent set of key identifiers used internally by the input system.
+ * Values are sequential and zero‑based to allow efficient indexing.
+ *
+ * These codes do not correspond to any platform API. Each backend maps its native
+ * key values to this enum through a dedicated translation layer.
+ */
+enum class KeyCode : uint16_t
 {
-    /// @enum KeyCode
-    /// @brief Keyboard key codes (mirrors raylib KeyboardKey)
-    enum class KeyCode : uint16_t {
-        Null = 0,
+    Unknown = 0, ///< Unknown / unmapped key
 
-        // Alphanumeric keys
+    // -- Printable keys (layout-agnostic) -----------------------------------------------
+    Space,
+    Apostrophe,
+    Comma,
+    Minus,
+    Period,
+    Slash,
 
-        A = 65, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
-        Zero = 48, One, Two, Three, Four, Five, Six, Seven, Eight, Nine,
+    // -- Digits (top row) ----------------------------------------------------------------
+    D0, D1, D2, D3, D4, D5, D6, D7, D8, D9,
 
-        // Function keys
+    Semicolon,
+    Equal,
 
-        F1 = 290, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
+    // -- Alphabet ------------------------------------------------------------------------
+    A, B, C, D, E, F, G, H, I, J, K, L, M,
+    N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
 
-        // Special keys
+    LeftBracket,
+    Backslash,
+    RightBracket,
+    GraveAccent,
 
-        Space = 32,
-        Apostrophe = 39,
-        Comma = 44,
-        Minus = 45,
-        Period = 46,
-        Slash = 47,
-        Semicolon = 59,
-        Equal = 61,
-        LeftBracket = 91,
-        Backslash = 92,
-        RightBracket = 93,
-        Grave = 96,
+    // -- Control and navigation --------------------------------------------------------
+    Escape, Enter, Tab, Backspace,
+    Insert, Delete,
+    Right, Left, Down, Up,
+    PageUp, PageDown, Home, End,
 
-        Escape = 256,
-        Enter = 257,
-        Tab = 258,
-        Backspace = 259,
-        Insert = 260,
-        Delete = 261,
-        Right = 262,
-        Left = 263,
-        Down = 264,
-        Up = 265,
-        PageUp = 266,
-        PageDown = 267,
-        Home = 268,
-        End = 269,
+    // -- State keys --------------------------------------------------------------------
+    CapsLock, ScrollLock, NumLock, PrintScreen, Pause,
 
-        // Modifier keys
+    // -- Function keys -----------------------------------------------------------------
+    F1,  F2,  F3,  F4,  F5,  F6,
+    F7,  F8,  F9,  F10, F11, F12,
 
-        LeftShift = 340,
-        LeftControl = 341,
-        LeftAlt = 342,
-        LeftSuper = 343,
-        RightShift = 344,
-        RightControl = 345,
-        RightAlt = 346,
-        RightSuper = 347,
+    // -- Numpad ------------------------------------------------------------------------
+    KP0, KP1, KP2, KP3, KP4,
+    KP5, KP6, KP7, KP8, KP9,
+    KPDecimal, KPDivide, KPMultiply,
+    KPSubtract, KPAdd, KPEnter, KPEqual,
 
-        // Special state keys
+    // -- Modifier keys -----------------------------------------------------------------
+    LeftShift,  LeftControl,  LeftAlt,  LeftSuper,
+    RightShift, RightControl, RightAlt, RightSuper,
 
-        CapsLock = 280,
-        ScrollLock = 281,
-        NumLock = 282,
-        PrintScreen = 283,
-        Pause = 284,
+    Menu,
 
-        // Numpad keys
+    Count   ///< Sentinel: number of valid key codes (do not use as a key)
+};
 
-        KP_0 = 320, KP_1, KP_2, KP_3, KP_4, KP_5, KP_6, KP_7, KP_8, KP_9,
-        KP_Decimal = 330,
-        KP_Divide = 331,
-        KP_Multiply = 332,
-        KP_Subtract = 333,
-        KP_Add = 334,
-        KP_Enter = 335,
-        KP_Equal = 336,
-    };
+// ============================================================================
+// Scan codes
+// ============================================================================
+
+/// Physical key identifier independent of keyboard layout.
+///
+/// The concrete value is backend-defined:
+///   - Raylib backend : GLFW physical key code (layout-independent).
+///   - Other backends : OS hardware scancode or equivalent.
+using ScanCode = int32_t;
+inline constexpr ScanCode InvalidScanCode = -1;
+
+// ============================================================================
+// Modifier flags
+// ============================================================================
+
+/**
+ * @enum Modifier
+ * @brief Bitmask flags representing keyboard modifier keys (Shift, Control, Alt, Super).
+ *
+ * Defines a set of modifier keys used by the input system. Values are
+ * represented as individual bit flags so they can be combined using
+ * bitwise operations.
+ *
+ * These flags do not correspond to any platform API. Each backend maps
+ * its native modifier state to this enum through a translation layer.
+ */
+enum class Modifier : uint8_t
+{
+    None    = 0,
+    Shift   = 1 << 0,
+    Control = 1 << 1,
+    Alt     = 1 << 2,
+    Super   = 1 << 3,
+};
+
+/**
+ * @brief Bitwise OR operator for Modifier enum to allow combining flags into a bitmask.
+ *
+ * Enables syntax like `Modifier::Shift | Modifier::Control` to create a combined bitmask of active modifiers.
+ *
+ * @param a First Modifier operand.
+ * @param b Second Modifier operand.
+ * @return A new Modifier value representing the combination of the input flags.
+ */
+
+inline Modifier operator| (Modifier a, Modifier b) noexcept { return static_cast<Modifier>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b)); }
+/**
+ * @brief Compound assignment operator for Modifier enum to allow adding flags to an existing bitmask.
+ *
+ * This operator allows syntax like `mods |= Modifier::Alt` to add a flag to an existing bitmask.
+ *
+ * @param a Modifier variable to modify (left-hand side).
+ * @param b Modifier flag to add (right-hand side).
+ * @return A reference to the modified Modifier variable after adding the flag.
+ */
+inline Modifier& operator|=(Modifier& a, Modifier b) noexcept { return a = a | b; }
+
+/**
+ * @brief Bitwise AND operator for Modifier enum to allow checking for specific flags in a bitmask.
+ *
+ * This operator enables syntax like `if (mods & Modifier::Control) { ... }` to check if a specific modifier is active.
+ *
+ * @param a First Modifier operand (bitmask).
+ * @param b Second Modifier operand (flag to check).
+ * @return A new Modifier value where the specified flag is set if it was present in the input bitmask; otherwise, None.
+ */
+inline Modifier operator& (Modifier a, Modifier b) noexcept { return static_cast<Modifier>(static_cast<uint8_t>(a) & static_cast<uint8_t>(b)); }
+
+/**
+ * @brief Checks whether a specific modifier flag is present in a bitmask.
+ *
+ * @param flags Combined Modifier bitmask to check.
+ * @param mod Modifier flag to test (e.g. Modifier::Shift).
+ * @return true if the specified modifier is active within the flags; false otherwise.
+ */
+inline bool HasModifier(Modifier flags, Modifier mod) noexcept { return (flags & mod) != Modifier::None; }
 
 } // namespace RS

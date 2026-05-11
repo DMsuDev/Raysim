@@ -147,6 +147,10 @@ void Application::Run()
     {
         RS_PROFILE_SCOPE("RunLoop");
 
+        // Flush per-frame transient input state (Pressed, Released, Repeating)
+        // before the window populates fresh events for this frame.
+        m_Input->Update();
+
         m_Window->PollEvents();
         m_Minimized = m_Window->IsMinimized();
 

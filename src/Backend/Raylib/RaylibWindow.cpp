@@ -1,6 +1,7 @@
 #include "rspch.hpp"
 
 #include "Backend/Raylib/RaylibWindow.hpp"
+#include "Backend/Raylib/RaylibKeyMap.hpp"
 #include "Raysim/Math/Types/Vector2.hpp"
 
 #include "Raysim/Events/Events.hpp"
@@ -59,11 +60,118 @@ bool RaylibWindow::ImplShouldClose() const
 
 void RaylibWindow::ImplPollEvents()
 {
-    LogOnceRegistry::LogOnce(
-        "EventPolling",
-        LogLevel::Warn,
-        "Event polling is handled internally by Raylib, so this will be ignored"
-    );
+    if (!m_EventCallback)
+        return;
+
+    // ---- Keyboard: pressed / released / repeat ---------------------------------
+    //
+    // Raylib input state is refreshed by PollInputEvents(), which is called
+    // internally by EndDrawing() at the end of each frame. By the time
+    // ImplPollEvents() runs (start of the next frame), the state is already
+    // fresh, no manual PollInputEvents() call is needed here.
+    //
+    // We iterate our KeyCode table (106 entries) instead of draining
+    // GetKeyPressed(), so the polling API’s GetLastKeyPressed() is unaffected.
+
+    for (std::size_t i = 1; i < KeyCodeToRaylib.size(); ++i)
+    {
+        const int nativeKey = KeyCodeToRaylib[i];
+        if (nativeKey == 0)
+            continue;
+
+        const auto kc = static_cast<KeyCode>(i);
+
+        if (::IsKeyPressed(nativeKey))
+        {
+            const bool repeat = ::IsKeyPressedRepeat(nativeKey);
+            KeyPressedEvent e(kc, repeat, static_cast<ScanCode>(nativeKey));
+            m_EventCallback(e);
+        }
+
+        if (::IsKeyReleased(nativeKey))
+        {
+            KeyReleasedEvent e(kc, static_cast<ScanCode>(nativeKey));
+            m_EventCallback(e);
+        }
+    }
+
+    // ---- Typed characters (Unicode codepoints) ---------------------------------
+    {
+        int cp;
+        while ((cp = ::GetCharPressed()) != 0)
+        {
+            KeyTypedEvent e(static_cast<uint32_t>(cp));
+            m_EventCallback(e);
+        }
+    }
+
+    // ---- Mouse: movement -------------------------------------------------------
+    {
+        const ::Vector2 delta = ::GetMouseDelta();
+        if (delta.x != 0.0f || delta.y != 0.0f)
+        {
+            const ::Vector2 pos = ::GetMousePosition();
+            MouseMovedEvent e(pos.x, pos.y);
+            m_EventCallback(e);
+        }
+    }
+
+    // ---- Mouse: scroll wheel ---------------------------------------------------
+    {
+        const ::Vector2 scroll = ::GetMouseWheelMoveV();
+        if (scroll.x != 0.0f || scroll.y != 0.0f)
+        {
+            MouseScrolledEvent e(scroll.x, scroll.y);
+            m_EventCallback(e);
+        }
+    }
+
+    // ---- Mouse: buttons --------------------------------------------------------
+    // Iterate through the keymap instead of raw indices so we skip any
+    // engine buttons that have no Raylib equivalent (native == -1).
+    // This also guards against passing out-of-range indices to Raylib
+    // (e.g. MouseButton::Button7 has no native Raylib mapping).
+    for (std::size_t i = 0; i < MouseButtonToRaylib.size(); ++i)
+    {
+        const int native = MouseButtonToRaylib[i];
+        if (native < 0)
+            continue;
+
+        if (::IsMouseButtonPressed(native))
+        {
+            MouseButtonPressedEvent e(static_cast<MouseButton>(i));
+            m_EventCallback(e);
+        }
+        if (::IsMouseButtonReleased(native))
+        {
+            MouseButtonReleasedEvent e(static_cast<MouseButton>(i));
+            m_EventCallback(e);
+        }
+    }
+
+    // ---- Window: resize --------------------------------------------------------
+    if (::IsWindowResized())
+    {
+        m_Data.Width  = ::GetScreenWidth();
+        m_Data.Height = ::GetScreenHeight();
+        WindowResizeEvent e(static_cast<uint32_t>(m_Data.Width),
+                            static_cast<uint32_t>(m_Data.Height));
+        m_EventCallback(e);
+    }
+
+    // ---- Window: focus ---------------------------------------------------------
+    if (::IsWindowFocused()  && m_WasUnfocused)
+    {
+        m_WasUnfocused = false;
+        WindowFocusEvent e(true);
+        m_EventCallback(e);
+    }
+    else if (!::IsWindowFocused() && !m_WasUnfocused)
+    {
+        m_WasUnfocused = true;
+        WindowFocusEvent e(false);
+        m_EventCallback(e);
+    }
 }
 
 void RaylibWindow::ImplSwapBuffers()
