@@ -356,7 +356,7 @@ namespace RS::Math {
      * @param epsilon Maximum allowed absolute difference (default: `1e-6f`).
      * @return `true` if `|a - b|` is within `epsilon`.
      */
-    [[nodiscard]] constexpr bool EpsilonEquals(float a, float b, float epsilon = 1e-6f) noexcept;
+    [[nodiscard]] inline bool EpsilonEquals(float a, float b, float epsilon = 1e-6f) noexcept;
 
 //==============================================================================
 // Algebraic helpers
@@ -410,7 +410,7 @@ namespace RS::Math {
      * @param x Input floating-point value.
      * @return Fractional part of `x` in [0, 1).
      */
-    [[nodiscard]] constexpr float Fract(float x) noexcept;
+    [[nodiscard]] inline float Fract(float x) noexcept;
 
     /**
      * @brief Clamps `x` to [0, 1].
