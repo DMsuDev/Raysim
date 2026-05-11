@@ -8,6 +8,20 @@
 namespace RS {
 
 // ============================================================================
+// GetRenderer
+// ============================================================================
+
+// Defined here (not in the header) so the static lives exclusively in the DLL.
+// An inline definition in the header would create a separate instance in every
+// translation unit that includes Scene.hpp, causing an uninitialised instance
+// in consumer EXEs when Raysim is built as a shared library.
+RenderCommand& Scene::GetRenderer() noexcept
+{
+    static RenderCommand s_Instance;
+    return s_Instance;
+}
+
+// ============================================================================
 // ImGui frame wrappers
 // ============================================================================
 
