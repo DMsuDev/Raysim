@@ -78,6 +78,7 @@ private:
     };
 
     WindowData m_Data;
+    bool       m_WasUnfocused = false; ///< Tracks previous focus state for WindowFocusEvent synthesis.
 };
 
 } // namespace RS::Backend

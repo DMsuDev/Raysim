@@ -1,5 +1,8 @@
 #pragma once
 #include "Raysim/Input/Input.hpp"
+#include "Raysim/Events/KeyEvent.hpp"
+
+#include <queue>
 
 namespace RS::Backend {
 
@@ -16,7 +19,11 @@ public:
     RaylibInput() = default;
     ~RaylibInput() override = default;
 
-    void Update() override {} // No-op, raylib handles input state internally
+    // Clears per-frame transient state. Must be called once per frame before PollEvents.
+    void Update() override;
+
+    // Captures KeyTypedEvent to populate the internal character queue.
+    void OnEvent(Event& e) override;
 
     // ============================================================================
     // KEYBOARD INPUT
@@ -26,7 +33,12 @@ public:
     bool IsKeyPressed(KeyCode key) const override;
     bool IsKeyReleased(KeyCode key) const override;
     bool IsKeyRepeating(KeyCode key) const override;
-    KeyCode GetLastKeyPressed() const override;
+
+    KeyCode  GetLastKeyPressed() const override;
+    ScanCode GetScanCode(KeyCode key) const override;
+    KeyCode  GetKeyFromScanCode(ScanCode sc) const override;
+    Modifier GetModifiers() const override;
+    uint32_t GetCharPressed() override;
 
     // ============================================================================
     // MOUSE INPUT
@@ -34,11 +46,22 @@ public:
 
     Math::Vec2f GetMousePosition() const override;
     Math::Vec2f GetMouseDelta() const override;
+
+    float GetMouseWheelMove() const override;
+
     bool IsMouseButtonDown(MouseButton button) const override;
     bool IsMouseButtonPressed(MouseButton button) const override;
     bool IsMouseButtonReleased(MouseButton button) const override;
-    float GetMouseWheelMove() const override;
-    bool IsMouseOnScreen() const override;
+
+    // ============================================================================
+    // Cursor Methods
+    // ============================================================================
+
+    void SetCursorPosition(float x, float y) override;
+    void SetCursorVisible(bool visible) override;
+
+    void SetCursorMode(CursorMode mode) override;
+    CursorMode GetCursorMode() const override;
 
     // ============================================================================
     // GAMEPAD INPUT
@@ -47,8 +70,17 @@ public:
     bool IsGamepadAvailable(int gamepad) const override;
     bool IsGamepadButtonDown(int gamepad, GamepadButton button) const override;
     bool IsGamepadButtonPressed(int gamepad, GamepadButton button) const override;
+    bool IsGamepadButtonReleased(int gamepad, GamepadButton button) const override;
+
     float GetGamepadAxisValue(int gamepad, GamepadAxis axis) const override;
     float GetGamepadAxisValue(int gamepad, int axis) const override;
+
+    const char* GetGamepadName(int gamepad) const override;
+
+private:
+    KeyCode              m_LastKeyPressed = KeyCode::Unknown;
+    CursorMode           m_CursorMode     = CursorMode::Normal;
+    std::queue<uint32_t> m_CharQueue;
 };
 
 } // namespace RS::Backend

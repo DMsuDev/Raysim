@@ -60,6 +60,9 @@ set(RAYSIM_SOURCES
     ${SRC_DIR}/Scene/SceneManager.cpp
     ${SRC_DIR}/Scene/Scene.cpp
 
+    # Input abstraction layer
+    ${SRC_DIR}/Input/EventDrivenInput.cpp
+
     # Backend: Raylib implementations
     ${SRC_DIR}/Backend/Raylib/RaylibInput.cpp
     ${SRC_DIR}/Backend/Raylib/RaylibRendererAPI.cpp
