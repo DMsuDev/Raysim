@@ -5,7 +5,11 @@
 
 #include "Raysim/Math/Types/Vector2.hpp"
 
+#include <functional>
+
 namespace RS {
+
+class Event; // Forward declaration of Event class
 
 /**
  * @interface Window
@@ -18,6 +22,24 @@ class Window
 {
 public:
     virtual ~Window() = default;
+
+// ===========================================================
+// Event callback
+// ===========================================================
+
+    /// @brief Callable type for the window-level event callback.
+    ///
+    /// The Application sets this once during construction. The Window
+    /// implementation calls it for every event it synthesizes (key press,
+    /// resize, close request, etc.).
+    using EventCallbackFn = std::function<void(Event&)>;
+
+    /// @brief Register the function that receives all window-level events.
+    /// @param callback  A callable with signature `void(Event&)`.
+    void SetEventCallback(EventCallbackFn callback)
+    {
+        m_EventCallback = std::move(callback);
+    }
 
 // ===========================================================
 // Non-virtual interface (NVI)
@@ -119,6 +141,10 @@ protected:
     {
         // The actual window creation logic will be implemented in the derived class.
     }
+
+    /// Callback set by the Application. Call this from ImplPollEvents() for each
+    /// synthesized event. Guard with `if (m_EventCallback)` before calling.
+    EventCallbackFn m_EventCallback;
 
 // ===========================================================
 // Window Lifecycle

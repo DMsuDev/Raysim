@@ -1,5 +1,6 @@
 #include "rspch.hpp"
 #include "Raysim/Core/LayerStack.hpp"
+#include "Raysim/Events/Event.hpp"
 
 namespace RS {
 
@@ -89,6 +90,18 @@ void LayerStack::RenderUIAll()
 {
     for (Layer* layer : m_Layers)
         layer->OnUIRender();
+}
+
+void LayerStack::DispatchEvent(Event& e)
+{
+    // Propagate in reverse order: overlays first, then layers beneath.
+    // Stops as soon as a layer marks the event as Handled.
+    for (auto it = m_Layers.rbegin(); it != m_Layers.rend(); ++it)
+    {
+        if (e.Handled)
+            break;
+        (*it)->OnEvent(e);
+    }
 }
 
 void LayerStack::Clear()

@@ -6,6 +6,8 @@
 
 namespace RS {
 
+class Event; // Forward declaration
+
 /**
  * @brief Manages a stack of application layers for ordered event handling and rendering.
  *
@@ -78,6 +80,12 @@ public:
 
 	/// @brief Calls OnUIRender() on every layer and overlay in stack order.
 	void RenderUIAll();
+
+	/// @brief Dispatches @p e to layers in reverse order (top-most first).
+	///
+	/// Iterates overlays then layers, calling OnEvent(e) on each. Stops early
+	/// if any layer sets e.Handled = true.
+	void DispatchEvent(Event& e);
 
 	/// @brief Detaches and deletes all layers and overlays, resetting the stack.
 	void Clear();

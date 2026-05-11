@@ -62,6 +62,9 @@
 #include "Raysim/Graphics/Color.hpp"
 #include "Raysim/Input/KeyCodes.hpp"
 
+// --- Events ---
+#include "Raysim/Events/Events.hpp"
+
 // --- Core system headers ---
 #include "Raysim/Renderer/RenderCommand.hpp"
 #include "Raysim/Scene/Scene.hpp"
