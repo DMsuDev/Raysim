@@ -167,7 +167,7 @@ inline float DeltaAngle(float a, float b) noexcept
 // Comparison
 //==============================================================================
 
-constexpr bool EpsilonEquals(float a, float b, float epsilon) noexcept
+inline bool EpsilonEquals(float a, float b, float epsilon) noexcept
 {
     return std::fabs(a - b) <= epsilon;
 }
@@ -182,7 +182,7 @@ constexpr float Sqr(float x) noexcept { return x * x; }
 inline float Floor(float x) noexcept { return std::floor(x); }
 inline int FloorToInt(float x) noexcept { return static_cast<int>(std::floor(x)); }
 
-constexpr float Fract(float x) noexcept { return x - std::floor(x); }
+inline float Fract(float x) noexcept { return x - std::floor(x); }
 constexpr float Saturate(float x) noexcept { return Clamp(x, 0.0f, 1.0f); }
 
 } // namespace RS::Math
