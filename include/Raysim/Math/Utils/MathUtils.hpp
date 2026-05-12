@@ -28,10 +28,10 @@
  *     - Sign / absolute   (Sign, Abs)
  *     - Interpolation     (Lerp, LerpUnclamped, InverseLerp, Remap, MapRange)
  *     - Smoothing         (SmoothStep01, SmootherStep01, SmoothDamp)
- *     - Stepping          (MoveTowards, Repeat, PingPong)
+ *     - Stepping          (MoveTowards, Mod, Wrap, Repeat, PingPong)
  *     - Angular helpers   (NormalizeAngle, DeltaAngle)
  *     - Comparison        (EpsilonEquals)
- *     - Algebraic         (Sqrt, Sqr, Floor, FloorToInt, Fract, Saturate)
+ *     - Algebraic         (Sqrt, Sqr, Sin, Cos, Exp, Floor, FloorToInt, Fract, Saturate)
  *
  *   This header is included by `Math.hpp` and re-exported as part of the public Math API.
  **********************************************************************************************/
@@ -290,6 +290,50 @@ namespace RS::Math {
     [[nodiscard]] float MoveTowards(float current, float target, float maxDelta) noexcept;
 
     /**
+     * @brief Computes the true mathematical modulus (always in [0, b) when b > 0).
+     *
+     * Unlike C++ `%` and `std::fmod`, the result is always non-negative when b > 0,
+     * matching GLSL `mod()` and Python `%` semantics.
+     *
+     * @param a Dividend.
+     * @param b Divisor. Returns 0 if b is zero.
+     * @return Remainder in [0, b) when b > 0.
+     */
+    [[nodiscard]] float Mod(float a, float b) noexcept;
+
+    /**
+     * @brief Integer true modulus (always in [0, b) when b > 0).
+     *
+     * @param a Dividend.
+     * @param b Divisor. Returns 0 if b is zero.
+     * @return Remainder in [0, b) when b > 0.
+     */
+    [[nodiscard]] constexpr int Mod(int a, int b) noexcept;
+
+    /**
+     * @brief Wraps `value` into the half-open interval [`min`, `max`).
+     *
+     * Works correctly for negative values; equivalent to
+     * `min + Mod(value - min, max - min)`.
+     *
+     * @param value Value to wrap.
+     * @param min   Lower bound (inclusive).
+     * @param max   Upper bound (exclusive).
+     * @return `value` mapped into [`min`, `max`).
+     */
+    [[nodiscard]] float Wrap(float value, float min, float max) noexcept;
+
+    /**
+     * @brief Integer version: wraps `value` into [`min`, `max`).
+     *
+     * @param value Value to wrap.
+     * @param min   Lower bound (inclusive).
+     * @param max   Upper bound (exclusive).
+     * @return `value` mapped into [`min`, `max`).
+     */
+    [[nodiscard]] constexpr int Wrap(int value, int min, int max) noexcept;
+
+    /**
      * @brief Wraps `t` so that it repeats within [0, `length`).
      *
      * Equivalent to a floating-point modulo, handling negative `t` correctly.
@@ -320,7 +364,7 @@ namespace RS::Math {
     /**
      * @brief Normalizes `angle` to the range [0, 2*pi).
      *
-     * Uses `std::fmod` to bring any angle into the unsigned canonical range.
+     * Wraps any angle into the unsigned canonical range using `Mod`.
      * Negative angles are mapped to their positive equivalent.
      *
      * @param angle Angle in radians (any value).
@@ -361,6 +405,36 @@ namespace RS::Math {
 //==============================================================================
 // Algebraic helpers
 //==============================================================================
+
+    /**
+     * @brief Computes the sine of `x` (in radians).
+     *
+     * Thin wrapper around `std::sin` provided for namespace consistency.
+     *
+     * @param x Angle in radians.
+     * @return Sine of `x`.
+     */
+    [[nodiscard]] float Sin(float x) noexcept;
+
+    /**
+     * @brief Computes the cosine of `x` (in radians).
+     *
+     * Thin wrapper around `std::cos` provided for namespace consistency.
+     *
+     * @param x Angle in radians.
+     * @return Cosine of `x`.
+     */
+    [[nodiscard]] float Cos(float x) noexcept;
+
+    /**
+     * @brief Computes e raised to the power `x` (natural exponential).
+     *
+     * Thin wrapper around `std::exp` provided for namespace consistency.
+     *
+     * @param x Exponent.
+     * @return e raised to the power `x`.
+     */
+    [[nodiscard]] float Exp(float x) noexcept;
 
     /**
      * @brief Computes the square root of `x`.
