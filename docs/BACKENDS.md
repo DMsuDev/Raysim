@@ -850,5 +850,5 @@ A backend is not considered complete until all of the following are verified aga
 ---
 
 <p align="center">
-  <img src="images/footer.png" alt="Raysim Footer" width="600" />
+  <img src="images/footer.png" alt="Raysim Footer" width="720" />
 </p>
