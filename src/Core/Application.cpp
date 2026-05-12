@@ -33,35 +33,48 @@ Application::Application(const ApplicationConfig& config)
     // Apply the console log level from config (overrides the default set in Log::Init)
     Log::SetConsoleLevel(config.ConsoleLogLevel);
 
-    // Create backends
-    m_Window = BackendFactory::CreateAppWindow(m_Configuration.Window);
-    m_Input = BackendFactory::CreateInput();
-    m_EventBus = CreateScope<EventBus>();
+    try
+    {
+        // Create backends
+        m_Window = BackendFactory::CreateAppWindow(m_Configuration.Window);
+        m_Input = BackendFactory::CreateInput();
+        m_EventBus = CreateScope<EventBus>();
 
-    RS_CORE_ASSERT(m_Window, "Failed to create window backend");
-    RS_CORE_ASSERT(m_Input, "Failed to create input backend");
-    RS_CORE_ASSERT(m_EventBus, "Failed to create event bus backend");
+        RS_CORE_ASSERT(m_Window, "Failed to create window backend");
+        RS_CORE_ASSERT(m_Input, "Failed to create input backend");
+        RS_CORE_ASSERT(m_EventBus, "Failed to create event bus backend");
 
-    // Initialise RenderCommand backend
-    auto api = BackendFactory::CreateRenderer();
-    RS_CORE_ASSERT(api, "Failed to create renderer backend");
+        // Initialise RenderCommand backend
+        auto api = BackendFactory::CreateRenderer();
+        RS_CORE_ASSERT(api, "Failed to create renderer backend");
 
-    RS::RenderCommand::Init(std::move(api));
+        RS::RenderCommand::Init(std::move(api));
 
-    // -- Event callback ----------------------------------------------------
-    m_Window->SetEventCallback([this](Event& e) { OnEvent(e); });
+        // -- Event callback ----------------------------------------------------
+        m_Window->SetEventCallback([this](Event& e) { OnEvent(e); });
 
-    // -- Font system --------------------------------------------------------
-    FontManager::SetProvider(CreateScope<STBTrueTypeProvider>());
-    FontManager::SetRenderer(BackendFactory::CreateFontRenderer());
+        // -- Font system --------------------------------------------------------
+        FontManager::SetProvider(CreateScope<STBTrueTypeProvider>());
+        FontManager::SetRenderer(BackendFactory::CreateFontRenderer());
 
-    // -- Populate EngineContext ---------------------------------------------
-    RebuildContext();
+        // -- Populate EngineContext ---------------------------------------------
+        RebuildContext();
 
-    // -- SceneManager ------------------------------------------------------
-    m_SceneManager = CreateScope<SceneManager>(m_EngineContext);
-    RS_CORE_ASSERT(m_SceneManager, "Failed to create scene manager backend");
-    m_EngineContext.Scenes = m_SceneManager.get();
+        // -- SceneManager ------------------------------------------------------
+        m_SceneManager = CreateScope<SceneManager>(m_EngineContext);
+        RS_CORE_ASSERT(m_SceneManager, "Failed to create scene manager backend");
+        m_EngineContext.Scenes = m_SceneManager.get();
+    }
+    catch (const std::exception& e)
+    {
+        RS_CORE_CRITICAL("Application initialization failed: {}", e.what());
+        throw; // Rethrow to be caught by the entry point
+    }
+    catch (...)
+    {
+        RS_CORE_CRITICAL("Application initialization failed due to an unknown error.");
+        throw; // Rethrow to be caught by the entry point
+    }
 
     RS_CORE_INFO("Application '{}' ready.", m_Configuration.Window.Title);
 }
@@ -138,6 +151,9 @@ void Application::OnEvent(Event& e)
 void Application::Run()
 {
     RS_PROFILE_FUNCTION();
+
+    try
+    {
 
     bool wasPausedDueToMinimize = false;
 
@@ -233,6 +249,20 @@ void Application::Run()
             std::this_thread::sleep_for(std::chrono::milliseconds(16));
         }
     }
+
+    } // try
+    catch (const std::exception& e)
+    {
+        RS_CORE_CRITICAL("Unhandled exception in main loop: {}", e.what());
+        Close();
+        throw;
+    }
+    catch (...)
+    {
+        RS_CORE_CRITICAL("Unhandled unknown exception in main loop.");
+        Close();
+        throw;
+    }
 }
 
 void Application::Close()
@@ -244,12 +274,23 @@ void Application::Close()
     RS_CORE_INFO("Shutting down application");
     Log::Flush();
 
-    m_SceneManager.reset();
-    m_Input.reset();
-    m_Window.reset();
+    try
+    {
+        m_SceneManager.reset();
+        m_Input.reset();
+        m_Window.reset();
 
-    Fonts::FontManager::Shutdown();
-    RenderCommand::Shutdown();
+        Fonts::FontManager::Shutdown();
+        RenderCommand::Shutdown();
+    }
+    catch (const std::exception& e)
+    {
+        RS_CORE_ERROR("Exception during shutdown: {}", e.what());
+    }
+    catch (...)
+    {
+        RS_CORE_ERROR("Unknown exception during shutdown.");
+    }
 }
 
 } // namespace RS

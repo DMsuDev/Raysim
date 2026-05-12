@@ -29,23 +29,38 @@ extern RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs arg
 
 int main(int argc, char** argv)
 {
-	RS::Log::Init(true, RS::LogFileMode::Truncate);
+	try
+	{
+		RS::Log::Init(true, RS::LogFileMode::Append);
 
-	RS_CORE_INFO("========= LOG START: {} {} =========", RS::Utils::Time::FullDate(), RS::Utils::Time::ClockTime());
+		RS_CORE_INFO("========= LOG START: {} {} =========", RS::Utils::Time::FullDate(), RS::Utils::Time::ClockTime());
 
-	RS_PROFILE_BEGIN_SESSION("Startup", "RaysimProfile-Startup.json");
-	auto app = RS::CreateApplication({ argc, argv });
-	RS_PROFILE_END_SESSION();
+		RS_PROFILE_BEGIN_SESSION("Startup", "RaysimProfile-Startup.json");
+		auto app = RS::CreateApplication({ argc, argv });
+		RS_PROFILE_END_SESSION();
 
-	RS_PROFILE_BEGIN_SESSION("Runtime", "RaysimProfile-Runtime.json");
-	app->Run();
-	RS_PROFILE_END_SESSION();
+		RS_PROFILE_BEGIN_SESSION("Runtime", "RaysimProfile-Runtime.json");
+		app->Run();
+		RS_PROFILE_END_SESSION();
 
-	RS_PROFILE_BEGIN_SESSION("Shutdown", "RaysimProfile-Shutdown.json");
-	delete app;
-	RS_PROFILE_END_SESSION();
+		RS_PROFILE_BEGIN_SESSION("Shutdown", "RaysimProfile-Shutdown.json");
+		delete app;
+		RS_PROFILE_END_SESSION();
 
-	RS_CORE_INFO("========= LOG END: {} {} =========", RS::Utils::Time::FullDate(), RS::Utils::Time::ClockTime());
+		RS_CORE_INFO("========= LOG END: {} {} =========", RS::Utils::Time::FullDate(), RS::Utils::Time::ClockTime());
 
-	RS::Log::Shutdown();
+		RS::Log::Shutdown();
+	}
+    catch (const std::exception& e)
+    {
+        RS_CORE_CRITICAL("Unhandled exception: {}", e.what());
+        RS::Log::Shutdown();
+        return EXIT_FAILURE;
+    }
+    catch (...)
+    {
+        RS_CORE_CRITICAL("Unhandled unknown exception");
+        RS::Log::Shutdown();
+        return EXIT_FAILURE;
+    }
 }
