@@ -90,7 +90,7 @@ target_sources(Raysim PRIVATE ${RAYSIM_SOURCES})
 # Set the target include directories
 target_include_directories(Raysim
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>.
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${IMGUI_DIR}>
         $<INSTALL_INTERFACE:include>
 
