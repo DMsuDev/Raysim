@@ -92,7 +92,7 @@ bool STBTrueTypeProvider::LoadFont(
     ChooseAtlasSize(fontSize, atlasW, atlasH);
 
     // Pack the requested character range into the atlas bitmap.
-    std::vector<uint8_t> pixels(atlasW * atlasH, 0);
+    std::vector<uint8_t> pixels(static_cast<size_t>(atlasW) * static_cast<size_t>(atlasH), 0);
     std::vector<stbtt_packedchar> packedChars(charCount);
 
     {
