@@ -1,38 +1,26 @@
 {
-  "version": 3,
+  "version": 6,
   "cmakeMinimumRequired": { "major": 3, "minor": 28, "patch": 0 },
   "configurePresets": [
     {
       "name": "base",
       "hidden": true,
+      "description": "Common infrastructure: vcpkg toolchain and compile-commands export. No feature flags.",
       "cacheVariables": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-        "RS_BUILD_EXAMPLES": "ON",
-        "RS_BUILD_SHARED": "OFF",
-        "RS_ENABLE_COVERAGE": "OFF",
-        "RS_ENABLE_SANITIZERS": "OFF",
-        "RS_ENABLE_LTO": "OFF"
-      }
-    },
-    {
-      "name": "vcpkg",
-      "hidden": true,
-      "inherits": "base",
-      "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake"
       }
     },
-
     {
       "name": "ninja",
       "hidden": true,
-      "inherits": "vcpkg",
+      "inherits": "base",
       "generator": "Ninja"
     },
     {
       "name": "msvc",
       "hidden": true,
-      "inherits": "vcpkg",
+      "inherits": "base",
       "generator": "Visual Studio 17 2022",
       "architecture": "x64",
       "cacheVariables": {
@@ -43,82 +31,124 @@
     {
       "name": "debug",
       "displayName": "Debug (Ninja)",
+      "description": "Debug build with ASan + UBSan. LTO and profiling disabled. Backend must be set by user preset.",
       "inherits": "ninja",
       "binaryDir": "${sourceDir}/build/ninja/debug",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "RS_ENABLE_SANITIZERS": "ON",
-        "RS_ENABLE_ASAN": "ON",
-        "RS_ENABLE_UBSAN": "ON",
-        "RS_ENABLE_TSAN": "OFF",
-        "RS_ENABLE_MSAN": "OFF",
-        "RS_ENABLE_LTO": "OFF"
+        "CMAKE_BUILD_TYPE":      "Debug",
+        "RS_BUILD_EXAMPLES":     "ON",
+        "RS_BUILD_SHARED":       "OFF",
+        "RS_ENABLE_PCH":         "ON",
+        "RS_WARNINGS_AS_ERRORS": "OFF",
+        "RS_ENABLE_COVERAGE":    "OFF",
+        "RS_ENABLE_PROFILE":     "OFF",
+        "RS_ENABLE_LTO":         "OFF",
+        "RS_ENABLE_SANITIZERS":  "ON",
+        "RS_ENABLE_ASAN":        "ON",
+        "RS_ENABLE_UBSAN":       "ON",
+        "RS_ENABLE_TSAN":        "OFF",
+        "RS_ENABLE_MSAN":        "OFF",
+        "RS_ENABLE_LSAN":        "OFF"
       }
     },
     {
       "name": "release",
       "displayName": "Release (Ninja)",
+      "description": "Optimized release build with LTO. All sanitizers and profiling disabled.",
       "inherits": "ninja",
       "binaryDir": "${sourceDir}/build/ninja/release",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "RS_ENABLE_LTO": "ON"
+        "CMAKE_BUILD_TYPE":      "Release",
+        "RS_BUILD_EXAMPLES":     "ON",
+        "RS_BUILD_SHARED":       "OFF",
+        "RS_ENABLE_PCH":         "ON",
+        "RS_WARNINGS_AS_ERRORS": "OFF",
+        "RS_ENABLE_COVERAGE":    "OFF",
+        "RS_ENABLE_PROFILE":     "OFF",
+        "RS_ENABLE_LTO":         "ON",
+        "RS_ENABLE_SANITIZERS":  "OFF",
+        "RS_ENABLE_ASAN":        "OFF",
+        "RS_ENABLE_UBSAN":       "OFF",
+        "RS_ENABLE_TSAN":        "OFF",
+        "RS_ENABLE_MSAN":        "OFF",
+        "RS_ENABLE_LSAN":        "OFF"
       }
     },
     {
       "name": "relwithdebinfo",
       "displayName": "RelWithDebInfo (Ninja)",
+      "description": "Optimized build retaining debug symbols. LTO enabled, sanitizers disabled.",
       "inherits": "ninja",
       "binaryDir": "${sourceDir}/build/ninja/relwithdebinfo",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
-        "RS_ENABLE_LTO": "ON"
+        "CMAKE_BUILD_TYPE":      "RelWithDebInfo",
+        "RS_BUILD_EXAMPLES":     "ON",
+        "RS_BUILD_SHARED":       "OFF",
+        "RS_ENABLE_PCH":         "ON",
+        "RS_WARNINGS_AS_ERRORS": "OFF",
+        "RS_ENABLE_COVERAGE":    "OFF",
+        "RS_ENABLE_PROFILE":     "OFF",
+        "RS_ENABLE_LTO":         "ON",
+        "RS_ENABLE_SANITIZERS":  "OFF",
+        "RS_ENABLE_ASAN":        "OFF",
+        "RS_ENABLE_UBSAN":       "OFF",
+        "RS_ENABLE_TSAN":        "OFF",
+        "RS_ENABLE_MSAN":        "OFF",
+        "RS_ENABLE_LSAN":        "OFF"
       }
     },
 
     {
       "name": "msvc-debug",
       "displayName": "Debug (MSVC)",
+      "description": "Multi-config MSVC solution. MSVC does not support GCC/Clang sanitizers.",
       "inherits": "msvc",
       "binaryDir": "${sourceDir}/build/msvc",
       "cacheVariables": {
-        "RS_ENABLE_SANITIZERS": "ON",
-        "RS_ENABLE_ASAN": "ON"
+        "RS_BUILD_EXAMPLES":     "ON",
+        "RS_BUILD_SHARED":       "OFF",
+        "RS_ENABLE_PCH":         "ON",
+        "RS_WARNINGS_AS_ERRORS": "OFF",
+        "RS_ENABLE_COVERAGE":    "OFF",
+        "RS_ENABLE_PROFILE":     "OFF",
+        "RS_ENABLE_LTO":         "OFF",
+        "RS_ENABLE_SANITIZERS":  "OFF",
+        "RS_ENABLE_ASAN":        "OFF",
+        "RS_ENABLE_UBSAN":       "OFF",
+        "RS_ENABLE_TSAN":        "OFF",
+        "RS_ENABLE_MSAN":        "OFF",
+        "RS_ENABLE_LSAN":        "OFF"
       }
     },
     {
       "name": "msvc-release",
       "displayName": "Release (MSVC)",
+      "description": "Multi-config MSVC solution with LTO. MSVC does not support GCC/Clang sanitizers.",
       "inherits": "msvc",
       "binaryDir": "${sourceDir}/build/msvc",
       "cacheVariables": {
-        "RS_ENABLE_LTO": "ON"
+        "RS_BUILD_EXAMPLES":     "ON",
+        "RS_BUILD_SHARED":       "OFF",
+        "RS_ENABLE_PCH":         "ON",
+        "RS_WARNINGS_AS_ERRORS": "OFF",
+        "RS_ENABLE_COVERAGE":    "OFF",
+        "RS_ENABLE_PROFILE":     "OFF",
+        "RS_ENABLE_LTO":         "ON",
+        "RS_ENABLE_SANITIZERS":  "OFF",
+        "RS_ENABLE_ASAN":        "OFF",
+        "RS_ENABLE_UBSAN":       "OFF",
+        "RS_ENABLE_TSAN":        "OFF",
+        "RS_ENABLE_MSAN":        "OFF",
+        "RS_ENABLE_LSAN":        "OFF"
       }
     }
   ],
 
   "buildPresets": [
-    {
-      "name": "debug",
-      "configurePreset": "debug"
-    },
-    {
-      "name": "release",
-      "configurePreset": "release"
-    },
-    {
-      "name": "relwithdebinfo",
-      "configurePreset": "relwithdebinfo"
-    },
-    {
-      "name": "msvc-debug",
-      "configurePreset": "msvc-debug",
-      "configuration": "Debug"
-    },
-    {
-      "name": "msvc-release",
-      "configurePreset": "msvc-release",
-      "configuration": "Release"
-    }
+    { "name": "debug",          "configurePreset": "debug"                                    },
+    { "name": "release",        "configurePreset": "release"                                  },
+    { "name": "relwithdebinfo", "configurePreset": "relwithdebinfo"                           },
+    { "name": "msvc-debug",     "configurePreset": "msvc-debug",   "configuration": "Debug"   },
+    { "name": "msvc-release",   "configurePreset": "msvc-release", "configuration": "Release" }
   ]
 }
