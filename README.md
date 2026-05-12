@@ -5,11 +5,12 @@
 [![C++](https://img.shields.io/badge/Language-C%2B%2B-00599C?style=flat&logo=cplusplus&logoColor=white)](https://isocpp.org/)
 [![CMake](https://img.shields.io/badge/Build-CMake-064F8C?style=flat&logo=cmake&logoColor=white)](https://cmake.org/)
 ![Status](https://img.shields.io/badge/Status-Alpha-orange?style=flat)
-[![Version](https://img.shields.io/badge/Version-0.91.1-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
+[![Version](https://img.shields.io/badge/Version-0.93.0-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
 [![License](https://img.shields.io/badge/License-Apache%202.0-lightgrey?style=flat)](LICENSE)
 
 [English Readme](https://github.com/DMsuDev/Raysim/blob/main/README.md)
 • [Readme Español](https://github.com/DMsuDev/Raysim/blob/main/README.es.md)
+• [Changelog](docs/CHANGELOG.md)
 
 Raysim is a C++ framework for 2D graphics and interactive applications, built on top of [raylib](https://www.raylib.com/).
 
@@ -17,7 +18,9 @@ Architecturally inspired by [**The Cherno's Hazel Engine**](https://github.com/T
 
 Useful for learning graphics programming, prototyping ideas, or building small games and simulations.
 
-> **Note:** This project is in **Alpha**. The API may change without warning and some features are still being implemented. Feedback and contributions are welcome!
+Feedback and contributions are welcome.
+
+> **Note:** project is in Alpha. The API may change without warning and some features are still being implemented.
 
 ## Quick Demos
 
@@ -36,273 +39,194 @@ Useful for learning graphics programming, prototyping ideas, or building small g
   <b>SceneShowcase</b>
 </p>
 
-| Example           | Description                                                                             |
-| ----------------- | --------------------------------------------------------------------------------------- |
-| `BouncingBalls`   | Physics simulation with gravity, mouse attraction/repulsion, and ball spawning.         |
-| `LissajousCurves` | Parametric curve visualiser with animated phase shift and selectable frequency presets. |
-| `Mouse2D`         | Mouse tracking and 2D interaction.                                                      |
-| `NoiseLandscape`  | Procedurally generated scrolling terrain using various noise functions.                 |
-| `SceneShowcase`   | Multi-scene demo navigable with ImGui: StarField, PlasmaArt, and ClockMandala.          |
+| Example           | Description                                                                                                                                                                                       |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `BouncingBalls`   | Physics simulation with gravity, mouse attraction/repulsion, and ball spawning. Spawn balls with left click, toggle gravity with G, and watch them collide and bounce against the walls.          |
+| `LissajousCurves` | Parametric curve visualiser with animated phase shift and selectable frequency presets. The curve evolves in real time; try switching presets with the ImGui panel to see the patterns transform. |
+| `Mouse2D`         | Tracks the mouse position with smooth exponential interpolation and draws a trailing circle. A good starting point to understand the input and rendering pipeline.                                |
+| `NoiseLandscape`  | Procedurally generated scrolling terrain rendered in layered passes using Perlin, Simplex, Cellular, and Value noise. Press R to reseed all layers and get a completely new landscape.            |
+| `SceneShowcase`   | Three independent visual scenes (StarField, PlasmaArt, ClockMandala) accessible from a shared ImGui navigation overlay. Shows how to switch scenes at runtime using the SceneManager.             |
 
-### Using CMake Presets
-
-To compile the examples, enable the `RS_BUILD_EXAMPLES` option (already enabled in presets):
-
-```bash
-cmake --preset debug
-cmake --build --preset debug
-```
-
-> Each example is a standalone executable in `examples/` that demonstrates different features of the framework. You can run them after building the project.
+All examples are built alongside the library. See the [Building](#building) section for setup instructions.
 
 ## Application Loop
 
-Each application cycle runs through the active scene's lifecycle methods in order.
+Each application cycle runs through the active scene's lifecycle callbacks in order. Override only the ones you need.
 
-<details>
-<summary>OnAttach</summary>
+| Callback                 | When it is called                                                                                                          |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `OnAttach`               | Once, when the scene is first pushed. Load assets, push layers, subscribe to the EventBus.                                 |
+| `OnStart`                | Every time the scene becomes active (after `OnAttach` or when resumed). Reset simulation state.                            |
+| `OnUpdate(dt)`           | Every frame. Input polling, game logic, variable-rate state updates.                                                       |
+| `OnFixedUpdate(fixedDt)` | At a fixed timestep, independent of frame rate. Physics integration and deterministic simulation steps.                    |
+| `OnDraw(alpha)`          | Every frame after `OnUpdate`. All rendering commands go here. `alpha` is a value in [0, 1) used for physics interpolation. |
+| `OnPause`                | When the scene is paused by the SceneManager.                                                                              |
+| `OnResume`               | When the scene is resumed from a paused state.                                                                             |
+| `OnDetach`               | When the scene is removed. Release resources and unsubscribe from the EventBus.                                            |
 
-Called once when the scene is first attached to the SceneManager. Use it to
-load assets, create entities, and initialise scene state.
-
-```cpp
-class MyScene : public Scene {
-    RS_SCENE(MyScene) // Macro to generate scene ID and name for lookup
-protected:
-    void OnAttach() override {
-        GetWindow().SetTitle("My Scene");
-    }
-};
-```
-
-</details>
-
-<details>
-<summary>OnStart</summary>
-
-Called each time the scene starts (after `OnAttach` or when resumed). Use it to
-reset game state, restart timers, or initialise dynamic resources.
-
-```cpp
-void OnStart() override {
-    position = {400, 300};
-    velocity = {150, 100};
-}
-```
-
-</details>
-
-<details>
-<summary>OnUpdate</summary>
-
-Called every frame. Use it for input polling, game logic, and anything that
-reads or writes simulation state. Receives the scaled delta time in seconds
-so movement stays frame-rate independent.
-
-```cpp
-void OnUpdate(float dt) override {
-    if (GetInput().IsKeyPressed(KeyCode::Space)) foo();
-    position += velocity * dt;
-}
-```
-
-</details>
-
-<details>
-<summary>OnFixedUpdate</summary>
-
-Called at a fixed timestep regardless of the actual frame rate. Use it for
-physics integration and deterministic simulation steps. The accumulator runs
-as many fixed steps as needed to catch up with real time, capped by
-`maxFixedSteps` of `ApplicationConfig` to avoid a spiral of death.
-
-```cpp
-void OnFixedUpdate(float fixedDt) override {
-    velocity += gravity * fixedDt;
-    position += velocity * fixedDt;
-}
-```
-
-</details>
-
-<details>
-<summary>OnDraw</summary>
-
-Called every frame after `OnUpdate`. Issue all rendering commands here.
-Receives an interpolation factor `alpha` in `[0, 1)` representing how far
-the simulation has advanced into the next fixed step. Use it to lerp between
-the previous and current physics snapshot so visuals stay smooth at any
-frame rate. Do not mutate state inside `OnDraw`.
-
-```cpp
-void OnDraw(float alpha) override {
-    GetRenderer().ClearScreen(Colors::DarkBlue);
-    Vector2 renderPos = prevPosition + (position - prevPosition) * alpha;
-    Shapes::DrawCircle(renderPos.x, renderPos.y, 20.0f, Colors::RayWhite);
-}
-```
-
-> Using a separate Draw step is ideal because it keeps code structure clean and avoids inconsistencies with the physics loop. However, it's optional. If you prefer, you can put all your rendering logic in OnUpdate and leave OnDraw empty. In that case, the `alpha` parameter will always be 0 since there's no interpolation happening, but it won't cause any issues.
-
-</details>
-
-<details>
-<summary>OnPause / OnResume</summary>
-
-- `OnPause`: Called when the scene is paused. Use it to pause animations, stop timers, etc.
-- `OnResume`: Called when the scene is resumed from a paused state. Use it to resume animations, restart timers, etc.
-
-```cpp
-void OnPause() override {
-    RS_LOG_INFO("Scene paused");
-}
-
-void OnResume() override {
-    RS_LOG_INFO("Scene resumed");
-}
-```
-
-</details>
+`OnDraw` receives an interpolation factor `alpha` so you can lerp between the previous and current physics snapshot for smooth rendering at any frame rate. Putting all rendering inside `OnUpdate` instead is also valid; `alpha` will simply be 0.
 
 ## Modules
 
 <details>
 <summary>Core</summary>
 
-| File                | Purpose                                                                                                                                                                  |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Application`       | Base class. Create scenes and register them with `RegisterScene<T>()` or `ChangeScene<T>()`. Direct access methods are provided for Window, Renderer, and Input.         |
-| `ApplicationConfig` | Configure title, resolution, max fixed steps, and log file before the loop starts. All fields have defaults - pass only what you need.                                   |
-| `Time`              | Static utility. Delta time, fixed timestep, time scale, pause/resume, FPS counters.                                                                                      |
-| `Log`               | Wraps spdlog. Writes to console and a log file. Use macros `RS_LOG_INFO`, `RS_LOG_WARN`, `RS_LOG_ERROR`.                                                                 |
-| `FontManager`       | Load a TTF/OTF font once, access it globally for text rendering. You can set a default font using `SetDefaultFont("path/to/font.ttf")` on `OnAttach() override`.         |
-| `BackendFactory`    | Creates concrete `RendererAPI`, `Window`, and `Input` instances for the selected backend.                                                                                |
-| `Scene`             | Base class for scenes. Provides lifecycle callbacks (OnStart, OnUpdate, OnFixedUpdate, OnDraw, OnPause, OnResume). Scenes receive an EngineContext for subsystem access. |
-| `SceneManager`      | Manages the scenes. Supports push/pop/replace operations and flow control (pause/resume). Lookup by ID or name.                                                          |
+| Symbol              | Purpose                                                                                                                                                              |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Application`       | Root class. Owns the main loop, backend, `SceneManager`, and `EngineContext`. Register scenes with `RegisterScene<T>()` and activate them with `ChangeScene<T>()`.   |
+| `ApplicationConfig` | Declarative configuration (window title, width, height, log level, max fixed steps). Pass to the `Application` constructor; all fields have sensible defaults.       |
+| `EngineContext`     | Plain struct passed to every scene. Holds non-owning pointers to `Window`, `Input`, `SceneManager`, `ApplicationConfig`, and `EventBus`.                             |
+| `Time`              | Static utility: delta time, fixed timestep, time scale, pause/resume, smoothed FPS, and `GetRealtimeSinceStartup()`.                                                 |
+| `Log`               | Thin wrapper around **spdlog**. Writes to console and an optional log file. Macros: `RS_LOG_TRACE`, `RS_LOG_INFO`, `RS_LOG_WARN`, `RS_LOG_ERROR`, `RS_LOG_CRITICAL`. |
+| `FontManager`       | Load a TTF/OTF font once with a key and reference it globally for text rendering. The `"default"` key is used when no key is specified.                              |
+| `BackendFactory`    | Creates concrete `RendererAPI`, `Window`, and `Input` instances for the active backend.                                                                              |
 
 </details>
 
 <details>
-<summary>Scene</summary>
+<summary>Scene System</summary>
 
-The scene system provides a structured way to organise your application into independent scenes (main menu, gameplay, pause screen, etc.), each with its own lifecycle and access to engine subsystems.
+Organises the application into independent, self-contained screens (main menu, gameplay, pause screen, etc.), each with its own lifecycle, layer stack, and subsystem access.
 
-**How to create a scene?**
+| Symbol         | Purpose                                                                                                           |
+| -------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `Scene`        | Base class. Override lifecycle callbacks. Use `RS_SCENE(MyScene)` to register the type automatically.             |
+| `SceneManager` | Manages the scene stack. Supports `ChangeScene`, `PushScene`, `PopScene`, pause/resume, and lookup by ID or name. |
 
-To create a scene, inherit from the `Scene` class and use the `RS_SCENE(MyScene)` macro inside the definition to automatically register the scene name and ID:
+</details>
 
-```cpp
-class MyScene : public Scene {
-    RS_SCENE(MyScene)
-    // ... override methods like OnAttach, OnUpdate, etc.
-};
-```
+<details>
+<summary>Events</summary>
 
-Then, register the scene in your application using `RegisterScene`:
+Two complementary event mechanisms are provided:
 
-```cpp
-app->RegisterScene<MyScene>();
-```
+Layer-based propagation: events dispatched by the `Window` are forwarded through the `LayerStack` in reverse order (top-most layer first). A layer can stop propagation by setting `e.Handled = true`. Ideal for UI overlays that should absorb input before it reaches game layers.
 
-You must register the scene before switching to it. Use `ChangeScene<T>()` to set the active scene:
+EventBus: a type-safe publish/subscribe broadcast channel owned by the `Application` and exposed through `EngineContext::Bus`. All subscribers receive the event in subscription order regardless of the `Handled` flag. Useful for decoupled systems such as audio, achievements, or debug hotkeys. Always subscribe in `OnAttach` and unsubscribe in `OnDetach`.
 
-```cpp
-RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
-{
-    RS::ApplicationConfig config;
-    config.Window.Title = "My App";
+| Built-in event category | Events                                                                                         |
+| ----------------------- | ---------------------------------------------------------------------------------------------- |
+| Window                  | `WindowCloseEvent`, `WindowResizeEvent`, `WindowFocusEvent`                                    |
+| Keyboard                | `KeyPressedEvent`, `KeyReleasedEvent`, `KeyTypedEvent`                                         |
+| Mouse                   | `MouseButtonPressedEvent`, `MouseButtonReleasedEvent`, `MouseMovedEvent`, `MouseScrolledEvent` |
 
-    auto* app = new RS::Application(config);
-    app->RegisterScene<MyScene>();
-    app->ChangeScene<MyScene>();
-    return app;
-}
-```
+</details>
+
+<details>
+<summary>Layers</summary>
+
+A `Layer` is a modular unit inside a scene's `LayerStack`. It receives the same callbacks as a scene plus `OnUIRender()` for ImGui widgets. The stack is divided into two groups: layers (processed bottom-to-top) and overlays (always processed after all layers). Add them from inside `OnAttach` with `PushLayer` / `PushOverlay`.
+
+| Method             | Effect                                     |
+| ------------------ | ------------------------------------------ |
+| `PushLayer(layer)` | Inserts a layer and calls `OnAttach()`.    |
+| `PushOverlay(ov)`  | Adds an overlay and calls `OnAttach()`.    |
+| `PopLayer(layer)`  | Removes a layer and calls `OnDetach()`.    |
+| `PopOverlay(ov)`   | Removes an overlay and calls `OnDetach()`. |
 
 </details>
 
 <details>
 <summary>Graphics</summary>
 
-| File         | Purpose                                                                                                                                                                                          |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Shapes`     | Filled and outlined: rectangles, circles, lines, triangles. Each function accepts an optional `OriginMode` to anchor the shape at its center or any corner/edge instead of the default top-left. |
-| `Texts`      | Draw text strings using the loaded font.                                                                                                                                                         |
-| `Color`      | RGBA color struct `{r, g, b, a}` with HSV conversion. Build any color inline: `Color{255, 100, 0}`.                                                                                              |
-| `Colors`     | Namespace of `constexpr` presets: `Colors::White`, `Colors::Black`, `Colors::Cyan`, `Colors::DarkBlue`, `Colors::RayBlack`, and more. Use these instead of constructing colors by hand.          |
-| `OriginMode` | Enum used by Shapes to control the anchor point of a shape (TopLeft, Center, BottomRight, etc.).                                                                                                 |
+| Symbol       | Purpose                                                                                                                                                                                                     |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Shapes`     | Filled and outlined primitives: rectangles, circles, lines, triangles. Each function accepts an optional `OriginMode` to anchor the shape at its center or any corner/edge instead of the default top-left. |
+| `Texts`      | Draw text strings at a screen position using the currently loaded font.                                                                                                                                     |
+| `Color`      | RGBA color struct `{r, g, b, a}` with `Lerp`, `FromHSV`, and operator overloads.                                                                                                                            |
+| `Colors`     | `constexpr` preset namespace: `Colors::White`, `Colors::Black`, `Colors::Cyan`, `Colors::DarkBlue`, `Colors::RayWhite`, and more.                                                                           |
+| `OriginMode` | Enum controlling the anchor point of a `Shapes` primitive (`TopLeft`, `Center`, `BottomRight`, etc.).                                                                                                       |
 
 </details>
 
 <details>
 <summary>Math</summary>
 
-| File         | Purpose                                                                                                                                                                                                                                                                                                     |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Vector2`    | 2D vector with arithmetic operators and common utility methods.                                                                                                                                                                                                                                             |
-| `Vector2Int` | 2D vector of integers with arithmetic operators and common utility methods.                                                                                                                                                                                                                                 |
-| `Vector3`    | 3D vector, used internally for color/clear operations and general math.                                                                                                                                                                                                                                     |
-| `Vector3Int` | 3D vector of integers with arithmetic operators and common utility methods.                                                                                                                                                                                                                                 |
-| `Math`       | Common math helpers: clamp, lerp, map, wrap, and trigonometric utilities.                                                                                                                                                                                                                                   |
-| `Random`     | Seeded Mersenne Twister RNG. Integer and float ranges, boolean helpers, container sampling, plus coherent noise (Perlin 2D/3D, Simplex, Cellular, Value) and Fractal Brownian Motion. Seed is auto-random on startup; call `Seed()` for deterministic results or `SeedRandom()` to re-randomise at runtime. |
+All math types live in the `RS::Math` namespace.
+
+| Symbol         | Purpose                                                                                                                                                                                                    |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Vec2f`        | `Vector2<float>`. 2D float vector with arithmetic operators, `Length`, `Normalize`, `Distance`, `Dot`, `Reflect`, `Project`, and `RotatedBy(Angle)`.                                                       |
+| `Vec2i`        | `Vector2<int>`. Integer 2D vector with the same operator set.                                                                                                                                              |
+| `Vec3f`        | `Vector3<float>`. 3D float vector, used internally and for general math.                                                                                                                                   |
+| `Vec3i`        | `Vector3<int>`. Integer 3D vector.                                                                                                                                                                         |
+| `Angle`        | Strongly-typed angle wrapper stored internally in radians. Construct via `Angle::Degrees(90.0f)`, `Angle::Radians(x)`, or the `90.0_deg` user-defined literal. Prevents accidental mixing of units.        |
+| `Math` (utils) | `Lerp`, `InverseLerp`, `Remap`, `Clamp`, `Clamp01`, `SmoothStep`, `SmoothDamp`, `MoveTowards`, `PingPong`, `Repeat`, `EpsilonEquals`, `Saturate`, `Fract`, and more.                                       |
+| `Random`       | Seeded Mersenne Twister RNG. Integer/float ranges, booleans, container sampling. Coherent noise: Perlin 2D/3D, Simplex, Cellular, Value, and FBM. Seed is auto-random on startup via `std::random_device`. |
 
 </details>
 
 <details>
-<summary>Interfaces and Backend</summary>
+<summary>Input</summary>
 
-Five abstract interfaces decouple user code from the underlying library:
+The `Input` interface provides backend-agnostic access to keyboard, mouse, and gamepad state. Access it with `GetInput()` from any scene or layer.
 
-| Interface      | Responsibility                                           |
-| -------------- | -------------------------------------------------------- |
-| `RendererAPI`  | Frame begin/end, screen clear, VSync control.            |
-| `Window`       | Title, size, fullscreen toggle, aspect ratio.            |
-| `Input`        | Keyboard, mouse buttons, cursor position, scroll.        |
-| `ImGuiBackend` | ImGui initialisation, shutdown, and per-frame lifecycle. |
-| `FontRenderer` | Font loading, glyph measurement, and text rendering.     |
+| Query category | Key methods                                                                                     |
+| -------------- | ----------------------------------------------------------------------------------------------- |
+| Keyboard       | `IsKeyDown`, `IsKeyPressed`, `IsKeyReleased`, `IsKeyRepeating`                                  |
+| Mouse          | `IsMouseButtonDown/Pressed/Released`, `GetMousePosition`, `GetMouseDelta`, `GetMouseWheelDelta` |
+| Gamepad        | `IsGamepadConnected`, `IsGamepadButtonDown/Pressed`, `GetGamepadAxis`                           |
 
-The `Raylib` backend is the only implementation included. `RaylibRendererAPI`,
-`RaylibWindow`, `RaylibInput`, `RaylibImGuiBackend`, and `RaylibFontRenderer`
-satisfy each interface. All backend-specific headers are confined to this layer
-and never leak into user code.
+Gamepad buttons and axes use the `GamepadButton` and `GamepadAxis` enums with an Xbox-style layout: A/B/X/Y face buttons, LB/RB shoulder buttons, LT/RT triggers, D-Pad, and thumb-sticks.
+
+Event-driven backends (GLFW, SDL2, etc.) extend `EventDrivenInput` instead of `Input` directly. `EventDrivenInput` maintains per-frame Down/Pressed/Released/Repeating state arrays populated through `OnEvent()` and cleared each `Update()`.
 
 </details>
 
 <details>
 <summary>ImGui Integration</summary>
 
-An `ImGuiLayer` is built in for debug overlays and in-app UI panels. Add it to a scene's layer stack and implement `OnUIRender()` on any `Layer` subclass to draw ImGui widgets.
+`ImGuiLayer` is built in for debug overlays and in-app UI panels. Push it as an overlay in `OnAttach()`, then implement `OnUIRender()` on any `Layer` subclass to draw ImGui widgets. The context is initialised and shut down automatically.
 
-```cpp
-class MyOverlay : public Layer {
-public:
-    MyOverlay() : Layer("MyOverlay") {}
-    void OnUIRender() override {
-        ImGui::Begin("Debug");
-        ImGui::Text("Hello from ImGui!");
-        ImGui::End();
-    }
-};
-```
+**SceneShowcase** demonstrates a shared `ImGui` overlay (`SceneNavLayer`) that switches between three sub-scenes at runtime.
+
+</details>
+
+<details>
+<summary>Interfaces and Backend</summary>
+
+Five abstract interfaces decouple user code from the underlying graphics library:
+
+| Interface      | Responsibility                                           |
+| -------------- | -------------------------------------------------------- |
+| `RendererAPI`  | Frame begin/end, screen clear, VSync control.            |
+| `Window`       | Title, size, fullscreen toggle, aspect ratio.            |
+| `Input`        | Keyboard, mouse, and gamepad state.                      |
+| `ImGuiBackend` | ImGui initialisation, shutdown, and per-frame lifecycle. |
+| `FontRenderer` | Font loading, glyph measurement, and text rendering.     |
+
+The `Raylib` backend is the only implementation currently included. `RaylibRendererAPI`, `RaylibWindow`, `RaylibInput`, `RaylibImGuiBackend`, and `RaylibFontRenderer` satisfy each interface. All backend-specific headers are confined to this layer and never leak into user code.
+
+The active backend is selected at configure time via the `RS_BACKEND` CMake cache option (`raylib` by default).
 
 </details>
 
 ## Building
 
-Minimum Requirements: **CMake 3.28**, **C++20**, and **Ninja**.
-Dependencies are managed via [vcpkg](https://vcpkg.io/) (included as a submodule).
+Minimum requirements: CMake 3.28, C++20, and Ninja. Dependencies are managed via [vcpkg](https://vcpkg.io/), which is included as a Git submodule.
 
-> **macOS:** macOS support has not been tested yet. The build system and dependencies should work in theory, but compatibility is not guaranteed and there may be undiscovered issues.
+macOS support has not been officially tested. The build system and dependencies should work in theory, but compatibility is not guaranteed.
 
-### Setup
+### 1. Clone with submodules
+
+vcpkg is included as a Git submodule, so you need to initialise it after cloning. If you cloned the repo without `--recurse-submodules`, run:
 
 ```bash
-# Initialize vcpkg and install dependencies
+git submodule update --init --recursive
+```
+
+### 2. Setup
+
+Once the submodule is ready, the setup script bootstraps vcpkg and installs all required dependencies automatically:
+
+```bash
 ./tools/setup_all.sh       # Linux / macOS
 .\tools\setup_all.ps1      # Windows (PowerShell)
 ```
 
-### Using CMake Presets
+### 3. Build
+
+Using CMake presets is the recommended and quickest way to build:
 
 ```bash
 cmake --preset debug              # Configure Debug (Ninja)
@@ -312,17 +236,13 @@ cmake --preset release            # Configure Release (Ninja)
 cmake --build --preset release    # Build Release
 ```
 
-> **Sanitizers:** The `debug` preset enables ASan and UBSan by default. Sanitizer support is **experimental** and still under testing, you may encounter issues depending on your toolchain or platform. On MinGW, sanitizers are automatically disabled.
+The `debug` preset enables ASan and UBSan by default. Sanitizer support is experimental and may not work on all toolchains; on MinGW they are automatically disabled.
 
 ### Manual CMake
 
-> **Note:** When not using presets, you must pass the vcpkg toolchain file manually so CMake can find the installed dependencies.
+When not using presets, pass the vcpkg toolchain file manually so CMake can locate the installed packages.
 
-The correct commands depend on which generator you choose. **Ninja** (single-config) and **Visual Studio** (multi-config) handle build type differently, mixing their flags is a common source of errors.
-
-#### With Ninja (recommended, works on all platforms)
-
-Ninja requires the build type to be set at **configure time** via `-DCMAKE_BUILD_TYPE`. The `--config` flag is not used at build time.
+#### With Ninja (recommended, all platforms)
 
 ```bash
 cmake -B build -G Ninja \
@@ -334,8 +254,6 @@ cmake --build build
 
 #### With Visual Studio (Windows only)
 
-Visual Studio is a multi-config generator: it ignores `-DCMAKE_BUILD_TYPE` and instead requires `--config` at **build time**. You must also specify the architecture with `-A x64`.
-
 ```bash
 cmake -B build -G "Visual Studio 17 2022" -A x64 \
   -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake \
@@ -343,9 +261,9 @@ cmake -B build -G "Visual Studio 17 2022" -A x64 \
 cmake --build build --config Release
 ```
 
-## Quick Start
+Visual Studio is a multi-config generator. It ignores `-DCMAKE_BUILD_TYPE` at configure time and requires `--config` at build time instead.
 
-Create a scene by inheriting from `Scene` and override the lifecycle methods. Configure the app with `ApplicationConfig`, register your scene, then call `ChangeScene<T>()` to activate it.
+## Quick Start
 
 ```cpp
 #include "Raysim/Raysim.hpp"
@@ -357,8 +275,8 @@ class MyScene : public Scene {
     RS_SCENE(MyScene)
 
 private:
-    Math::Vec2 position = {400, 300};
-    Math::Vec2 velocity = {150, 100};
+    Math::Vec2f position = {400.0f, 300.0f};
+    Math::Vec2f velocity = {150.0f, 100.0f};
 
     void OnFixedUpdate(float fixedDt) override {
         position += velocity * fixedDt;
@@ -370,7 +288,7 @@ private:
         if (position.y < 20 || position.y > height - 20) velocity.y *= -1;
     }
 
-    void OnDraw(float alpha) override {
+    void OnDraw(float /*alpha*/) override {
         GetRenderer().ClearScreen(Colors::DarkBlue);
         Shapes::DrawCircle(position.x, position.y, 20.0f, Colors::RayWhite);
     }
@@ -390,7 +308,7 @@ RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
 }
 ```
 
-> **Tip:** The seed is auto-random on startup. Call `SetRandomSeed(value)` in `OnAttach()` only if you need reproducibility.
+The seed is auto-random on startup. Call `Math::Random::Seed(value)` in `OnAttach()` only if you need a reproducible sequence.
 
 ## License
 
