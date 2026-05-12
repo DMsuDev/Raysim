@@ -56,6 +56,7 @@ All notable changes to this project will be documented in this file.
 - `Input` interface extended with gamepad query methods (`IsGamepadButtonDown`, `IsGamepadButtonPressed`, `GetGamepadAxis`, `IsGamepadConnected`, etc.) using the new `GamepadButton` and `GamepadAxis` enums.
 - `Vector2` template now includes `Angle.hpp` so that `RotatedBy(Angle)` is available without additional includes.
 - All example projects (`BouncingBalls`, `LissajousCurves`, `Mouse2D`, `NoiseLandscape`, `SceneShowcase`) updated to use `Math::Vec2f` / `Math::Vec2i` aliases instead of the old `Math::Vec2` usage.
+- `imgui` and `spdlog` were removed as submodules and are now integrated locally in `third_party/` with CMake targets defined in `cmake/ThirdParty/`.
 
 ---
 
