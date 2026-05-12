@@ -172,5 +172,5 @@ The active backend is selected at configure time via the `RS_BACKEND` CMake cach
 ---
 
 <p align="center">
-  <img src="images/footer.png" alt="Raysim Footer" width="600" />
+  <img src="images/footer.png" alt="Raysim Footer" width="720" />
 </p>

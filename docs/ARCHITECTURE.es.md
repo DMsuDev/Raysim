@@ -172,5 +172,5 @@ El backend activo se selecciona en tiempo de configuración mediante la opción 
 ---
 
 <p align="center">
-  <img src="images/footer.png" alt="Raysim Footer" width="600" />
+  <img src="images/footer.png" alt="Raysim Footer" width="720" />
 </p>

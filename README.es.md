@@ -175,5 +175,5 @@ Este proyecto está licenciado bajo la **Apache License 2.0**.
 Consulta el archivo [LICENSE](LICENSE) para más detalles.
 
 <p align="center">
-  <img src="docs/images/footer.png" alt="Raysim Footer" width="600" />
+  <img src="docs/images/footer.png" alt="Raysim Footer" width="720" />
 </p>

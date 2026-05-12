@@ -18,7 +18,7 @@ This document provides practical, in-depth examples for every module in the Rays
     - [Logging](#logging)
     - [Font Loading and Rendering](#font-loading-and-rendering)
   - [Scene System](#scene-system)
-    - [Defining a Scene with RS_SCENE](#defining-a-scene-with-rs_scene)
+    - [Defining a Scene with RS\_SCENE](#defining-a-scene-with-rs_scene)
     - [Scene Lifecycle Walkthrough](#scene-lifecycle-walkthrough)
     - [Scene Transitions (ChangeScene, PushScene, PopScene)](#scene-transitions-changescene-pushscene-popscene)
   - [Layers](#layers)
@@ -51,7 +51,7 @@ This document provides practical, in-depth examples for every module in the Rays
     - [Debug Panels with OnUIRender](#debug-panels-with-onuirender)
     - [Styling ImGui](#styling-imgui)
   - [Debug and Profiling](#debug-and-profiling)
-    - [Instrumentation with RS_PROFILE_FUNCTION](#instrumentation-with-rs_profile_function)
+    - [Instrumentation with RS\_PROFILE\_FUNCTION](#instrumentation-with-rs_profile_function)
     - [Scoped Profiling](#scoped-profiling)
 
 ---
@@ -1047,5 +1047,5 @@ Each scope records its own timing independently of the call stack, giving flat c
 ---
 
 <p align="center">
-  <img src="images/footer.png" alt="Raysim Footer" width="600" />
+  <img src="images/footer.png" alt="Raysim Footer" width="720" />
 </p>
