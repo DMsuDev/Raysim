@@ -2,6 +2,7 @@
 
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
+#include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/async.h>
 
 namespace RS {
@@ -81,15 +82,24 @@ void Log::Init(bool async, LogFileMode fileMode)
         /// Console pattern: colored `[HH:MM:SS] [logger] message`.
         consoleSink->set_pattern("%^[%T] [%n] %v%$");
 
-        // rotate_on_open=true clears/rotates the file on each startup (Truncate).
-        // rotate_on_open=false appends to the existing file (Append).
-        const bool rotateOnOpen = (fileMode == LogFileMode::Truncate);
-        auto fileSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
-            "Raysim.log",
-            1024 * 1024 * 10,  // 10 MB per file
-            5,                 // keep 5 rotated files
-            rotateOnOpen
-        );
+        // Truncate: overwrite the existing file on each startup (basic_file_sink, truncate=true).
+        // Append:   keep previous logs and rotate when the file exceeds 10 MB (rotating_file_sink).
+        spdlog::sink_ptr fileSink;
+        if (fileMode == LogFileMode::Truncate)
+        {
+            fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
+                "Raysim.log",
+                true  // truncate=true: replaces the file instead of appending
+            );
+        }
+        else
+        {
+            fileSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
+                "Raysim.log",
+                1024 * 1024 * 10,  // 10 MB per file
+                5                  // keep 5 rotated files
+            );
+        }
         fileSink->set_level(spdlog::level::trace);
         /// File pattern: `[HH:MM:SS] [level] logger: message`.
         fileSink->set_pattern("[%T] [%l] %n: %v");
