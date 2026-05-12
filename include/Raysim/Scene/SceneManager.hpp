@@ -113,6 +113,7 @@ public:
 
     void Update(float dt)
     {
+        RS_PROFILE_FUNCTION();
         HandleTransition();
 
         if (m_Current)
@@ -121,12 +122,14 @@ public:
 
     void FixedUpdate(float dt)
     {
+        RS_PROFILE_FUNCTION();
         if (m_Current)
             m_Current->FixedUpdate(dt, MakeKey());
     }
 
     void Draw(float alpha)
     {
+        RS_PROFILE_FUNCTION();
         if (m_Current)
             m_Current->Draw(alpha, MakeKey());
     }
@@ -137,12 +140,14 @@ public:
 
     void Pause()
     {
+        RS_PROFILE_FUNCTION();
         if (m_Current)
             m_Current->Pause(MakeKey());
     }
 
     void Resume()
     {
+        RS_PROFILE_FUNCTION();
         if (m_Current)
             m_Current->Resume(MakeKey());
     }
@@ -153,6 +158,7 @@ public:
     /// receives it via its NVI, which then propagates it to the LayerStack.
     void OnEvent(Event& e)
     {
+        RS_PROFILE_FUNCTION();
         if (m_Current)
             m_Current->OnEvent(e, MakeKey());
     }

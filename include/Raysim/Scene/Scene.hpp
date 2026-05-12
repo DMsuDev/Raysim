@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include "Raysim/Core/Base.hpp"
+
 #include "Raysim/Core/EngineContext.hpp"
 #include "Raysim/Core/LayerStack.hpp"
 #include "Raysim/Renderer/RenderCommand.hpp"
@@ -93,8 +95,10 @@ public:
 
     void Start(Key)
     {
+        RS_PROFILE_FUNCTION();
         if (m_State == SceneState::Uninitialized)
         {
+            RS_CORE_DEBUG("Scene '{}': starting", m_Config.Name);
             OnStart();
             m_State = SceneState::Running;
         }
@@ -104,10 +108,15 @@ public:
     {
         if (m_State == SceneState::Running)
         {
-            OnUpdate(dt);
+            {
+                RS_PROFILE_SCOPE("Scene::OnUpdate");
+                OnUpdate(dt);
+            }
 
-            // Update all layers and overlays in the stack after the scene update.
-            m_LayerStack.UpdateAll(dt);
+            {
+                RS_PROFILE_SCOPE("Scene::LayerUpdate");
+                m_LayerStack.UpdateAll(dt);
+            }
         }
     }
 
@@ -122,20 +131,26 @@ public:
         // Can draw even if paused, but not if uninitialized or stopped
         if (m_State != SceneState::Uninitialized)
         {
-            OnDraw(alpha);
+            {
+                RS_PROFILE_SCOPE("Scene::OnDraw");
+                OnDraw(alpha);
+            }
 
-            ImGuiBeginFrame();
-
-            m_LayerStack.RenderUIAll();
-
-            ImGuiEndFrame();
+            {
+                RS_PROFILE_SCOPE("Scene::ImGui");
+                ImGuiBeginFrame();
+                m_LayerStack.RenderUIAll();
+                ImGuiEndFrame();
+            }
         }
     }
 
     void Pause(Key)
     {
+        RS_PROFILE_FUNCTION();
         if (m_State == SceneState::Running)
         {
+            RS_CORE_DEBUG("Scene '{}': paused", m_Config.Name);
             m_State = SceneState::Paused;
             OnPause();
         }
@@ -143,8 +158,10 @@ public:
 
     void Resume(Key)
     {
+        RS_PROFILE_FUNCTION();
         if (m_State == SceneState::Paused)
         {
+            RS_CORE_DEBUG("Scene '{}': resumed", m_Config.Name);
             m_State = SceneState::Running;
             OnResume();
         }
@@ -152,8 +169,10 @@ public:
 
     void Stop(Key)
     {
+        RS_PROFILE_FUNCTION();
         if (m_State != SceneState::Uninitialized)
         {
+            RS_CORE_DEBUG("Scene '{}': stopping", m_Config.Name);
             m_LayerStack.Clear();
             m_ImGuiLayer = nullptr;
             OnDetach();

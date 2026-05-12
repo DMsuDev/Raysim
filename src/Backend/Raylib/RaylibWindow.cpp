@@ -17,6 +17,8 @@ namespace RS::Backend {
 RaylibWindow::RaylibWindow(const WindowProps& props)
     : Window(props)
 {
+    RS_PROFILE_FUNCTION();
+
     if (props.Width == 0 || props.Height == 0) {
         RS_CORE_ERROR("Invalid window size: {}x{}. Width and height must be greater than 0.", props.Width, props.Height);
         RS_ASSERT(false, "Window size must be greater than 0");
@@ -40,6 +42,7 @@ RaylibWindow::~RaylibWindow()
 
 void RaylibWindow::Shutdown()
 {
+    RS_PROFILE_FUNCTION();
     RS_CORE_DEBUG("Shutting down RaylibWindow");
     if (::IsWindowReady())
     {
@@ -60,6 +63,8 @@ bool RaylibWindow::ImplShouldClose() const
 
 void RaylibWindow::ImplPollEvents()
 {
+    RS_PROFILE_FUNCTION();
+
     if (!m_EventCallback)
         return;
 
@@ -189,6 +194,7 @@ void RaylibWindow::ImplSwapBuffers()
 
 void RaylibWindow::ImplSetSize(int width, int height)
 {
+    RS_PROFILE_FUNCTION();
     m_Data.Width = width;
     m_Data.Height = height;
 
@@ -210,6 +216,7 @@ Math::Vec2i RaylibWindow::ImplGetSize() const
 
 void RaylibWindow::ImplSetTitle(const std::string& title)
 {
+    RS_PROFILE_FUNCTION();
     m_Data.Title = title;
 
     if (::IsWindowReady())
@@ -225,6 +232,7 @@ void RaylibWindow::ImplSetTitle(const std::string& title)
 
 void RaylibWindow::ImplSetFullscreen(bool fullscreen)
 {
+    RS_PROFILE_FUNCTION();
     if (fullscreen == m_Data.Fullscreen)
         return;
 
