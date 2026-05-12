@@ -8,6 +8,25 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- **Top-level exception guard in `EntryPoint`** (`include/Raysim/Core/EntryPoint.hpp`): the generated `main()` now wraps the full application lifecycle (`CreateApplication`, `app->Run()`, and `delete app`) in a two-level try/catch. `std::exception` derivatives are caught first, and their message is logged via `RS_CORE_CRITICAL("Unhandled exception: {}", e.what())`; a second catch-all `(...)` block handles unknown exceptions. In both cases, `Log::Shutdown()` is called before returning `EXIT_FAILURE`, ensuring the log sink is flushed and the file is properly closed even when an unhandled exception propagates out of user code.
+
+- `RS_CORE_ASSERT_THROW(expr)` / `RS_ASSERT_THROW(expr)` macros (`include/Raysim/Core/Assert.hpp`): wrap an expression in a try/catch block. If an exception is thrown, its message is logged at `CRITICAL` level along with full source location (`file:line (function)`) using the core logger (`RS_CORE_ASSERT_THROW`) or the client logger (`RS_ASSERT_THROW`), and the exception is then rethrown. Both macros compile to `((void)0)` in builds where `RS_ENABLE_ASSERTS` is not defined, adding zero overhead to release binaries:
+
+  ```cpp
+  // Engine-internal use (core logger)
+  RS_CORE_ASSERT_THROW(m_Window->Init(spec));
+
+  // Application use (client logger)
+  RS_ASSERT_THROW(renderer.LoadShader("default.glsl"));
+  ```
+
+- `LogFileMode::Truncate` option for `Log::Init()` (`include/Raysim/Core/Log.hpp`): `Log::Init(bool async, LogFileMode fileMode)` now accepts a `LogFileMode` enum as its second argument. The default `LogFileMode::Append` preserves the log file contents across runs (previous behavior). Passing `LogFileMode::Truncate` clears the log file at startup, producing a clean single-session log — useful for development workflows where accumulated log history obscures the output of the current run:
+
+  ```cpp
+  // EntryPoint.hpp  — application startup
+  Log::Init(/*async=*/true, LogFileMode::Truncate);
+  ```
+
 - `EventBus`: type-safe publish/subscribe event bus owned by the `Application` and exposed through `EngineContext::Bus`.
   Unlike the layer-based propagation (blocking, ordered), the `EventBus` is a broadcast channel: all active subscribers receive the event in subscription order regardless of the `Handled` flag. Typical use cases include audio systems reacting to focus events, debug overlays subscribing to hotkeys, and achievement systems listening for game events.
 
