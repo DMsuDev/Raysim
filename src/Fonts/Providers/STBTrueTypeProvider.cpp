@@ -37,8 +37,10 @@ std::vector<uint8_t> ReadFile(const std::string& path)
     }
 
     std::vector<uint8_t> buf(static_cast<size_t>(size));
-    std::fread(buf.data(), 1, static_cast<size_t>(size), f);
+    const size_t read = std::fread(buf.data(), 1, static_cast<size_t>(size), f);
     std::fclose(f);
+    if (read != static_cast<size_t>(size))
+        return {};
     return buf;
 }
 
