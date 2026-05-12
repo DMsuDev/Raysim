@@ -64,6 +64,7 @@
 
 // --- Events ---
 #include "Raysim/Events/Events.hpp"
+#include "Raysim/Events/EventBus.hpp"
 
 // --- Core system headers ---
 #include "Raysim/Renderer/RenderCommand.hpp"
