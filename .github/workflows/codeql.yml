@@ -29,9 +29,13 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: cpp
+          config: |
+            paths-ignore:
+              - vcpkg/**
+              - third_party/**
 
-      # CMake + Ninja + system deps
       - name: Install dependencies
+        # CMake + Ninja + system deps
         run: |
           sudo apt-get update
           sudo apt-get install -y cmake ninja-build \
