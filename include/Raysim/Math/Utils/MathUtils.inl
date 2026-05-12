@@ -83,7 +83,7 @@ constexpr T LerpUnclamped(T a, T b, float t) noexcept
 inline float InverseLerp(float a, float b, float value) noexcept
 {
     const float denom = b - a;
-    return (std::fabs(denom) <= 1e-12f) ? 0.0f : Clamp01((value - a) / denom);
+    return (Abs(denom) <= 1e-12f) ? 0.0f : Clamp01((value - a) / denom);
 }
 
 inline float Remap(float value, float inMin, float inMax, float outMin, float outMax) noexcept
@@ -129,20 +129,43 @@ constexpr float SmootherStep01(float t) noexcept
 
 inline float MoveTowards(float current, float target, float maxDelta) noexcept
 {
-    if (std::fabs(target - current) <= maxDelta) return target;
+    if (Abs(target - current) <= maxDelta) return target;
     return current + (target > current ? maxDelta : -maxDelta);
+}
+
+inline float Mod(float a, float b) noexcept
+{
+    if (b == 0.0f) return 0.0f;
+    return a - b * Floor(a / b);
+}
+
+constexpr int Mod(int a, int b) noexcept
+{
+    if (b == 0) return 0;
+    return ((a % b) + b) % b;
+}
+
+inline float Wrap(float value, float min, float max) noexcept
+{
+    const float range = max - min;
+    return (range == 0.0f) ? min : min + Mod(value - min, range);
+}
+
+constexpr int Wrap(int value, int min, int max) noexcept
+{
+    const int range = max - min;
+    return (range == 0) ? min : min + Mod(value - min, range);
 }
 
 inline float Repeat(float t, float length) noexcept
 {
-    if (length <= 0.0f) return 0.0f;
-    return t - std::floor(t / length) * length;
+    return (length <= 0.0f) ? 0.0f : Mod(t, length);
 }
 
 inline float PingPong(float t, float length) noexcept
 {
     const float r = Repeat(t, length * 2.0f);
-    return length - std::fabs(r - length);
+    return length - Abs(r - length);
 }
 
 //==============================================================================
@@ -151,15 +174,13 @@ inline float PingPong(float t, float length) noexcept
 
 inline float NormalizeAngle(float angle) noexcept
 {
-    angle = std::fmod(angle, TWO_PI);
-    return (angle < 0.0f) ? angle + TWO_PI : angle;
+    return Mod(angle, TWO_PI);
 }
 
 inline float DeltaAngle(float a, float b) noexcept
 {
-    float diff = std::fmod(b - a, TWO_PI);
+    float diff = Mod(b - a, TWO_PI);
     if (diff >  PI) diff -= TWO_PI;
-    if (diff < -PI) diff += TWO_PI;
     return diff;
 }
 
@@ -169,7 +190,7 @@ inline float DeltaAngle(float a, float b) noexcept
 
 inline bool EpsilonEquals(float a, float b, float epsilon) noexcept
 {
-    return std::fabs(a - b) <= epsilon;
+    return Abs(a - b) <= epsilon;
 }
 
 //==============================================================================
@@ -180,9 +201,13 @@ inline float Sqrt(float x) noexcept { return std::sqrt(x); }
 constexpr float Sqr(float x) noexcept { return x * x; }
 
 inline float Floor(float x) noexcept { return std::floor(x); }
-inline int FloorToInt(float x) noexcept { return static_cast<int>(std::floor(x)); }
+inline int FloorToInt(float x) noexcept { return static_cast<int>(Floor(x)); }
 
-inline float Fract(float x) noexcept { return x - std::floor(x); }
+inline float Fract(float x) noexcept { return x - Floor(x); }
 constexpr float Saturate(float x) noexcept { return Clamp(x, 0.0f, 1.0f); }
+
+inline float Sin(float x) noexcept { return std::sin(x); }
+inline float Cos(float x) noexcept { return std::cos(x); }
+inline float Exp(float x) noexcept { return std::exp(x); }
 
 } // namespace RS::Math
