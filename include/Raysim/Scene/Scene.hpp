@@ -286,6 +286,8 @@ protected:
     ///       so scenes can write GetRenderer().ClearScreen(...) instead of
     ///       RS::RenderCommand::ClearScreen(...) directly.
     RenderCommand& GetRenderer() noexcept;
+    /// @brief Get the global event bus for publishing and subscribing to events across the application.
+    inline EventBus& GetEventBus() noexcept { return *m_Context->Bus; }
 
 private:
 
