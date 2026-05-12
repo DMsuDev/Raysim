@@ -59,7 +59,9 @@ public:
     /// @param callback  A callable with signature `void(Event&)`.
     void SetEventCallback(EventCallbackFn callback)
     {
+        RS_CORE_ASSERT(callback, "Event callback cannot be null");
         m_EventCallback = std::move(callback);
+        RS_CORE_DEBUG("Window event callback registered");
     }
 
 // ===========================================================

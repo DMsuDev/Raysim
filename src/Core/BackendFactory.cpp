@@ -15,7 +15,7 @@ Scope<RendererAPI> BackendFactory::CreateRenderer()
     RS_PROFILE_FUNCTION();
 
 #if defined(RS_BACKEND_RAYLIB)
-    RS_CORE_DEBUG("Renderer backend created: Raylib");
+    RS_CORE_TRACE("BackendFactory: Creating RaylibRendererAPI");
     return CreateScope<Backend::RaylibRendererAPI>();
 #else
     RS_CORE_ERROR("No supported renderer backend defined.");
@@ -28,7 +28,8 @@ Scope<Window> BackendFactory::CreateAppWindow(const WindowProps& props)
     RS_PROFILE_FUNCTION();
 
 #if defined(RS_BACKEND_RAYLIB)
-    RS_CORE_DEBUG("Window backend created: Raylib");
+    RS_CORE_TRACE("BackendFactory: Creating RaylibWindow with title '{}', size {}x{}",
+        props.Title, props.Width, props.Height);
     return CreateScope<Backend::RaylibWindow>(props);
 #else
     RS_CORE_ERROR("No supported window backend defined.");
@@ -42,7 +43,7 @@ Scope<Input> BackendFactory::CreateInput()
     RS_PROFILE_FUNCTION();
 
 #if defined(RS_BACKEND_RAYLIB)
-    RS_CORE_DEBUG("Input backend created: Raylib");
+    RS_CORE_TRACE("BackendFactory: Creating RaylibInput");
     return CreateScope<Backend::RaylibInput>();
 #else
     RS_CORE_ERROR("No supported input backend defined.");
@@ -55,7 +56,7 @@ Scope<Fonts::FontRenderer> BackendFactory::CreateFontRenderer()
     RS_PROFILE_FUNCTION();
 
 #if defined(RS_BACKEND_RAYLIB)
-    RS_CORE_DEBUG("FontRenderer backend created: Raylib");
+    RS_CORE_TRACE("BackendFactory: Creating RaylibFontRenderer");
     return CreateScope<Backend::RaylibFontRenderer>();
 #else
     RS_CORE_ERROR("No supported FontRenderer backend defined.");
@@ -68,7 +69,7 @@ Scope<ImGuiBackend> BackendFactory::CreateImGuiBackend()
     RS_PROFILE_FUNCTION();
 
 #if defined(RS_BACKEND_RAYLIB)
-    RS_CORE_DEBUG("ImGuiBackend created: Raylib");
+    RS_CORE_TRACE("BackendFactory: Creating RaylibImGuiBackend");
     return CreateScope<Backend::RaylibImGuiBackend>();
 #else
     RS_CORE_ERROR("No supported ImGuiBackend defined for the current window and renderer backends.");

@@ -19,9 +19,6 @@
 #include "Raysim/Fonts/FontManager.hpp"
 #include "Raysim/Fonts/Providers/STBTrueTypeProvider.hpp"
 
-// --- Math ---
-#include "Raysim/Math/Random.hpp"
-
 // --- Backend factory ---
 #include "Raysim/Core/BackendFactory.hpp"
 
@@ -43,6 +40,7 @@ Application::Application(const ApplicationConfig& config)
 
     RS_CORE_ASSERT(m_Window, "Failed to create window backend");
     RS_CORE_ASSERT(m_Input, "Failed to create input backend");
+    RS_CORE_ASSERT(m_EventBus, "Failed to create event bus backend");
 
     // Initialise RenderCommand backend
     auto api = BackendFactory::CreateRenderer();
@@ -56,13 +54,13 @@ Application::Application(const ApplicationConfig& config)
     // -- Font system --------------------------------------------------------
     FontManager::SetProvider(CreateScope<STBTrueTypeProvider>());
     FontManager::SetRenderer(BackendFactory::CreateFontRenderer());
-    FontManager::LoadDefaultFont();
 
     // -- Populate EngineContext ---------------------------------------------
     RebuildContext();
 
     // -- SceneManager ------------------------------------------------------
     m_SceneManager = CreateScope<SceneManager>(m_EngineContext);
+    RS_CORE_ASSERT(m_SceneManager, "Failed to create scene manager backend");
     m_EngineContext.Scenes = m_SceneManager.get();
 
     RS_CORE_INFO("Application '{}' ready.", m_Configuration.Window.Title);
@@ -102,6 +100,8 @@ void Application::RebuildContext()
 
 void Application::OnEvent(Event& e)
 {
+    RS_PROFILE_FUNCTION();
+
     EventDispatcher dispatcher(e);
 
     // Engine handles close and resize at the application level first.
@@ -149,9 +149,17 @@ void Application::Run()
 
         // Flush per-frame transient input state (Pressed, Released, Repeating)
         // before the window populates fresh events for this frame.
-        m_Input->Update();
+        {
+            RS_PROFILE_SCOPE("InputUpdate");
+            m_Input->Update();
+        }
 
-        m_Window->PollEvents();
+        // Poll window events (resize, close, etc.) and feed them into the event system.
+        {
+            RS_PROFILE_SCOPE("PollEvents");
+            m_Window->PollEvents();
+        }
+
         m_Minimized = m_Window->IsMinimized();
 
         if (m_Minimized)
@@ -186,16 +194,19 @@ void Application::Run()
             uint32_t stepsTaken = 0;
             while (Time::ShouldFixedStep() && stepsTaken < m_MaxFixedSteps)
             {
+                RS_PROFILE_SCOPE("FixedUpdate");
                 sm.FixedUpdate(Time::GetFixedDeltaTime());
                 ++stepsTaken;
             }
 
             if (stepsTaken == m_MaxFixedSteps)
-            {
                 RS_CORE_WARN("Frame drop detected! Fixed steps clamped to {}", m_MaxFixedSteps);
-            }
 
-            sm.Update(Time::GetDeltaTime());
+            // Variable timestep update (delta time scaled by timeScale)
+            {
+                RS_PROFILE_SCOPE("Update");
+                sm.Update(Time::GetDeltaTime());
+            }
         }
 
         RS::RenderCommand::BeginFrame();
@@ -210,6 +221,7 @@ void Application::Run()
 
         if (!m_Minimized)
         {
+            RS_PROFILE_SCOPE("SwapBuffers");
             m_Window->SwapBuffers();
         }
 
@@ -238,24 +250,6 @@ void Application::Close()
 
     Fonts::FontManager::Shutdown();
     RenderCommand::Shutdown();
-}
-
-//==============================================================================
-// Facade - fonts / resources
-//==============================================================================
-
-void Application::SetDefaultFont(const std::string& fontPath, int fontSize)
-{
-    Fonts::FontManager::LoadFont("default", fontPath, fontSize);
-}
-
-//==============================================================================
-// Facade - misc
-//==============================================================================
-
-void Application::SetRandomSeed(unsigned int seed)
-{
-    ::RS::Math::Random::Seed(seed);
 }
 
 } // namespace RS

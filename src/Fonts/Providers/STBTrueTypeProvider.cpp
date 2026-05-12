@@ -70,7 +70,11 @@ bool STBTrueTypeProvider::LoadFont(
     RS_CORE_DEBUG("STBTrueTypeProvider: loading '{}' @ {}px ({} glyphs)", path, fontSize, charCount);
 
     // Read the entire TTF file into memory.
-    std::vector<uint8_t> ttfBuf = ReadFile(path);
+    std::vector<uint8_t> ttfBuf;
+    {
+        RS_PROFILE_SCOPE("STB::ReadFile");
+        ttfBuf = ReadFile(path);
+    }
     if (ttfBuf.empty()) {
         RS_CORE_ERROR("STBTrueTypeProvider: could not open '{}'", path);
         return false;
@@ -87,33 +91,35 @@ bool STBTrueTypeProvider::LoadFont(
     uint32_t atlasW = 0, atlasH = 0;
     ChooseAtlasSize(fontSize, atlasW, atlasH);
 
-    // Pack the requested character range into the atlas bitmap. The resulting
-    // packedChars array contains the pixel coordinates and metrics for each glyph.
+    // Pack the requested character range into the atlas bitmap.
     std::vector<uint8_t> pixels(atlasW * atlasH, 0);
     std::vector<stbtt_packedchar> packedChars(charCount);
 
-    stbtt_pack_context ctx{};
-    if (!stbtt_PackBegin(&ctx, pixels.data(),
-                         static_cast<int>(atlasW),
-                         static_cast<int>(atlasH),
-                         /*stride=*/0, /*padding=*/1, nullptr))
     {
-        RS_CORE_ERROR("STBTrueTypeProvider: atlas PackBegin failed for '{}'", path);
-        return false;
-    }
+        RS_PROFILE_SCOPE("STB::AtlasPack");
+        stbtt_pack_context ctx{};
+        if (!stbtt_PackBegin(&ctx, pixels.data(),
+                             static_cast<int>(atlasW),
+                             static_cast<int>(atlasH),
+                             /*stride=*/0, /*padding=*/1, nullptr))
+        {
+            RS_CORE_ERROR("STBTrueTypeProvider: atlas PackBegin failed for '{}'", path);
+            return false;
+        }
 
-    if (!stbtt_PackFontRange(&ctx, ttfBuf.data(), /*fontIndex=*/0,
-                             static_cast<float>(fontSize),
-                             static_cast<int>(firstChar),
-                             static_cast<int>(charCount),
-                             packedChars.data()))
-    {
+        if (!stbtt_PackFontRange(&ctx, ttfBuf.data(), /*fontIndex=*/0,
+                                 static_cast<float>(fontSize),
+                                 static_cast<int>(firstChar),
+                                 static_cast<int>(charCount),
+                                 packedChars.data()))
+        {
+            stbtt_PackEnd(&ctx);
+            RS_CORE_ERROR("STBTrueTypeProvider: atlas PackFontRange failed - try a larger atlas (fontSize={})", fontSize);
+            return false;
+        }
+
         stbtt_PackEnd(&ctx);
-        RS_CORE_ERROR("STBTrueTypeProvider: atlas PackFontRange failed - try a larger atlas (fontSize={})", fontSize);
-        return false;
     }
-
-    stbtt_PackEnd(&ctx);
 
     // Calculate font metrics (ascender, descender, line gap) at the chosen pixel height.
     const float scale = stbtt_ScaleForPixelHeight(&info, static_cast<float>(fontSize));
@@ -127,41 +133,44 @@ bool STBTrueTypeProvider::LoadFont(
 
     // Construct the FontAtlas and populate glyph metrics based on the packed character data.
     FontAtlas atlas;
-    atlas.width  = static_cast<uint16_t>(atlasW);
-    atlas.height = static_cast<uint16_t>(atlasH);
+    {
+        RS_PROFILE_SCOPE("STB::GlyphExtraction");
+        atlas.width  = static_cast<uint16_t>(atlasW);
+        atlas.height = static_cast<uint16_t>(atlasH);
 
-    atlas.data = std::move(pixels);
+        atlas.data = std::move(pixels);
 
-    atlas.metrics.lineHeight = lineHeightPx;
-    atlas.metrics.ascent     = ascenderPx;
-    atlas.metrics.descent    = descenderPx;
-    atlas.glyphs.reserve(charCount);
-    atlas.codepointToIndex.assign(firstChar + charCount, INVALID_GLYPH);
+        atlas.metrics.lineHeight = lineHeightPx;
+        atlas.metrics.ascent     = ascenderPx;
+        atlas.metrics.descent    = descenderPx;
+        atlas.glyphs.reserve(charCount);
+        atlas.codepointToIndex.assign(firstChar + charCount, INVALID_GLYPH);
 
-    for (uint32_t i = 0; i < charCount; ++i) {
-        const uint32_t           cp = firstChar + i;
-        const stbtt_packedchar& pc = packedChars[i];
+        for (uint32_t i = 0; i < charCount; ++i) {
+            const uint32_t           cp = firstChar + i;
+            const stbtt_packedchar& pc = packedChars[i];
 
-        const uint16_t glW = static_cast<uint16_t>(pc.x1 - pc.x0);
-        const uint16_t glH = static_cast<uint16_t>(pc.y1 - pc.y0);
+            const uint16_t glW = static_cast<uint16_t>(pc.x1 - pc.x0);
+            const uint16_t glH = static_cast<uint16_t>(pc.y1 - pc.y0);
 
-        Glyph g;
-        g.codepoint = cp;
-        g.atlasRegion.atlasPos  = {static_cast<uint16_t>(pc.x0), static_cast<uint16_t>(pc.y0)};
-        g.atlasRegion.atlasSize = {glW, glH};
+            Glyph g;
+            g.codepoint = cp;
+            g.atlasRegion.atlasPos  = {static_cast<uint16_t>(pc.x0), static_cast<uint16_t>(pc.y0)};
+            g.atlasRegion.atlasSize = {glW, glH};
 
-        g.offset.x = pc.xoff;
-        g.offset.y = pc.yoff;
-        g.advanceX = pc.xadvance;
+            g.offset.x = pc.xoff;
+            g.offset.y = pc.yoff;
+            g.advanceX = pc.xadvance;
 
-        // UVs are normalized [0,1] based on atlas dimensions
-        g.uvRect.uvMin = {static_cast<float>(pc.x0) / static_cast<float>(atlasW),
-                          static_cast<float>(pc.y0) / static_cast<float>(atlasH)};
-        g.uvRect.uvMax = {static_cast<float>(pc.x1) / static_cast<float>(atlasW),
-                          static_cast<float>(pc.y1) / static_cast<float>(atlasH)};
+            // UVs are normalized [0,1] based on atlas dimensions
+            g.uvRect.uvMin = {static_cast<float>(pc.x0) / static_cast<float>(atlasW),
+                              static_cast<float>(pc.y0) / static_cast<float>(atlasH)};
+            g.uvRect.uvMax = {static_cast<float>(pc.x1) / static_cast<float>(atlasW),
+                              static_cast<float>(pc.y1) / static_cast<float>(atlasH)};
 
-        atlas.codepointToIndex[cp] = i;
-        atlas.glyphs.push_back(g);
+            atlas.codepointToIndex[cp] = i;
+            atlas.glyphs.push_back(g);
+        }
     }
 
     // Populate output Font struct with metadata and atlas.

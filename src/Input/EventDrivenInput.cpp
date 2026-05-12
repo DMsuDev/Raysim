@@ -13,6 +13,8 @@ namespace RS {
 
 void EventDrivenInput::Update()
 {
+    RS_PROFILE_FUNCTION();
+
     // Clear per-frame transient key states.
     m_KeyPressed.fill(false);
     m_KeyReleased.fill(false);
@@ -34,6 +36,8 @@ void EventDrivenInput::Update()
 
 void EventDrivenInput::OnEvent(Event& e)
 {
+    RS_PROFILE_FUNCTION();
+
     EventDispatcher d(e);
     d.Dispatch<KeyPressedEvent>         ([this](KeyPressedEvent&          ke){ HandleKeyPressed(ke);          return false; });
     d.Dispatch<KeyReleasedEvent>        ([this](KeyReleasedEvent&         ke){ HandleKeyReleased(ke);         return false; });

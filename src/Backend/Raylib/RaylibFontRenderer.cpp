@@ -85,30 +85,32 @@ bool RaylibFontRenderer::UploadFontAtlas(FontHandle handle, const FontAtlas& atl
     }
 
     // -- Convert R8 grayscale to RGBA (white + alpha) ----------------------
-    // We store white pixels with alpha=grayscale so that color tinting via
-    // DrawTexturePro works correctly.
     const uint32_t pixelCount = atlas.width * atlas.height;
     std::vector<uint8_t> rgba;
-    rgba.reserve(pixelCount * 4);
-
-    for (uint32_t i = 0; i < pixelCount; ++i) {
-        rgba.push_back(255);            // R
-        rgba.push_back(255);            // G
-        rgba.push_back(255);            // B
-        rgba.push_back(atlas.data[i]);  // A (from grayscale atlas)
+    {
+        RS_PROFILE_SCOPE("FontAtlas::RGBAConvert");
+        rgba.reserve(pixelCount * 4);
+        for (uint32_t i = 0; i < pixelCount; ++i) {
+            rgba.push_back(255);
+            rgba.push_back(255);
+            rgba.push_back(255);
+            rgba.push_back(atlas.data[i]);
+        }
     }
 
     // -- Upload to GPU via raylib Image -> Texture2D -----------------------
-    ::Image img{};
-    img.data    = rgba.data();
-    img.width   = static_cast<int>(atlas.width);
-    img.height  = static_cast<int>(atlas.height);
-    img.mipmaps = 1;
-    img.format  = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+    ::Texture2D tex;
+    {
+        RS_PROFILE_SCOPE("FontAtlas::GPUUpload");
+        ::Image img{};
+        img.data    = rgba.data();
+        img.width   = static_cast<int>(atlas.width);
+        img.height  = static_cast<int>(atlas.height);
+        img.mipmaps = 1;
+        img.format  = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
 
-    ::Texture2D tex = ::LoadTextureFromImage(img);
-    // NOTE: LoadTextureFromImage copies the data to GPU memory.
-    // rgba can be freed after this call (it goes out of scope naturally).
+        tex = ::LoadTextureFromImage(img);
+    }
 
     if (tex.id == 0) {
         RS_CORE_ERROR("RaylibFontRenderer: GPU texture upload failed for handle {}", handle);
@@ -131,6 +133,8 @@ bool RaylibFontRenderer::UploadFontAtlas(FontHandle handle, const FontAtlas& atl
 
 void RaylibFontRenderer::ReleaseFontAtlas(FontHandle handle)
 {
+    RS_PROFILE_FUNCTION();
+
     const auto it = m_Textures.find(handle);
     if (it == m_Textures.end()) return;
 

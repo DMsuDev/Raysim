@@ -1,4 +1,5 @@
 #include "rspch.hpp"
+
 #include "Raysim/Core/LayerStack.hpp"
 #include "Raysim/Events/Event.hpp"
 
@@ -82,18 +83,21 @@ void LayerStack::PopOverlay(Layer* overlay)
 
 void LayerStack::UpdateAll(float dt)
 {
+    RS_PROFILE_FUNCTION();
     for (Layer* layer : m_Layers)
         layer->OnUpdate(dt);
 }
 
 void LayerStack::RenderUIAll()
 {
+    RS_PROFILE_FUNCTION();
     for (Layer* layer : m_Layers)
         layer->OnUIRender();
 }
 
 void LayerStack::DispatchEvent(Event& e)
 {
+    RS_PROFILE_FUNCTION();
     // Propagate in reverse order: overlays first, then layers beneath.
     // Stops as soon as a layer marks the event as Handled.
     for (auto it = m_Layers.rbegin(); it != m_Layers.rend(); ++it)

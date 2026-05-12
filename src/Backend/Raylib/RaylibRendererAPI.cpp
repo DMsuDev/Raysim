@@ -30,21 +30,27 @@ void RaylibRendererAPI::Clear()
 
 void RaylibRendererAPI::BeginFrame()
 {
+    RS_PROFILE_FUNCTION();
     ::BeginDrawing();
 }
 
 void RaylibRendererAPI::EndFrame()
 {
+    RS_PROFILE_FUNCTION();
+    // EndDrawing() internally calls PollInputEvents() and swaps the framebuffer.
     ::EndDrawing();
 }
 
 void RaylibRendererAPI::SetViewport(uint32_t /*x*/, uint32_t /*y*/,
                                     uint32_t /*width*/, uint32_t /*height*/)
 {
-    // Raylib does not expose a direct viewport call;
-    // the viewport matches the window size automatically.
+    // Raylib does not expose a direct viewport API; the viewport always matches
+    // the window dimensions and cannot be overridden. This call is a no-op.
+    LogOnceRegistry::LogOnce(
+        "SetViewport",
+        LogLevel::Warn,
+        "SetViewport is not supported by the Raylib backend and will be ignored."
+    );
 }
-
-
 
 } // namespace RS::Backend

@@ -36,6 +36,7 @@ FontHandle FontManager::GenerateHandle() noexcept
 void FontManager::SetProvider(Scope<TrueTypeProvider> provider)
 {
     RS_PROFILE_FUNCTION();
+
     RS_ASSERT(provider != nullptr, "FontManager: provider must not be null");
     s_TextProvider = std::move(provider);
     RS_CORE_DEBUG("FontManager: TrueType provider set");
@@ -44,15 +45,20 @@ void FontManager::SetProvider(Scope<TrueTypeProvider> provider)
 void FontManager::SetRenderer(Scope<FontRenderer> renderer)
 {
     RS_PROFILE_FUNCTION();
+
     RS_ASSERT(renderer != nullptr, "FontManager: renderer must not be null");
+
     s_TextRenderer = std::move(renderer);
     s_TextRenderer->Init();
+    LoadDefaultFont(); // Ensure the built-in default font is registered and ready to use.
+
     RS_CORE_DEBUG("FontManager: font renderer set and initialized");
 }
 
 void FontManager::Shutdown()
 {
     RS_PROFILE_FUNCTION();
+
     UnloadAll();
 
     if (s_TextRenderer) {
@@ -216,6 +222,8 @@ std::vector<std::string> FontManager::GetLoadedFontNames()
 
 void FontManager::UnloadFont(FontHandle handle)
 {
+    RS_PROFILE_FUNCTION();
+
     if (handle == INVALID_FONT_HANDLE) return;
 
     const auto it = s_Fonts.find(handle);
@@ -242,6 +250,8 @@ void FontManager::UnloadFont(FontHandle handle)
 
 void FontManager::UnloadFont(const std::string& name)
 {
+    RS_PROFILE_FUNCTION();
+
     const auto it = s_NameMap.find(name);
     if (it == s_NameMap.end()) {
         RS_CORE_WARN("FontManager::UnloadFont -> '{}' not found", name);
@@ -252,6 +262,8 @@ void FontManager::UnloadFont(const std::string& name)
 
 void FontManager::UnloadAll()
 {
+    RS_PROFILE_FUNCTION();
+
     // Collect handles so we don't invalidate iterators mid-loop
     std::vector<FontHandle> handles;
     handles.reserve(s_Fonts.size());
@@ -275,6 +287,11 @@ Math::Vec2f FontManager::MeasureText(
     const std::string& text,
     float              spacing)
 {
+    RS_PROFILE_FUNCTION();
+
+    RS_ASSERT(!text.empty(), "FontManager::MeasureText -> text cannot be empty");
+    RS_ASSERT(spacing >= 0, "FontManager::MeasureText -> spacing cannot be negative (got {})", spacing);
+
     // Resolve handle
     if (handle == INVALID_FONT_HANDLE || handle == DEFAULT_FONT_HANDLE) {
         // Fallback: delegate to renderer which knows about the built-in font
@@ -304,6 +321,8 @@ void FontManager::RenderText(
     float              spacing,
     const Color&       color)
 {
+    RS_PROFILE_FUNCTION();
+
     RS_ASSERT(!text.empty(), "FontManager::RenderText -> text cannot be empty");
     RS_ASSERT(fontSize > 0,  "FontManager::RenderText -> fontSize must be positive (got {})", fontSize);
 

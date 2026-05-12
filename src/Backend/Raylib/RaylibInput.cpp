@@ -16,6 +16,8 @@ namespace RS::Backend {
 
 void RaylibInput::Update()
 {
+    RS_PROFILE_FUNCTION();
+
     // Nothing to clear: Raylib manages key state internally.
     // The char queue is drained by GetCharPressed(); do NOT clear it here
     // because Update() is called before PollEvents(), and new chars arrive
@@ -28,6 +30,7 @@ void RaylibInput::Update()
 
 void RaylibInput::OnEvent(Event& e)
 {
+    RS_PROFILE_FUNCTION();
     EventDispatcher d(e);
 
     // Collect typed characters dispatched by RaylibWindow::PollEvents().
