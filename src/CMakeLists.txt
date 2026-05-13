@@ -15,6 +15,7 @@ rs_enable_sanitizers(Raysim)
 rs_enable_coverage(Raysim)
 rs_enable_optimizations(Raysim)
 rs_enable_lto(Raysim)
+rs_enable_rdynamic(Raysim)
 
 # Shared library symbol visibility
 # RS_BUILD_SHARED: PUBLIC so consumers know to use dllimport
