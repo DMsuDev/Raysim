@@ -20,9 +20,7 @@ public:
     void SetViewport(uint32_t x, uint32_t y,
                      uint32_t width, uint32_t height) override;
 
-    void ClearScreen(const Color& color)   override;
-    /// Overload to allow clearing with a linear RGB color vector [0,1]
-    void ClearScreen(const Math::Vec3f& color) override;
+    void ClearScreen(const Color& color) override;
     void Clear() override;
 };
 
