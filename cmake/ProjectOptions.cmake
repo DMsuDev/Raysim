@@ -93,10 +93,20 @@ endif()
 # Summary of options
 # ===========================================================================
 
-message(STATUS "====================================")
-message(STATUS "  Raysim backend : ${RS_BACKEND}")
-message(STATUS "  Library type   : ${RS_LIB_TYPE}")
-message(STATUS "====================================")
+if(PROJECT_IS_TOP_LEVEL)
+  message(STATUS "Configuration summary:")
+  message(STATUS "| RS_BACKEND: ${RS_BACKEND}")
+  message(STATUS "| RS_BUILD_SHARED: ${RS_BUILD_SHARED}")
+  message(STATUS "| RS_ENABLE_SANITIZERS: ${RS_ENABLE_SANITIZERS}")
+  message(STATUS "|   RS_ENABLE_ASAN: ${RS_ENABLE_ASAN}")
+  message(STATUS "|   RS_ENABLE_UBSAN: ${RS_ENABLE_UBSAN}")
+  message(STATUS "|   RS_ENABLE_TSAN: ${RS_ENABLE_TSAN}")
+  message(STATUS "|   RS_ENABLE_MSAN: ${RS_ENABLE_MSAN}")
+  message(STATUS "|   RS_ENABLE_LSAN: ${RS_ENABLE_LSAN}")
+  message(STATUS "| RS_ENABLE_LTO: ${RS_ENABLE_LTO}")
+  message(STATUS "| RS_ENABLE_PCH: ${RS_ENABLE_PCH}")
+  message(STATUS "| RS_BUILD_EXAMPLES: ${RS_BUILD_EXAMPLES}")
+endif()
 
 # ===========================================================================
 # rs_apply_build_defines(<target>)
