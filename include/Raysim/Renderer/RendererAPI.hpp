@@ -22,9 +22,6 @@
 #pragma once
 
 #include "Raysim/Core/Base.hpp"
-
-#include "Raysim/Math/Types/Vector2.hpp"
-#include "Raysim/Math/Types/Vector3.hpp"
 #include "Raysim/Graphics/Color.hpp"
 
 #include <cstdint>
@@ -113,17 +110,7 @@ public:
      *              Alpha handling is backend-dependent for the default
      *              framebuffer; it is respected for off-screen targets.
      */
-    virtual void ClearScreen(const Color& color)   = 0;
-
-    /**
-     * @brief Clear the colour buffer using a linear-colour RGB triplet.
-     *
-     * Each component should be in [0, 1]. Values outside this range produce
-     * implementation-defined results. Alpha is implicitly set to 1.0.
-     *
-     * @param color RGB colour vector (linear space).
-     */
-    virtual void ClearScreen(const Math::Vec3f& color) = 0;
+    virtual void ClearScreen(const Color& color) = 0;
 
     /**
      * @brief Clear all buffers (color, depth, stencil) to their default values.

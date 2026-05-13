@@ -38,22 +38,45 @@ namespace RS
     class RenderCommand
     {
     public:
+
+        /// @brief Initializes the RenderCommand system with a specific RendererAPI backend.
+        /// Transfers ownership of the backend and calls its internal initialization routine.
+        /// Must be called once at application startup before issuing any render commands.
+        /// @param api A Scope<RendererAPI> instance representing the graphics API to use.
         static void Init(Scope<RendererAPI> api);
+
+        /// @brief Shuts down the RenderCommand system.
+        /// Releases the active RendererAPI instance and clears all renderer state.
         static void Shutdown();
 
+        /// @brief Marks the beginning of a new rendering frame.
+        /// Prepares the active RendererAPI for issuing draw commands.
         static void BeginFrame();
+
+        /// @brief Finalizes the current rendering frame.
+        /// Flushes pending commands and presents the rendered output.
         static void EndFrame();
 
+        /// @brief Sets the viewport dimensions for rendering.
+        /// The viewport defines the area of the render target that will be drawn to.
+        /// @param x The x-coordinate of the viewport's lower-left corner.
+        /// @param y The y-coordinate of the viewport's lower-left corner.
+        /// @param width The width of the viewport.
+        /// @param height The height of the viewport.
         static void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
+        /// @brief Clears the screen with the given color.
+        /// @param color The color to clear the color buffer with, specified as an RGBA Color value.
         static void ClearScreen(const Color &color);
-        static void ClearScreen(const Math::Vec3f &color);
+
+        /// @brief Clears the screen using the default clear color (black).
+        /// Useful for passes where a custom clear color is not required.
         static void Clear();
 
     private:
-        // Defined in the .cpp to ensure a single shared instance across modules.
-        // `inline static` would create separate copies in each module (EXE/DLL),
-        // causing crashes in shared-library builds.
+        // Defined in the .cpp to guarantee a single shared instance across all modules.
+        // Using `inline static` would create one instance per translation unit,
+        // which breaks shared-library builds (EXE + DLL) and leads to undefined behavior.
         static Scope<RendererAPI> m_API;
     };
 

@@ -19,18 +19,32 @@ void RenderCommand::Init(Scope<RendererAPI> api)
     m_API->Init();
 }
 
-void RenderCommand::Shutdown() { m_API.reset(); }
+void RenderCommand::Shutdown()
+{
+    m_API.reset();
+}
 
-void RenderCommand::BeginFrame() { m_API->BeginFrame(); }
-void RenderCommand::EndFrame()   { m_API->EndFrame(); }
+void RenderCommand::BeginFrame()
+{
+    m_API->BeginFrame();
+}
+void RenderCommand::EndFrame()
+{
+    m_API->EndFrame();
+}
 
 void RenderCommand::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 {
     m_API->SetViewport(x, y, width, height);
 }
 
-void RenderCommand::ClearScreen(const Color& color)       { m_API->ClearScreen(color); }
-void RenderCommand::ClearScreen(const Math::Vec3f& color) { m_API->ClearScreen(color); }
-void RenderCommand::Clear()                               { m_API->Clear(); }
+void RenderCommand::ClearScreen(const Color& color)
+{
+    m_API->ClearScreen(color);
+}
+void RenderCommand::Clear()
+{
+    m_API->Clear();
+}
 
 } // namespace RS
