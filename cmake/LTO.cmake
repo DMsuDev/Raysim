@@ -21,11 +21,21 @@ function(rs_enable_lto target_name)
   endif()
 
   include(CheckIPOSupported)
-  check_ipo_supported(RESULT supported OUTPUT error)
 
-  if(supported)
+  # Check if the compiler supports IPO/LTO before enabling it,
+  # to avoid build errors on unsupported toolchains.
+  check_ipo_supported(
+    RESULT RS_IPO_SUPPORTED
+    OUTPUT RS_IPO_OUTPUT
+  )
+
+  if(RS_IPO_SUPPORTED)
     set_property(TARGET ${target_name} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
   else()
-    message(WARNING "IPO/LTO not supported: ${error}")
+    message(WARNING
+      "IPO/LTO is not supported for target '${target_name}': "
+      "${RS_IPO_OUTPUT}"
+    )
   endif()
+
 endfunction()
