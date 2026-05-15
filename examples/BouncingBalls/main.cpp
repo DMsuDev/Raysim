@@ -79,7 +79,7 @@ private:
         if (cols != gridCols_ || rows != gridRows_) {
             gridCols_ = cols;
             gridRows_ = rows;
-            grid_.assign(cols * rows, {});
+            grid_.assign(static_cast<size_t>(cols) * static_cast<size_t>(rows), {});
         } else {
             for (auto& cell : grid_) cell.clear();
         }
