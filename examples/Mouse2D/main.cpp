@@ -10,14 +10,31 @@ class MouseDetection : public Scene {
 
 private:
     Math::Vec2f mousePos{0.0f, 0.0f};
+    Math::Vec2f offset{0.0f, 0.0f};
     Math::Vec2f mouseSmoothedPos{0.0f, 0.0f};
 
     static constexpr float SQUARE_SPEED = 10.0f;
     static constexpr float MIN_SQUARE_SIZE = 30.0f;
 
+    static constexpr float OFFSET_MOVE_X = 100.0f;
+    static constexpr float OFFSET_MOVE_Y = 100.0f;
+
     bool leftDown_   = false;
     bool rightDown_  = false;
     bool middleDown_ = false;
+
+    void DrawGridMovement(Math::Vec2f offset, float cellSize, Math::Vec2f windowSize) {
+
+        float startX = Math::Mod(offset.x, cellSize);
+        float startY = Math::Mod(offset.y, cellSize);
+
+        // Draw grid background
+        Color gridColor{60, 60, 60};
+        for (float  x = startX; x < windowSize.x; x += cellSize)
+            Shapes::DrawLine(x, 0.0f, x, windowSize.y, gridColor);
+        for (float  y = startY; y < windowSize.y; y += cellSize)
+            Shapes::DrawLine(0.0f, y, windowSize.x, y, gridColor);
+    }
 
 public:
 
@@ -38,6 +55,9 @@ public:
         mousePos = input().GetMousePosition();
         mouseSmoothedPos = Math::Lerp(mouseSmoothedPos, mousePos, SQUARE_SPEED * dt);
 
+        offset.x += OFFSET_MOVE_X * dt;
+        offset.y += OFFSET_MOVE_Y * dt;
+
         leftDown_   = input().IsMouseButtonDown(MouseButton::Left);
         rightDown_  = input().IsMouseButtonDown(MouseButton::Right);
         middleDown_ = input().IsMouseButtonDown(MouseButton::Middle);
@@ -49,12 +69,7 @@ public:
         float w = static_cast<float>(window().GetWidth());
         float h = static_cast<float>(window().GetHeight());
 
-        // Draw grid background
-        Color gridColor{60, 60, 60};
-        for (int x = 0; x < window().GetWidth(); x += 50)
-            Shapes::DrawLine(static_cast<float>(x), 0.0f, static_cast<float>(x), h, gridColor);
-        for (int y = 0; y < window().GetHeight(); y += 50)
-            Shapes::DrawLine(0.0f, static_cast<float>(y), w, static_cast<float>(y), gridColor);
+        DrawGridMovement(offset, 50.0f, {w,h});
 
         // Left rectangle - scales with mouse Y
         float fixedY   = h * 0.5f;
