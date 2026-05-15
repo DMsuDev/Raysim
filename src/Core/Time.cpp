@@ -293,7 +293,7 @@ void Time::SetTargetFPS(int fps)
     else
     {
         g.targetFrameTime = 0.0f;
-        RS_CORE_TRACE("Time: frame rate cap disabled");
+        RS_CORE_WARN("Time: {TargetFPS = 0} detected, uncapping frame rate");
     }
 }
 
