@@ -4,6 +4,72 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.94.1] - 2026-05-15
+
+### Added
+
+- **ApplicationConfig FPS/VSync settings** (`include/Raysim/Core/ApplicationConfig.hpp`, `src/Core/Application.cpp`): Added `TargetFPS` (default: 60, use 0 for uncapped) and `VSync` (default: true) to `ApplicationConfig`. These settings are applied at startup: `m_Window->SetVSync(config.VSync)` and `Time::SetTargetFPS(config.TargetFPS)`.
+
+- **Convenience header files** (`include/Raysim/Events.hpp`, `include/Raysim/Fonts.hpp`, `include/Raysim/Graphics.hpp`, `include/Raysim/Inputs.hpp`, `include/Raysim/Layers.hpp`, `include/Raysim/Math.hpp`, `include/Raysim/Scenes.hpp`): New modular headers that aggregate related modules for cleaner includes. Updated `Raysim.hpp` to include these new convenience headers instead of core headers directly.
+
+- **Scene accessor rename to camelCase** (`include/Raysim/Scene/Scene.hpp`): Renamed `GetInput()` → `input()`, `GetWindow()` → `window()`, `GetSceneManager()` → `sceneManager()`, `GetRenderer()` → `renderer()`, and added new `eventBus()` accessor for consistent API across the codebase.
+
+- **MathUtils enhancements** (`include/Raysim/Math/Utils/MathUtils.hpp`, `include/Raysim/Math/Utils/MathUtils.inl`):
+  - Added `Mod(float a, float b)` and `Mod(int a, int b)`: True mathematical modulus returning values in [0, b) (unlike C++ `%` which can be negative).
+  - Added `Wrap(float value, float min, float max)` and `Wrap(int value, int min, int max)`: Wraps values into half-open interval [min, max), works correctly with negative values.
+  - Added `Sin`, `Cos`, `Exp` to algebraic helpers.
+
+- **New documentation**:
+  - `docs/ARCHITECTURE.es.md` / `docs/ARCHITECTURE.md`: Architecture documentation explaining the engine's design (Core, Scene System, Rendering, Input, Events, Backends).
+  - `docs/BACKENDS.md`: Comprehensive backend documentation covering all supported backends (Raylib, GLFW/OpenGL, SFML, SDL2), their requirements, and configuration.
+  - `docs/EXAMPLES.md`: Examples documentation with detailed descriptions, screenshots, and usage instructions for all demo projects.
+  - `docs/REQUIREMENTS.md`: Centralized system prerequisites documentation (C++ compiler, CMake, vcpkg, backend-specific requirements).
+
+- **Example modularization**:
+  - **BouncingBalls**: Split into `example_ball.cpp/hpp`, `example_helpers.cpp/hpp` for better code organization.
+  - **LissajousCurves**: Extracted `LissajousSimulation.cpp/hpp` and `LissajousTypes.hpp` for simulation logic separation.
+  - **Mouse2D**: Extracted `example_layers.cpp/hpp` for UI layer modularization.
+
+- **Project status update**: README files updated to reflect project status change from Alpha to Beta.
+
+### Changed
+
+- **Application initialization/runtime/shutdown exception handling** (`src/Core/Application.cpp`): Wrapped initialization (backend creation, renderer setup, scene manager), main loop (`Run()`), and shutdown in try/catch blocks that log errors and rethrow exceptions to be handled by the top-level guard in `EntryPoint`.
+
+- **CMake build system enhancements** (`cmake/RDynamic.cmake`, `cmake/StandardSettings.cmake`, `cmake/LTO.cmake`, `examples/CMakeLists.txt`):
+  - Added `RDynamic.cmake` for dynamic symbol export handling on Windows.
+  - Improved `StandardSettings.cmake` with POSTFIX and POSITION CODE support.
+  - Enhanced asset handling in example CMakeLists.
+  - Updated CMake presets to version 6.
+
+- **Documentation sync**: `README.es.md` synchronized with `README.md` structure and content. Removed redundant system prerequisites section in favor of centralized `docs/REQUIREMENTS.md` reference.
+
+- **RenderCommand documentation** (`include/Raysim/Renderer/RenderCommand.hpp`): Added documentation, removed redundant `ClearScreen(Math::Vec3f)` overload (use `Color` instead).
+
+- **Text module refactor** (`include/Raysim/Graphics/Texts.hpp`, `src/Graphics/Texts.cpp`): Removed `RenderTextInRectangle` function and implementation.
+
+- **LayerStack fix** (`include/Raysim/Core/LayerStack.hpp`): Added missing `#include <cstdint>` for `uint32_t`.
+
+- **Example updates**: All examples updated to use new Scene accessor names (`input()`, `window()`, `sceneManager()`, `renderer()`, `eventBus()`), use `Math::Vec2f` / `Math::Vec2i`, and streamline window management.
+
+### Fixed
+
+- **Shell script compatibility**: `tools/init_vcpkg.sh` now uses `$0` as a fallback for `${BASH_SOURCE[0]}` to support non-bash shells (dash, sh). Removed non-breaking space characters that caused syntax errors on Linux.
+
+- **Font loading** (`src/Fonts/Providers/STBTrueTypeProvider.cpp`): Validates `fread` return value to avoid partial reads.
+
+- **Font pixel vector size** (`src/Backend/Raylib/RaylibRendererAPI.cpp`): Ensures proper size calculation for pixel vector in `LoadFont` method.
+
+- **CMake target syntax** (`CMakeLists.txt`): Fixed incorrect syntax in `target_include_directories` for Raysim.
+
+- **CodeQL workflow** (`.github/workflows/codeql.yml`): Updated to ignore vcpkg and third-party paths, upgraded checkout action version.
+
+### Maintenance
+
+- Version bump to 0.94.1 across build configuration files (`CMakeLists.txt`, `vcpkg.json`) and README badges.
+
+---
+
 ## [0.93.0] - 2026-05-12
 
 ### Added
