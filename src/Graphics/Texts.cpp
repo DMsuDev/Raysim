@@ -73,23 +73,4 @@ void Text::RenderTextEx(const std::string& text, float x, float y, float fontSiz
     DrawTextInternal(text, adjustedX, adjustedY, fontSize, spacing, color);
 }
 
-//==============================================================================
-// Text in rectangle
-//==============================================================================
-
-void Text::RenderTextInRectangle(const std::string& text, float x, float y, float w, float h, float fontSize, const Color& color, OriginMode origin, float spacing) {
-    RS_ASSERT(!text.empty(), "Text cannot be empty");
-    RS_ASSERT(fontSize > 0, "Font size must be positive: {}", fontSize);
-    RS_ASSERT(w > 0, "Rectangle width must be positive: {}", w);
-    RS_ASSERT(h > 0, "Rectangle height must be positive: {}", h);
-
-    Math::Vec2f dims = MeasureTextDimensions(text, fontSize, spacing);
-    Math::Vec2f originVec = OriginToVector(origin);
-
-    float drawX = x + (w - dims.x) * originVec.x;
-    float drawY = y + (h - dims.y) * originVec.y;
-
-    DrawTextInternal(text, drawX, drawY, fontSize, spacing, color);
-}
-
 } // namespace RS

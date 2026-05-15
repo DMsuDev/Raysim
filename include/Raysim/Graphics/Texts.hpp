@@ -118,30 +118,6 @@ namespace Text {
      */
     void RenderTextEx(const std::string& text, float x, float y, float fontSize, float spacing, const Color& color, OriginMode origin);
 
-//==============================================================================
-// Layout helpers
-//==============================================================================
-
-    /**
-     * @brief Draw text positioned inside a rectangle with alignment
-     *
-     * Positions the text within the rectangle defined by (x, y, w, h).
-     * The text is aligned according to @c origin (use Center to center it).
-     * If text is larger than the rect, it will be positioned according to the
-     * chosen alignment and may overflow the rectangle bounds.
-     *
-     * @param text Text to draw
-     * @param x Rectangle top-left X
-     * @param y Rectangle top-left Y
-     * @param w Rectangle width
-     * @param h Rectangle height
-     * @param fontSize Font size in pixels
-     * @param color Text color
-     * @param origin Alignment/anchor inside the rectangle (default: Center)
-     * @param spacing Character spacing for RenderTextEx (default: 0.0f)
-     */
-    void RenderTextInRectangle(const std::string& text, float x, float y, float w, float h, float fontSize, const Color& color, OriginMode origin = OriginMode::Center, float spacing = 0.0f);
-
 } // namespace Text
 
 } // namespace RS
