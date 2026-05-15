@@ -16,8 +16,8 @@ private:
     static constexpr float SQUARE_SPEED = 10.0f;
     static constexpr float MIN_SQUARE_SIZE = 30.0f;
 
-    static constexpr float OFFSET_MOVE_X = 100.0f;
-    static constexpr float OFFSET_MOVE_Y = 100.0f;
+    static constexpr float OFFSET_MOVE_X = 20.0f;
+    static constexpr float OFFSET_MOVE_Y = 20.0f;
 
     bool leftDown_   = false;
     bool rightDown_  = false;
