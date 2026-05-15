@@ -18,3 +18,6 @@ MD034: false
 
 # Allow using multiple top-level headings (e.g., for different sections of the README)
 MD041: false
+
+# Allow emphasis used instead of a heading
+MD036: false
