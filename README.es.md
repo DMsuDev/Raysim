@@ -11,7 +11,7 @@
 [English Readme](https://github.com/DMsuDev/Raysim/blob/main/README.md)
 • [Readme Español](https://github.com/DMsuDev/Raysim/blob/main/README.es.md)
 • [Changelog](docs/CHANGELOG.md)
-• [Arquitectura](docs/ARCHITECTURE.es.md)
+• [Architecture](docs/ARCHITECTURE.md)
 
 Raysim es un framework de C++ para gráficos 2D y aplicaciones interactivas, construido sobre [raylib](https://www.raylib.com/).
 
@@ -52,12 +52,13 @@ Comentarios y contribuciones son bienvenidos. ❤️
 Todos los ejemplos se compilan junto con la librería. Consulta la sección [Compilación](#-compilación) para las instrucciones de configuración.
 
 > [!TIP]
-> ¿Buscas la referencia completa de módulos, callbacks del ciclo de vida y el sistema de eventos? Consulta [docs/ARCHITECTURE.es.md](docs/ARCHITECTURE.es.md).
+> ¿Buscas la referencia completa de módulos, callbacks del ciclo de vida y el sistema de eventos? Consulta [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## 🔧 Compilación
 
-Requisitos mínimos: CMake 3.28, C++20 y Ninja. Las dependencias se gestionan mediante [vcpkg](https://vcpkg.io/), incluido como submódulo de Git.
+Para obtener información detallada sobre requisitos del sistema, plataformas soportadas e información de dependencias, consulta el documento [System & Build Requirements](docs/REQUIREMENTS.md).
 
+> [!NOTE]
 > El soporte para **macOS** no ha sido probado oficialmente. El sistema de compilación y las dependencias deberían funcionar en teoría, pero la compatibilidad no está garantizada.
 
 ### 1. Clonar con submódulos
@@ -68,16 +69,16 @@ vcpkg está incluido como submódulo de Git, por lo que es necesario inicializar
 git submodule update --init --recursive
 ```
 
-### 2. Configuración inicial
+### 2. Setup
 
-Con el submódulo listo, el script de configuración inicializa vcpkg e instala automáticamente todas las dependencias requeridas:
+Una vez que el submódulo esté listo, el script de configuración inicializa vcpkg e instala automáticamente todas las dependencias requeridas:
 
 ```bash
 ./tools/setup_all.sh       # Linux / macOS
 .\tools\setup_all.ps1      # Windows (PowerShell)
 ```
 
-### 3. Compilar
+### 3. Build
 
 Usar CMake presets es la forma recomendada y más rápida de compilar:
 
@@ -122,7 +123,7 @@ Visual Studio es un generador multi-config. Ignora `-DCMAKE_BUILD_TYPE` en el ti
 ## 🚀 Inicio Rápido
 
 > [!TIP]
-> El ejemplo a continuación es intencionalmente mínimo. Para una visión más profunda del ciclo de vida de las escenas, layers, eventos y todos los módulos disponibles, consulta [docs/ARCHITECTURE.es.md](docs/ARCHITECTURE.es.md) y [docs/EXAMPLES.md](docs/EXAMPLES.md).
+> El ejemplo a continuación es intencionalmente mínimo. Para una visión más profunda del ciclo de vida de las escenas, layers, eventos y todos los módulos disponibles, consulta [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) y [docs/EXAMPLES.md](docs/EXAMPLES.md).
 
 ```cpp
 #include "Raysim/Raysim.hpp"
@@ -156,7 +157,7 @@ private:
 RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
 {
     RS::ApplicationConfig config;
-    config.Window.Title  = "Mi Primera App Raysim";
+    config.Window.Title  = "Mi Primera Escena";
     config.Window.Width  = 800;
     config.Window.Height = 600;
 
