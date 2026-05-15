@@ -23,6 +23,7 @@
 
 #include "Raysim/Core/Layer.hpp"
 
+#include <cstdint>
 #include <vector>
 
 namespace RS {
