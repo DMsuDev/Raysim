@@ -15,7 +15,7 @@ namespace RS {
 // An inline definition in the header would create a separate instance in every
 // translation unit that includes Scene.hpp, causing an uninitialised instance
 // in consumer EXEs when Raysim is built as a shared library.
-RenderCommand& Scene::GetRenderer() noexcept
+RenderCommand& Scene::renderer() noexcept
 {
     static RenderCommand s_Instance;
     return s_Instance;
@@ -52,7 +52,7 @@ ImGuiLayer* Scene::SetupImGuiLayer()
 
     auto backend = BackendFactory::CreateImGuiBackend();
 
-    auto* layer = new ImGuiLayer(GetWindow(), std::move(backend));
+    auto* layer = new ImGuiLayer(window(), std::move(backend));
     m_ImGuiLayer = layer;
     m_LayerStack.PushOverlay(layer);
 

@@ -270,24 +270,29 @@ protected:
     ImGuiLayer* SetupImGuiLayer();
 
 // ============================================================================
-// Direct access to subsystems
+// Direct access to engine subsystems (high‑level)
 // ============================================================================
 
-    /// @brief Get the input subsystem from the engine context.
-    inline Input& GetInput() noexcept { return *m_Context->InputSystem; }
-    /// @brief Get the window subsystem from the engine context.
-    inline Window& GetWindow() noexcept { return *m_Context->MainWindow; }
-    /// @brief Get the SceneManager to trigger scene transitions from within a scene.
-    /// @note Use this to call ChangeScene<T>(), ChangeScene(id), or ChangeScene(name).
-    inline SceneManager& GetSceneManager() noexcept { return *m_Context->Scenes; }
-    /// @brief Returns a proxy reference to the static RenderCommand dispatcher.
-    /// @note RenderCommand is a purely static API, it holds no instance state.
-    ///       This accessor exists only for API consistency and backward compatibility,
-    ///       so scenes can write GetRenderer().ClearScreen(...) instead of
-    ///       RS::RenderCommand::ClearScreen(...) directly.
-    RenderCommand& GetRenderer() noexcept;
-    /// @brief Get the global event bus for publishing and subscribing to events across the application.
-    inline EventBus& GetEventBus() noexcept { return *m_Context->Bus; }
+    /// @brief Access the input subsystem.
+    /// @return Reference to the engine-wide Input system.
+    inline Input& input() noexcept { return *m_Context->InputSystem; }
+
+    /// @brief Access the main window.
+    /// @return Reference to the application's primary Window.
+    inline Window& window() noexcept { return *m_Context->MainWindow; }
+
+    /// @brief Access the SceneManager controlling scene transitions.
+    /// @return Reference to the SceneManager.
+    inline SceneManager& sceneManager() noexcept { return *m_Context->Scenes; }
+
+    /// @brief Access the RenderCommand dispatcher.
+    /// @note RenderCommand is a static API; this returns a proxy for API consistency.
+    /// @return Reference to the RenderCommand interface.
+    RenderCommand& renderer() noexcept;
+
+    /// @brief Access the global event bus.
+    /// @return Reference to the EventBus for publishing/subscribing to events.
+    inline EventBus& eventBus() noexcept { return *m_Context->Bus; }
 
 private:
 
