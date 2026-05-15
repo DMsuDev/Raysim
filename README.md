@@ -141,15 +141,15 @@ private:
     void OnFixedUpdate(float fixedDt) override {
         position += velocity * fixedDt;
 
-        float width  = static_cast<float>(GetWindow().GetWidth());
-        float height = static_cast<float>(GetWindow().GetHeight());
+        float width  = static_cast<float>(window().GetWidth());
+        float height = static_cast<float>(window().GetHeight());
 
         if (position.x < 20 || position.x > width  - 20) velocity.x *= -1;
         if (position.y < 20 || position.y > height - 20) velocity.y *= -1;
     }
 
     void OnDraw(float /*alpha*/) override {
-        GetRenderer().ClearScreen(Colors::DarkBlue);
+        renderer().ClearScreen(Colors::DarkBlue);
         Shapes::DrawCircle(position.x, position.y, 20.0f, Colors::RayWhite);
     }
 };
