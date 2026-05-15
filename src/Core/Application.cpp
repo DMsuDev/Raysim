@@ -50,6 +50,10 @@ Application::Application(const ApplicationConfig& config)
 
         RS::RenderCommand::Init(std::move(api));
 
+        // -- Apply ApplicationConfig settings -----------------------------------
+        m_Window->SetVSync(m_Configuration.VSync);
+        Time::SetTargetFPS(m_Configuration.TargetFPS);
+
         // -- Event callback ----------------------------------------------------
         m_Window->SetEventCallback([this](Event& e) { OnEvent(e); });
 
