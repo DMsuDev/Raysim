@@ -58,38 +58,19 @@
 
 #include "Raysim/Core/Base.hpp"
 
-// --- Properties and enums ---
-#include "Raysim/Graphics/Color.hpp"
-#include "Raysim/Input/KeyCodes.hpp"
+#include "Raysim/Events.hpp"
+#include "Raysim/Inputs.hpp"
 
-// --- Events ---
-#include "Raysim/Events/Events.hpp"
-#include "Raysim/Events/EventBus.hpp"
-
-// --- Core system headers ---
-#include "Raysim/Renderer/RenderCommand.hpp"
-#include "Raysim/Scene/Scene.hpp"
-#include "Raysim/Scene/SceneManager.hpp"
-#include "Raysim/Input/Input.hpp"
 #include "Raysim/Core/Window.hpp"
 #include "Raysim/Core/Time.hpp"
 
 #include "Raysim/Core/Application.hpp"
 
-// --- Graphics ---
-#include "Raysim/Graphics/Shapes.hpp"
-#include "Raysim/Graphics/Texts.hpp"
-
-// --- Font system ---
-#include "Raysim/Fonts/Fonts.hpp"
-
-// --- Layer system ---
-#include "Raysim/Core/Layer.hpp"
-#include "Raysim/Core/LayerStack.hpp"
-#include "Raysim/ImGui/ImGuiLayer.hpp"
-
-// --- Math ---
-#include "Raysim/Math/Math.hpp"
+#include "Raysim/Graphics.hpp"
+#include "Raysim/Scenes.hpp"
+#include "Raysim/Fonts.hpp"
+#include "Raysim/Layers.hpp"
+#include "Raysim/Math.hpp"
 
 namespace RS {
     using FontManager = RS::Fonts::FontManager;
