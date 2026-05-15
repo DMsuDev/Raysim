@@ -36,7 +36,9 @@ namespace RS
      */
     struct ApplicationConfig
     {
-        WindowProps Window = WindowProps();            // Window properties (Title, Width, Height)
+        WindowProps Window = WindowProps();   // Window properties (Title, Width, Height)
+        int         TargetFPS = 60;           // Desired frame rate (0 for uncapped)
+        bool        VSync = true;             // Whether to enable vertical sync
 
         // Minimum log level shown in the console.
         // Defaults to Trace in debug builds and Info in release builds.
