@@ -1,7 +1,6 @@
 #include "Raysim/Raysim.hpp"
 #include "Raysim/Core/EntryPoint.hpp"
 
-#include <cmath>
 #include <functional>
 #include <vector>
 
@@ -244,9 +243,7 @@ void StarField::Reset(Star& s, bool spread)
 
 void StarField::OnStart()
 {
-    GetWindow().SetSize(1000, 700);
-    GetWindow().SetTitle("SceneShowcase - StarField");
-    Time::SetTargetFPS(60);
+    window().SetTitle("SceneShowcase - StarField");
 
     m_Stars.resize(NUM_STARS);
     for (auto& s : m_Stars) Reset(s, true);
@@ -254,8 +251,8 @@ void StarField::OnStart()
     SetupImGuiLayer();
     PushLayer(new StarFieldControlLayer(m_Speed, m_Rainbow));
     PushOverlay(new SceneNavLayer("StarField", 1, 3,
-        [this]() { GetSceneManager().ChangeScene<PlasmaArt>(); },
-        [this]() { GetSceneManager().ChangeScene<ClockMandala>(); }
+        [this]() { sceneManager().ChangeScene<PlasmaArt>(); },
+        [this]() { sceneManager().ChangeScene<ClockMandala>(); }
     ));
 }
 
@@ -271,12 +268,12 @@ void StarField::OnUpdate(float dt)
 
 void StarField::OnDraw(float alpha)
 {
-    GetRenderer().ClearScreen(Color{5, 5, 18});
+    renderer().ClearScreen(Color{5, 5, 18});
 
-    float hw = GetWindow().GetWidth()  * 0.5f;
-    float hh = GetWindow().GetHeight() * 0.5f;
-    float sw = static_cast<float>(GetWindow().GetWidth());
-    float sh = static_cast<float>(GetWindow().GetHeight());
+    float hw = window().GetWidth()  * 0.5f;
+    float hh = window().GetHeight() * 0.5f;
+    float sw = static_cast<float>(window().GetWidth());
+    float sh = static_cast<float>(window().GetHeight());
 
     for (const auto& s : m_Stars)
     {
@@ -304,15 +301,13 @@ void StarField::OnDraw(float alpha)
 
 void PlasmaArt::OnStart()
 {
-    GetWindow().SetSize(1000, 700);
-    GetWindow().SetTitle("SceneShowcase - PlasmaArt");
-    Time::SetTargetFPS(60);
+    window().SetTitle("SceneShowcase - PlasmaArt");
 
     SetupImGuiLayer();
     PushLayer(new PlasmaControlLayer(m_FX, m_FY, m_Speed));
     PushOverlay(new SceneNavLayer("PlasmaArt", 2, 3,
-        [this]() { GetSceneManager().ChangeScene<ClockMandala>(); },
-        [this]() { GetSceneManager().ChangeScene<StarField>(); }
+        [this]() { sceneManager().ChangeScene<ClockMandala>(); },
+        [this]() { sceneManager().ChangeScene<StarField>(); }
     ));
 }
 
@@ -323,10 +318,10 @@ void PlasmaArt::OnUpdate(float dt)
 
 void PlasmaArt::OnDraw(float alpha)
 {
-    GetRenderer().ClearScreen(Colors::Black);
+    renderer().ClearScreen(Colors::Black);
 
-    float cw = static_cast<float>(GetWindow().GetWidth())  / COLS;
-    float ch = static_cast<float>(GetWindow().GetHeight()) / ROWS;
+    float cw = static_cast<float>(window().GetWidth())  / COLS;
+    float ch = static_cast<float>(window().GetHeight()) / ROWS;
 
     for (int row = 0; row < ROWS; ++row)
     {
@@ -335,12 +330,12 @@ void PlasmaArt::OnDraw(float alpha)
             float nx = static_cast<float>(col) / COLS;
             float ny = static_cast<float>(row) / ROWS;
 
-            float v = std::sin(nx * m_FX  * Math::PI + m_Time)
-                    + std::sin(ny * m_FY  * Math::PI + m_Time * 0.7f)
-                    + std::sin((nx + ny)  * 3.0f     + m_Time * 1.3f)
-                    + std::sin(std::sqrt(nx * nx + ny * ny) * 5.0f - m_Time);
+            float v = Math::Sin(nx * m_FX  * Math::PI + m_Time)
+                    + Math::Sin(ny * m_FY  * Math::PI + m_Time * 0.7f)
+                    + Math::Sin((nx + ny)  * 3.0f     + m_Time * 1.3f)
+                    + Math::Sin(Math::Sqrt(nx * nx + ny * ny) * 5.0f - m_Time);
 
-            float hue = std::fmod((v + 4.0f) * 45.0f, 360.0f);
+            float hue = Math::Mod((v + 4.0f) * 45.0f, 360.0f);
             Color c   = Color::FromHSV(hue, 1.0f, 1.0f);
 
             Shapes::DrawRect(col * cw, row * ch, cw + 1.0f, ch + 1.0f, c);
@@ -354,15 +349,13 @@ void PlasmaArt::OnDraw(float alpha)
 
 void ClockMandala::OnStart()
 {
-    GetWindow().SetSize(1000, 700);
-    GetWindow().SetTitle("SceneShowcase - ClockMandala");
-    Time::SetTargetFPS(60);
+    window().SetTitle("SceneShowcase - ClockMandala");
 
     SetupImGuiLayer();
     PushLayer(new MandalaControlLayer(m_Rings, m_Speed));
     PushOverlay(new SceneNavLayer("ClockMandala", 3, 3,
-        [this]() { GetSceneManager().ChangeScene<StarField>(); },
-        [this]() { GetSceneManager().ChangeScene<PlasmaArt>(); }
+        [this]() { sceneManager().ChangeScene<StarField>(); },
+        [this]() { sceneManager().ChangeScene<PlasmaArt>(); }
     ));
 }
 
@@ -373,10 +366,10 @@ void ClockMandala::OnUpdate(float dt)
 
 void ClockMandala::OnDraw(float alpha)
 {
-    GetRenderer().ClearScreen(Color{10, 5, 30});
+    renderer().ClearScreen(Color{10, 5, 30});
 
-    float w  = static_cast<float>(GetWindow().GetWidth());
-    float h  = static_cast<float>(GetWindow().GetHeight());
+    float w  = static_cast<float>(window().GetWidth());
+    float h  = static_cast<float>(window().GetHeight());
     float cx = w * 0.5f;
     float cy = h * 0.5f;
 
@@ -389,7 +382,7 @@ void ClockMandala::OnDraw(float alpha)
         int   nodes  = (ring + 1) * 6;
         float dir    = (ring % 2 == 0) ? 1.0f : -1.0f;
         float rot    = m_Time * dir * (0.4f + 0.15f * ring);
-        float hue    = std::fmod(t * 240.0f + m_Time * 25.0f, 360.0f);
+        float hue    = Math::Mod(t * 240.0f + m_Time * 25.0f, 360.0f);
 
         Color cBright = Color::FromHSV(hue, 0.95f, 1.0f, 220);
         Color cDim    = Color::FromHSV(hue, 0.60f, 0.55f, 100);
@@ -401,22 +394,22 @@ void ClockMandala::OnDraw(float alpha)
         for (int n = 0; n < nodes; ++n)
         {
             float angle  = rot + n * (Math::TWO_PI / static_cast<float>(nodes));
-            float px     = cx + std::cos(angle) * radius;
-            float py     = cy + std::sin(angle) * radius;
+            float px     = cx + Math::Cos(angle) * radius;
+            float py     = cy + Math::Sin(angle) * radius;
             float rotDeg = Math::ToDegrees(angle) + m_Time * 60.0f * dir;
             Shapes::DrawPolygon(px, py, sides, nodeSize * 0.5f, rotDeg, cBright);
         }
     }
 
     // Pulsing starburst at the centre
-    float pulse = 28.0f + std::sin(m_Time * 3.0f) * 8.0f;
+    float pulse = 28.0f + Math::Sin(m_Time * 3.0f) * 8.0f;
     for (int i = 0; i < 16; ++i)
     {
         float angle = m_Time * 0.6f + i * (Math::TWO_PI / 16.0f);
-        float len   = pulse + std::sin(m_Time * 5.0f + i * 0.7f) * 6.0f;
-        float ex    = cx + std::cos(angle) * len;
-        float ey    = cy + std::sin(angle) * len;
-        Color lc    = Color::FromHSV(std::fmod(m_Time * 80.0f + i * 22.5f, 360.0f), 1.0f, 1.0f);
+        float len   = pulse + Math::Sin(m_Time * 5.0f + i * 0.7f) * 6.0f;
+        float ex    = cx + Math::Cos(angle) * len;
+        float ey    = cy + Math::Sin(angle) * len;
+        Color lc    = Color::FromHSV(Math::Mod(m_Time * 80.0f + i * 22.5f, 360.0f), 1.0f, 1.0f);
         Shapes::DrawLine(cx, cy, ex, ey, lc, 2.0f);
     }
 
@@ -433,6 +426,8 @@ RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs /*args*/)
     config.Window.Title  = "SceneShowcase";
     config.Window.Width  = 1000;
     config.Window.Height = 700;
+    config.TargetFPS     = 60;
+    config.VSync         = true;
 
     auto* app = new RS::Application(config);
     app->RegisterScene<StarField>();
