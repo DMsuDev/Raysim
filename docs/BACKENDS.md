@@ -1,10 +1,9 @@
 # Backends
 
-This document covers everything related to creating new backend implementations for Raysim: what the backend abstraction is, why it exists, what each interface contract requires, and exactly how to wire a new graphics/input platform into the engine.
+This document explains how _Raysim’s_ backend architecture works and how to implement a new backend.  
+It covers the purpose of the abstraction, the responsibilities of each interface, and the exact steps required to integrate a new graphics or input platform into the engine.
 
-> **Navigation**: [Home](../README.md) • [Examples](./EXAMPLES.md) • Backends
-
----
+> **Navigation:** [Home](../README.md) • [Examples](./EXAMPLES.md) • Backends
 
 ## Table of Contents
 
@@ -19,12 +18,14 @@ This document covers everything related to creating new backend implementations 
     - [Interface Hierarchy](#interface-hierarchy)
     - [Directory Layout](#directory-layout)
   - [Interfaces](#interfaces)
-    - [RendererAPI](#rendererapi)
-    - [Window](#window)
-    - [Input and EventDrivenInput](#input-and-eventdriveninput)
-    - [ImGuiBackend](#imguibackend)
-    - [FontRenderer](#fontrenderer)
-  - [KeyMap Template](#keymap-template)
+  - [RendererAPI](#rendererapi)
+  - [Window](#window)
+  - [Input and EventDrivenInput](#input-and-eventdriveninput)
+    - [Polling Model (Raylib-style)](#polling-model-raylib-style)
+    - [Event-Driven Model (GLFW, SDL2, Win32)](#event-driven-model-glfw-sdl2-win32)
+  - [ImGuiBackend](#imguibackend)
+  - [FontRenderer](#fontrenderer)
+    - [KeyMap Template](#keymap-template)
     - [KeyCode Mappings](#keycode-mappings)
     - [MouseButton Mappings](#mousebutton-mappings)
     - [Gamepad Mappings](#gamepad-mappings)
@@ -34,6 +35,8 @@ This document covers everything related to creating new backend implementations 
     - [3. Implement RendererAPI](#3-implement-rendererapi)
     - [4. Implement Window](#4-implement-window)
     - [5. Implement Input / EventDrivenInput](#5-implement-input--eventdriveninput)
+      - [Option A — Polling Backend](#option-a--polling-backend)
+      - [Option B — Event-Driven Backend](#option-b--event-driven-backend)
     - [6. Implement ImGuiBackend](#6-implement-imguibackend)
     - [7. Implement FontRenderer](#7-implement-fontrenderer)
     - [8. Wire Up BackendFactory](#8-wire-up-backendfactory)
@@ -42,7 +45,6 @@ This document covers everything related to creating new backend implementations 
     - [Win32](#win32)
     - [macOS](#macos)
     - [Linux](#linux)
-  - [Testing](#testing)
 
 ---
 
@@ -50,15 +52,18 @@ This document covers everything related to creating new backend implementations 
 
 ### What Is a Backend?
 
-Raysim is fully backend-agnostic at the user level. Every graphics draw call, window operation, and input query goes through a set of abstract C++ interfaces — the engine core never touches a windowing or graphics API directly. The concrete classes that satisfy those interfaces form a **backend**.
+`Raysim` is fully backend‑agnostic at the user level. Every draw call, window operation, and input query goes through abstract C++ interfaces — the engine core never interacts with a graphics or windowing API directly.
+A backend is simply the concrete implementation of those interfaces.
 
-The `Raylib` backend is the reference implementation and the only officially supported backend. It handles window creation, input polling, frame begin/end, font atlas uploads, and ImGui integration — all by delegating to `raylib` and `rlImGui`. The architecture is intentionally simple enough that a competent developer can add a new backend (e.g. SDL3 + OpenGL, GLFW + Vulkan, or a headless software renderer) by following this document.
-
-> **Before you write your own backend**, ask yourself whether the existing Raylib backend is truly insufficient for your use case. The most common reason to add a backend is portability to a platform where Raylib is not available, not dissatisfaction with Raylib's API. A custom backend written from scratch will almost certainly have more bugs and fewer features than the battle-tested reference implementation. Use the reference backend for as long as possible, then replace only the parts you actually need.
+The `Raylib` backend is the reference implementation and the only officially supported one _for now_. It handles window creation, input polling, frame begin/end, font atlas uploads, and ImGui integration by delegating to `raylib` and `rlImGui`.
+The architecture is intentionally simple so that a developer can implement additional backends (e.g., `SDL3` + `OpenGL`, `GLFW` + `Vulkan`, or a headless software renderer) by following this document.
 
 ### Why Five Separate Interfaces?
 
-Backend responsibilities are deliberately split across five narrow interfaces rather than one monolithic "platform" class. Each interface has a distinct lifetime, caller, and thread-safety contract:
+> [!NOTE]
+> Backend responsibilities are intentionally split across **five narrow interfaces**, rather than a single monolithic "platform" class.
+
+Each interface has its own lifetime, caller, and thread‑safety expectations:
 
 | Interface      | Abstract Base  | Lifetime             | Primary Caller         |
 | -------------- | -------------- | -------------------- | ---------------------- |
@@ -68,15 +73,16 @@ Backend responsibilities are deliberately split across five narrow interfaces ra
 | `ImGuiBackend` | `ImGuiBackend` | Application lifetime | ImGui Layer            |
 | `FontRenderer` | `FontRenderer` | Application lifetime | FontManager            |
 
-Keeping them separate means you can swap or stub individual components independently — for example, you can reuse the Raylib `Window` + `Input` while replacing only `FontRenderer` with a custom GPU renderer, without touching the other four.
+This separation allows you to replace or stub individual components independently.
 
----
+For example, you can keep Raylib’s `Window` + `Input` while replacing only `FontRenderer` with a custom GPU implementation, without touching other backends.
 
 ## Architecture
 
 ### Backend Selection at Configure Time
 
-The backend is selected at CMake configure time via the `RS_BACKEND` cache variable. The selection is **permanent** for a given build tree — there is no runtime mechanism to switch backends after compilation.
+The backend is selected at CMake configure time through the `RS_BACKEND` cache variable.  
+This choice is fixed for the lifetime of the build directory, `Raysim` does not support switching backends at runtime.
 
 ```bash
 cmake -B build -G Ninja \
@@ -84,11 +90,15 @@ cmake -B build -G Ninja \
   -DRS_BACKEND=raylib     # raylib (default), sdl2, glfw, etc.
 ```
 
-CMake reads `RS_BACKEND`, adds a corresponding preprocessor `#define` (e.g. `RS_BACKEND_RAYLIB`), and links only the source files and third-party libraries for the chosen backend. All other backend directories are excluded from the build entirely — there is no dead code from unused backends in the final binary.
+CMake reads `RS_BACKEND`, defines the corresponding preprocessor macro (e.g. `RS_BACKEND_RAYLIB`), and compiles only the source files and third‑party libraries for that backend.
+
+All other backend directories are excluded entirely, no unused code ends up in the final binary.
 
 ### BackendFactory: Compile-Time Dispatch
 
-`BackendFactory` is the single point of construction for all backend objects. It uses `#if defined(...)` blocks that resolve entirely at compile time — no virtual dispatch, no `std::variant`, no type erasure beyond the abstract interface itself:
+`BackendFactory` is the single point of construction for all backend objects.
+
+It uses `#if defined(...)` blocks that resolve entirely at compile time, no virtual dispatch, no `std::variant`, no type-erasure beyond the abstract interface itself:
 
 ```cpp
 // BackendFactory.cpp
@@ -104,7 +114,7 @@ Scope<RendererAPI> BackendFactory::CreateRenderer() {
 }
 ```
 
-Each `Create*` function follows the same pattern. `BackendFactory` never stores state — it is a pure factory used once at `Application` startup to populate the engine's owned subsystem pointers.
+Each `Create*` function follows the same pattern. `BackendFactory` holds no state, it is used once during `Application` startup to populate the engine’s subsystem pointers.
 
 The macro is defined in `CMakeLists.txt` after reading `RS_BACKEND`:
 
@@ -163,49 +173,51 @@ Each backend subdirectory contains:
 - `XxxFontRenderer.hpp/.cpp` — implements `FontRenderer`
 - `XxxKeyMap.hpp` — compile-time translation tables (header-only)
 
----
-
 ## Interfaces
 
-### RendererAPI
+> [!TIP]
+> Before implementing a new backend, familiarize yourself with the five core interfaces below. Each has a specific responsibility and lifetime within the engine.
+
+## RendererAPI
 
 **Header**: `Raysim/Renderer/RendererAPI.hpp`
 
-`RendererAPI` is the narrowest of the five interfaces. Its job is limited to: framing (signaling the GPU that a new frame is starting/ending), clearing the framebuffer, and setting the viewport rectangle. It is **not** responsible for issuing shape draw calls — those go through `Shapes::*` and the `RenderCommand` static facade, which in the Raylib backend ultimately call `raylib` functions directly.
+`RendererAPI` is the engine’s lowest-level graphics abstraction.  
+It provides only the essential operations required by the core:
 
-```cpp
-class RendererAPI {
-public:
-    virtual ~RendererAPI() = default;
+- Frame lifecycle (begin/end frame)
+- Viewport control
+- Screen clearing
 
-    virtual void Init() {} // optional; called once after construction
+All drawing operations (shapes, sprites, text) are implemented by higher-level
+systems (`RenderCommand`, `Shapes`, `Texts`) using the backend’s native API
+(e.g., raylib’s drawing functions).
 
-    virtual void BeginFrame() = 0;
-    virtual void EndFrame() = 0;
+> [!NOTE]
+> The interface is intentionally minimal. It will expand as new backends or
+> advanced features (render targets, GPU resources, sync primitives) are added.
 
-    virtual void SetViewport(uint32_t x, uint32_t y,
-                              uint32_t width, uint32_t height) = 0;
+---
 
-    virtual void ClearScreen(const Color& color) = 0;
-    virtual void ClearScreen(const Math::Vec3f& color) = 0;
-    virtual void Clear() = 0;
-};
-```
+**Method Summary**
 
-**Raylib implementation notes** (`RaylibRendererAPI`):
+| Method          | Signature                                                                      | Responsibility                                                                | Call Frequency           |
+| --------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- | ------------------------ |
+| `Init()`        | `virtual void Init() {}`                                                       | Optional backend setup (shaders, buffers, state). Called once after creation. | Once at startup          |
+| `BeginFrame()`  | `virtual void BeginFrame() = 0`                                                | Start a new frame. Bind targets, reset state, prepare for rendering.          | Once per frame           |
+| `EndFrame()`    | `virtual void EndFrame() = 0`                                                  | Finish rendering and present the frame (swap buffers / submit).               | Once per frame           |
+| `SetViewport()` | `virtual void SetViewport(uint32_t x, uint32_t y, uint32_t w, uint32_t h) = 0` | Define the renderable region of the target.                                   | On demand                |
+| `ClearScreen()` | `virtual void ClearScreen(const Color& color) = 0`                             | Clear the color buffer to a specific color.                                   | Typically once per frame |
+| `Clear()`       | `virtual void Clear() = 0`                                                     | Clear depth/stencil (or backend equivalent).                                  | On demand                |
 
-- `Init()` calls `glad` to load any required OpenGL extension function pointers that raylib may not expose.
-- `BeginFrame()` / `EndFrame()` map directly to raylib's `BeginDrawing()` / `EndDrawing()`, which manage the internal render texture swap chain.
-- `ClearScreen(Color)` calls `ClearBackground()` with the Raysim `Color` converted to raylib's `Color` struct. The overload accepting `Math::Vec3f` normalizes the `[0,1]` float components to `[0,255]` before calling `ClearBackground`.
-- `SetViewport` calls `glViewport()` via GLAD. For the default raylib framebuffer, this is generally a no-op, but it matters when rendering into sub-regions (e.g. split-screen or embedded editor panels).
-
-**Thread safety contract**: `RendererAPI` is called exclusively from the main thread in step with the game loop. Implementations do **not** need to be thread-safe; do not call any `RendererAPI` method from a worker thread.
-
-### Window
+## Window
 
 **Header**: `Raysim/Core/Window.hpp`
 
-`Window` uses the **Template Method** pattern: the public API consists of non-virtual methods that perform bookkeeping (e.g. updating `m_Props`) and then delegate to protected pure virtual `Impl*` methods that the concrete backend overrides. This guarantees that the `WindowProps` struct (title, width, height, VSync, fullscreen flags) is always kept in sync regardless of which backend is active.
+`Window` implements a **Template Method** architecture:
+The public API consists of non-virtual methods that perform bookkeeping (e.g. updating `m_Props`) and then delegate to protected pure virtual `Impl*` functions implemented by each backend.
+
+This ensures that `WindowProps` (title, width, height, VSync, fullscreen flags) always remains consistent, regardless of the underlying platform.
 
 ```cpp
 class Window {
@@ -235,35 +247,60 @@ public:
 };
 ```
 
-Subclasses override the `Impl*` protected virtuals:
+Backends implement the protected `Impl*` methods:
 
 ```cpp
 protected:
     virtual void ImplPollEvents() = 0;
     virtual void ImplSwapBuffers() = 0;
     virtual bool ImplShouldClose() const = 0;
+
     virtual void ImplSetSize(int w, int h) = 0;
     virtual Vec2i ImplGetSize() const = 0;
+
     virtual void ImplSetTitle(const std::string& title) = 0;
     virtual void ImplSetFullscreen(bool fs) = 0;
     virtual bool ImplIsMinimized() const = 0;
     virtual void ImplSetVSync(bool enabled) = 0;
+
     virtual void* ImplGetNativeWindow() const = 0;
 ```
 
-The base `Window` class synthesizes and dispatches `WindowResizeEvent`, `WindowCloseEvent`, and `WindowFocusEvent` automatically. Subclasses do **not** re-implement event dispatch — they call the base class protected helpers (e.g. `FireWindowResizeEvent(w, h)`) whenever the native platform reports a relevant event. This centralizes event wiring and prevents each backend from having subtly different event dispatch semantics.
+The base `Window` class synthesizes and dispatches:
 
-**Important**: `GetNativeWindow()` returns a raw platform-specific handle (`HWND` on Win32, `GLFWwindow*` on GLFW, etc.). It is intentionally typed as `void*` to keep backend types out of the public header. Cast it to the appropriate type inside the backend implementation, never in user-facing code.
+- `WindowResizeEvent`
+- `WindowCloseEvent`
+- `WindowFocusEvent`
 
-### Input and EventDrivenInput
+Backends **must not** re‑implement event dispatch.
+Instead, they call the base class helpers (e.g., `FireWindowResizeEvent(w, h)`) whenever the platform reports a relevant event.
+This centralizes event behavior and prevents subtle inconsistencies between backends.
+
+> [!IMPORTANT]
+> `GetNativeWindow()` returns a raw platform handle (`HWND`, `GLFWwindow*`, etc.) as a `void*` on purpose.
+> This keeps backend types out of the public headers.
+> Casting should only be done inside backend implementations, never in user code.
+
+## Input and EventDrivenInput
 
 **Header**: `Raysim/Input/Input.hpp`
 
-Raysim distinguishes two fundamentally different input models, which map to two distinct base classes:
+> [!NOTE]
+> Raysim distinguishes two fundamentally different input models, which map to two distinct base classes.
 
-**Polling model** (Raylib-style): the backend directly queries the native API on every call. No state is accumulated between queries. `IsKeyDown(key)` asks raylib _right now_ whether that key is held. This is simpler to implement but only works if the native library provides per-frame polling functions.
+### Polling Model (Raylib-style)
 
-**Event-driven model** (GLFW, SDL2, Win32): the native library delivers input through callbacks or an event queue. The backend must accumulate per-frame state (down/pressed/released/repeating) in arrays, update them as callbacks fire, and reset one-shot states (pressed/released) at the start of each frame. `EventDrivenInput` provides all of this machinery; backends only need to implement the native callback bridge.
+The backend directly queries the native API on every call. No state is accumulated between queries. `IsKeyDown(key)` asks raylib _right now_ whether that key is held.
+
+> [!TIP]
+> This model is simpler to implement but only works if the native library provides per-frame polling functions.
+
+### Event-Driven Model (GLFW, SDL2, Win32)
+
+The native library delivers input through callbacks or an event queue. The backend must accumulate per-frame state (down/pressed/released/repeating) in arrays, update them as callbacks fire, and reset one-shot states (pressed/released) at the start of each frame.
+
+> [!IMPORTANT]
+> `EventDrivenInput` provides all of this machinery; backends only need to implement the native callback bridge.
 
 The abstract `Input` interface covers both models:
 
@@ -330,11 +367,17 @@ The `OnEvent` handler processes incoming events from the `EventBus` and maps the
 
 `Update()` is called once per frame before `OnUpdate` runs. It copies the _down_ state to compute _pressed_ (newly down this frame) and _released_ (newly up this frame), then clears those one-shot arrays for next frame.
 
-### ImGuiBackend
+## ImGuiBackend
 
 **Header**: `Raysim/ImGui/ImGuiBackend.hpp`
 
-The ImGui backend is responsible for exactly two things: forwarding platform state to `ImGuiIO` each frame (`BeginFrame`) and issuing GPU draw calls for the ImGui draw lists (`EndFrame`). These map directly to Dear ImGui's two-phase rendering model described in its own [BACKENDS.md](../asd).
+> [!IMPORTANT]
+> The ImGui backend is responsible for exactly **two** things:
+>
+> - **BeginFrame**: Forward platform state to `ImGuiIO` (cursor, keys, display size)
+> - **EndFrame**: Issue GPU draw calls for the ImGui draw lists
+>
+> These map directly to Dear ImGui's two-phase rendering model.
 
 ```cpp
 class ImGuiBackend {
@@ -386,11 +429,14 @@ void MyImGuiBackend::EndFrame() {
 
 > Note: the Raysim Raylib backend uses `rlImGui` (bundled in `third_party/rlImGui/`) which wraps both `BeginFrame` and `EndFrame` responsibilities in `rlImGuiBegin()` / `rlImGuiEnd()`.
 
-### FontRenderer
+## FontRenderer
 
 **Header**: `Raysim/Fonts/Rendering/FontRenderer.hpp`
 
-`FontRenderer` is the GPU-side half of the font system. `FontManager` owns the atlas metadata (glyph rectangles, advance widths, kerning) and calls `FontRenderer` to upload atlas textures to GPU memory and issue text draw calls. This split allows `FontManager` to be backend-agnostic: it never touches a GPU API directly.
+> [!NOTE]
+> `FontRenderer` is the **GPU-side half** of the font system. `FontManager` owns the atlas metadata (glyph rectangles, advance widths, kerning) and calls `FontRenderer` to upload atlas textures to GPU memory and issue text draw calls.
+
+This split allows `FontManager` to be **backend-agnostic**: it never touches a GPU API directly.
 
 ```cpp
 class FontRenderer {
@@ -426,13 +472,17 @@ The `FontAtlas` struct (`Raysim/Fonts/Types/FontAtlas.hpp`) provides all the dat
 - `unsigned int TextureID` — GPU texture handle (populated by `LoadFontAtlas`)
 - `int AtlasWidth`, `int AtlasHeight` — atlas dimensions in pixels
 
+### KeyMap Template
+
+> [!IMPORTANT]
+> Every backend must translate between Raysim's abstract key/button/axis codes and the native integers used by the underlying library.
+
+This translation is done **entirely at compile time** through `constexpr` arrays — there are no `switch` statements, no hash maps, no runtime lookups.
+
+> [!TIP]
+> The `BackendKeyMapTemplate.hpp` in `include/Backend/` is a fully commented template. Copy it to your backend directory, rename it, and fill in the native constants. The `static_assert` checks at the bottom of each array definition will catch any mismatch between the array size and the enum's `Count` sentinel.
+
 ---
-
-## KeyMap Template
-
-Every backend must translate between Raysim's abstract key/button/axis codes and the native integers used by the underlying library. This translation is done entirely at compile time through `constexpr` arrays — there are no `switch` statements, no hash maps, no runtime lookups.
-
-The `BackendKeyMapTemplate.hpp` in `include/Backend/` is a fully commented template. Copy it to your backend directory, rename it, and fill in the native constants. The `static_assert` checks at the bottom of each array definition will catch any mismatch between the array size and the enum's `Count` sentinel.
 
 ### KeyCode Mappings
 
@@ -459,7 +509,8 @@ inline constexpr auto XxxKeyToKeyCode = BuildReverseKeyMap(KeyCodeToXxx);
 
 ### MouseButton Mappings
 
-Mouse button indices are small and fixed. Map any unsupported button to `-1`:
+> [!NOTE]
+> Mouse button indices are small and fixed. Map any unsupported button to `-1`.
 
 ```cpp
 inline constexpr std::array<int, MouseButtonCount> MouseButtonToXxx = {{
@@ -508,7 +559,10 @@ inline constexpr std::array<int, XxxGamepadAxisCount> GamepadAxisToXxx = {{
 
 ## Step-by-Step: Creating a New Backend
 
-The steps below are ordered to minimize integration friction. Start with the KeyMap (no compilation dependency on anything else), then work inward toward `BackendFactory`.
+> [!IMPORTANT]
+> The steps below are **ordered to minimize integration friction**. Start with the KeyMap (no compilation dependency on anything else), then work inward toward `BackendFactory`.
+
+---
 
 ### 1. Create the Backend Directory
 
@@ -530,15 +584,26 @@ src/Backend/MyBackend/
     MyBackendFontRenderer.cpp
 ```
 
+---
+
 ### 2. Implement the KeyMap Header
 
-Copy `include/Backend/BackendKeyMapTemplate.hpp` to `include/Backend/MyBackend/MyBackendKeyMap.hpp`. Fill in every entry in the three translation arrays (`KeyCodeToXxx`, `MouseButtonToXxx`, `GamepadButtonToXxx`, `GamepadAxisToXxx`) using the native constants from your window/input library. The `static_assert` lines at the end of each array will fail at compile time if you miss any entry.
+> [!TIP]
+> Copy `include/Backend/BackendKeyMapTemplate.hpp` to `include/Backend/MyBackend/MyBackendKeyMap.hpp`. Fill in every entry in the three translation arrays (`KeyCodeToXxx`, `MouseButtonToXxx`, `GamepadButtonToXxx`, `GamepadAxisToXxx`) using the native constants from your window/input library.
 
-The KeyMap header must be `#include`d only from within the backend `.cpp` files — it should never appear in engine-facing headers.
+The `static_assert` lines at the end of each array will fail at compile time if you miss any entry.
+
+> [!CAUTION]
+> The KeyMap header must be `#include`d only from within the backend `.cpp` files — it should **never** appear in engine-facing headers.
+
+---
 
 ### 3. Implement RendererAPI
 
-`RendererAPI` is the simplest interface. Implement `BeginFrame` / `EndFrame` as the frame delimiters of your graphics API, `ClearScreen` as a full-framebuffer clear, and `SetViewport` as the equivalent of `glViewport`:
+> [!NOTE]
+> `RendererAPI` is the **simplest** interface.
+
+Implement `BeginFrame` / `EndFrame` as the frame delimiters of your graphics API, `ClearScreen` as a full-framebuffer clear, and `SetViewport` as the equivalent of `glViewport`:
 
 ```cpp
 // MyBackendRendererAPI.hpp
@@ -561,9 +626,12 @@ public:
 
 `Init()` is the right place to initialize any GPU state that must be set up once (load GLAD, create shared VAOs/UBOs, compile shaders used by `FontRenderer`, etc.).
 
+---
+
 ### 4. Implement Window
 
-Inherit from `Window` and override every `Impl*` virtual. Do **not** fire events from inside the `Impl*` methods directly — call the protected helper methods provided by the `Window` base class (e.g. `FireWindowResizeEvent`, `FireWindowCloseEvent`) so the base class can update `m_Props` before dispatching:
+> [!WARNING]
+> Inherit from `Window` and override every `Impl*` virtual. Do **not** fire events from inside the `Impl*` methods directly — call the protected helper methods provided by the `Window` base class (e.g. `FireWindowResizeEvent`, `FireWindowCloseEvent`) so the base class can update `m_Props` before dispatching:
 
 ```cpp
 // MyBackendWindow.hpp
@@ -597,11 +665,16 @@ private:
 
 The constructor must call the base `Window(props)` constructor first. Inside it, create the OS window, create the graphics context (or let the native library do it), and apply the initial `VSync` and `Fullscreen` settings from `props`.
 
+---
+
 ### 5. Implement Input / EventDrivenInput
 
-Choose the input model that matches your library:
+> [!IMPORTANT]
+> Choose the input model that matches your library:
 
-**Option A — Polling backend** (library provides `IsKeyDown`-style queries per frame):
+#### Option A — Polling Backend
+
+_(library provides `IsKeyDown`-style queries per frame)_
 
 ```cpp
 class MyBackendInput : public Input {
@@ -616,9 +689,12 @@ public:
 };
 ```
 
-**Option B — Event-driven backend** (library delivers input via callbacks):
+#### Option B — Event-Driven Backend
 
-Inherit from `EventDrivenInput` and install native callbacks that call the protected setters. The base class handles all state accumulation and frame-reset logic:
+_(library delivers input via callbacks)_
+
+> [!TIP]
+> Inherit from `EventDrivenInput` and install native callbacks that call the protected setters. The base class handles **all** state accumulation and frame-reset logic:
 
 ```cpp
 class MyBackendInput : public EventDrivenInput {
@@ -644,13 +720,21 @@ private:
 };
 ```
 
+---
+
 ### 6. Implement ImGuiBackend
 
-Install platform callbacks in `Init`, update `ImGuiIO` in `BeginFrame`, and flush draw data in `EndFrame`. See the [ImGuiBackend interface section](#imguibackend) for a full lifecycle example. Pay attention to:
+> [!IMPORTANT]
+> Install platform callbacks in `Init`, update `ImGuiIO` in `BeginFrame`, and flush draw data in `EndFrame`. See the [ImGuiBackend interface section](#imguibackend) for a full lifecycle example.
 
-- `io.DisplaySize` and `io.DisplayFramebufferScale` must be set in `BeginFrame` if the window can be resized.
-- `io.DeltaTime` must be set to the elapsed time in seconds, not milliseconds.
-- Mouse position must be in window-space pixels, not screen-space.
+**Key points to verify:**
+
+| Setting                      | Description                                                   |
+| ---------------------------- | ------------------------------------------------------------- |
+| `io.DisplaySize`             | Must be set in `BeginFrame` if the window can be resized.     |
+| `io.DisplayFramebufferScale` | Also updated on resize.                                       |
+| `io.DeltaTime`               | Must be set to elapsed time in **seconds**, not milliseconds. |
+| Mouse position               | Must be in **window-space pixels**, not screen-space.         |
 
 ```cpp
 class MyBackendImGuiBackend : public ImGuiBackend {
@@ -676,9 +760,15 @@ public:
 };
 ```
 
+---
+
 ### 7. Implement FontRenderer
 
-`Init` and `Shutdown` manage any shared GPU resources (e.g. a dedicated shader program for text rendering). `LoadFontAtlas` uploads the bitmap atlas to GPU memory and writes the resulting GPU texture ID back into `font.Atlas.TextureID`. `RenderText` computes per-glyph screen quads and issues batched draw calls:
+> [!NOTE]
+> `Init` and `Shutdown` manage any shared GPU resources (e.g. a dedicated shader program for text rendering).
+
+- `LoadFontAtlas`: Uploads the bitmap atlas to GPU memory and writes the resulting GPU texture ID back into `font.Atlas.TextureID`.
+- `RenderText`: Computes per-glyph screen quads and issues batched draw calls.
 
 ```cpp
 class MyBackendFontRenderer : public FontRenderer {
@@ -696,9 +786,12 @@ public:
 };
 ```
 
+---
+
 ### 8. Wire Up BackendFactory
 
-Add one `#elif` branch per `Create*` function in `BackendFactory.cpp`. Each function follows the same structure — include the concrete header, return a `CreateScope<>` of the concrete type:
+> [!IMPORTANT]
+> Add one `#elif` branch per `Create*` function in `BackendFactory.cpp`. Each function follows the same structure — include the concrete header, return a `CreateScope<>` of the concrete type:
 
 ```cpp
 Scope<RendererAPI> BackendFactory::CreateRenderer() {
@@ -757,11 +850,15 @@ Scope<Fonts::FontRenderer> BackendFactory::CreateFontRenderer() {
 }
 ```
 
-Also update `BackendFactory.hpp` to forward-declare any new concrete classes that the factory must reference.
+> [!NOTE]
+> Also update `BackendFactory.hpp` to forward-declare any new concrete classes that the factory must reference.
+
+---
 
 ### 9. Update CMake Configuration
 
-Add a new branch in the root `CMakeLists.txt` and in `src/CMakeLists.txt`. The root file defines the macro and pulls in the backend's CMake module (which finds/fetches the required third-party library). The source file adds the backend's `.cpp` files to the `Raysim` target:
+> [!IMPORTANT]
+> Add a new branch in the root `CMakeLists.txt` and in `src/CMakeLists.txt`. The root file defines the macro and pulls in the backend's CMake module (which finds/fetches the required third-party library). The source file adds the backend's `.cpp` files to the `Raysim` target:
 
 ```cmake
 # Root CMakeLists.txt
@@ -789,13 +886,12 @@ if(RS_BACKEND STREQUAL "mybackend")
 endif()
 ```
 
----
-
 ## Platform-Specific Considerations
 
 ### Win32
 
-Windows introduces several macro collisions that affect backend code. Before including any Raysim or raylib header inside a backend `.cpp` or `.hpp` file, ensure the following defines are in place:
+> [!WARNING]
+> Windows introduces several macro collisions that affect backend code. Before including any Raysim or raylib header inside a backend `.cpp` or `.hpp` file, ensure the following defines are in place:
 
 ```cpp
 #if defined(_WIN32)
@@ -811,43 +907,48 @@ Windows introduces several macro collisions that affect backend code. Before inc
 #endif
 ```
 
-`DrawText` and `CreateWindow` are defined as macros by `<windows.h>` and clash with Raysim and raylib symbols of the same name. `NOMINMAX` prevents `<windows.h>` from defining `min`/`max` macros that collide with `std::min`/`std::max`. These guards are already applied in the engine's `Application.hpp` for user-facing code, but backend `.cpp` files that pull in both `<windows.h>` and raylib headers must apply them manually.
+> [!IMPORTANT]
+> `DrawText` and `CreateWindow` are defined as macros by `<windows.h>` and clash with Raysim and raylib symbols of the same name. `NOMINMAX` prevents `<windows.h>` from defining `min`/`max` macros that collide with `std::min`/`std::max`.
 
-`RS_DEBUGBREAK()` expands to `__debugbreak()` on MSVC, which signals the debugger without terminating the process.
+<!-- -->
+
+> [!NOTE]
+> These guards are already applied in the engine's `Application.hpp` for user-facing code, but backend `.cpp` files that pull in both `<windows.h>` and raylib headers must apply them manually.
+
+<!-- -->
+
+> [!NOTE]
+> `RS_DEBUGBREAK()` expands to `__debugbreak()` on MSVC, which signals the debugger without terminating the process.
+
+---
 
 ### macOS
 
-macOS is not officially tested. The build system and vcpkg dependencies are cross-platform and should work in theory, but compatibility is not guaranteed. Known gaps:
+> [!CAUTION]
+> macOS is **not officially tested**. The build system and vcpkg dependencies are cross-platform and should work in theory, but compatibility is not guaranteed.
 
-- No Metal backend exists. A Metal `RendererAPI` would need to be authored from scratch using the Metal C++ API or Objective-C++ wrappers.
-- `RS_DEBUGBREAK()` expands to `__builtin_trap()`, which terminates the process rather than pausing the debugger on some configurations. Use LLDB's breakpoint on `__builtin_trap` to catch these.
-- Cocoa window creation (via GLFW or SDL2) requires the main thread to have a `NSRunLoop`. Raylib already handles this internally; custom backends must do the same.
+**Known gaps:**
+
+| Issue             | Description                                                                                                                                                                    |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| No Metal backend  | A Metal `RendererAPI` would need to be authored from scratch using the Metal C++ API or Objective-C++ wrappers.                                                                |
+| `RS_DEBUGBREAK()` | Expands to `__builtin_trap()`, which terminates the process rather than pausing the debugger on some configurations. Use LLDB's breakpoint on `__builtin_trap` to catch these. |
+| NSRunLoop         | Cocoa window creation (via GLFW or SDL2) requires the main thread to have a `NSRunLoop`. Raylib already handles this internally; custom backends must do the same.             |
+
+---
 
 ### Linux
 
-On Linux, `RS_DEBUGBREAK()` uses `__builtin_trap()`. Both X11 and Wayland display servers are viable:
+> [!NOTE]
+> On Linux, `RS_DEBUGBREAK()` uses `__builtin_trap()`. Both X11 and Wayland display servers are viable:
 
-- **X11**: `GetNativeWindow()` returns an `Xlib::Window` (a `uint64_t`). The OpenGL context is a `GLXContext`.
-- **Wayland**: `GetNativeWindow()` returns a `wl_surface*`. Requires `EGL` for OpenGL context creation.
+| Display Server | `GetNativeWindow()` Returns | Context                           |
+| -------------- | --------------------------- | --------------------------------- |
+| **X11**        | `Xlib::Window` (`uint64_t`) | `GLXContext`                      |
+| **Wayland**    | `wl_surface*`               | Requires `EGL` for OpenGL context |
 
-GLFW and SDL2 abstract these differences, which is one reason they are the preferred choices for new backends on Linux.
-
----
-
-## Testing
-
-A backend is not considered complete until all of the following are verified against the reference Raylib backend's behavior:
-
-1. **Build cleanly**: `cmake --preset debug && cmake --build --preset debug` with `RS_BACKEND=mybackend` produces no errors or warnings.
-2. **All examples run**: Every project under `examples/` should run and display correctly. These exercise the full public API surface.
-3. **Window events**: `WindowCloseEvent` (clicking the X button) terminates the application. `WindowResizeEvent` updates the viewport and re-renders without artifacts. `WindowFocusEvent` fires when the window gains and loses focus.
-4. **ImGui layer**: Push `ImGuiLayer` in a scene and call `ImGui::ShowDemoWindow()`. Verify that all widgets render correctly, text input works, and the demo window can be resized and moved.
-5. **Font rendering**: Call `FontManager::LoadFont("test", "fonts/OpenSans-Regular.ttf", 32)` and render text at multiple sizes. Verify glyph shapes, spacing, and color accuracy.
-6. **Keyboard input**: Verify `IsKeyDown` (held), `IsKeyPressed` (one-shot), `IsKeyReleased` (one-shot), and `IsKeyRepeating` (held-repeat) all fire at the correct times and clear correctly across frame boundaries.
-7. **Mouse input**: Verify `GetMousePosition`, `GetMouseDelta`, `GetMouseWheelMove`, and all three mouse button states.
-8. **Gamepad input**: If the backend supports gamepads, connect a controller and verify axes (deadzone behavior, normalized range) and buttons against the native driver's reported values.
-
----
+> [!TIP]
+> GLFW and SDL2 abstract these differences, which is one reason they are the **preferred choices** for new backends on Linux.
 
 <p align="center">
   <img src="images/footer.png" alt="Raysim Footer" width="720" />
