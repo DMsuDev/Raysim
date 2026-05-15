@@ -5,7 +5,6 @@
 #include "TerrainLayer.hpp"
 
 #include <optional>
-#include <string>
 
 using namespace RS;
 
@@ -43,18 +42,17 @@ private:
 
     void DrawHUD()
     {
-        std::string modeLine  = "[1-5] Mode: " + std::string(NoiseName(terrain_->GetMode()));
-        std::string pauseLine = "[SPACE] " + std::string(autoScroll_ ? "Scrolling" : "Paused  ");
-        std::string speedLine = "[Up/Down] Speed: " + std::to_string(static_cast<int>(scrollSpeed_)) + " px/s";
-        std::string reseedLine= "[R] Reseed";
-        std::string fpsLine   = "FPS: " + std::to_string(static_cast<int>(Time::GetSmoothedFPS()));
-
-        Text::RenderText(modeLine,   16.0f, 16.0f, 22, Colors::White);
-        Text::RenderText(pauseLine,  16.0f, 44.0f, 18, Colors::LightGray);
-        Text::RenderText(speedLine,  16.0f, 68.0f, 18, Colors::LightGray);
-        Text::RenderText(reseedLine, 16.0f, 92.0f, 18, Colors::LightGray);
-        Text::RenderText(fpsLine, static_cast<float>(GetWindow().GetWidth()) - 16.0f, 16.0f, 20,
-                   Colors::LightGray, OriginMode::TopRight);
+        Text::RenderText(fmt::format("[1-5] Mode: {}", NoiseName(terrain_->GetMode())),
+                         16.0f, 16.0f, 22, Colors::White);
+        Text::RenderText(fmt::format("[SPACE] {}", autoScroll_ ? "Scrolling" : "Paused  "),
+                         16.0f, 44.0f, 18, Colors::LightGray);
+        Text::RenderText(fmt::format("[Up/Down] Speed: {} px/s", static_cast<int>(scrollSpeed_)),
+                         16.0f, 68.0f, 18, Colors::LightGray);
+        Text::RenderText("[R] Reseed",
+                         16.0f, 92.0f, 18, Colors::LightGray);
+        Text::RenderText(fmt::format("FPS: {}", static_cast<int>(Time::GetSmoothedFPS())),
+                         static_cast<float>(window().GetWidth()) - 16.0f, 16.0f, 20,
+                         Colors::LightGray, OriginMode::TopRight);
     }
 
 #pragma endregion
@@ -68,12 +66,9 @@ public:
     void OnStart() override
     {
         RS_DEBUG("NoiseLandscape starting");
-        GetWindow().SetSize(1200, 700);
-        GetWindow().SetTitle("Raysim - Noise Landscape");
         FontManager::LoadFont("opensans", "fonts/OpenSans-Regular.ttf", 32);
-        Time::SetTargetFPS(60);
-        float w = static_cast<float>(GetWindow().GetWidth());
-        float h = static_cast<float>(GetWindow().GetHeight());
+        float w = static_cast<float>(window().GetWidth());
+        float h = static_cast<float>(window().GetHeight());
         skyLayer_.emplace(w, h * SKY_HEIGHT_RATIO, STAR_COUNT, SKY_GRAD_STEPS);
         terrain_.emplace(w, h);
     }
@@ -81,22 +76,22 @@ public:
     void OnUpdate(float dt) override
     {
         //--- Mode select ------------------------------------------------
-        if (GetInput().IsKeyPressed(KeyCode::D1))    terrain_->SetMode(NoiseMode::Perlin);
-        if (GetInput().IsKeyPressed(KeyCode::D2))    terrain_->SetMode(NoiseMode::Simplex);
-        if (GetInput().IsKeyPressed(KeyCode::D3))    terrain_->SetMode(NoiseMode::Cellular);
-        if (GetInput().IsKeyPressed(KeyCode::D4))    terrain_->SetMode(NoiseMode::Value);
-        if (GetInput().IsKeyPressed(KeyCode::D5))    terrain_->SetMode(NoiseMode::FBM);
+        if (input().IsKeyPressed(KeyCode::D1))    terrain_->SetMode(NoiseMode::Perlin);
+        if (input().IsKeyPressed(KeyCode::D2))    terrain_->SetMode(NoiseMode::Simplex);
+        if (input().IsKeyPressed(KeyCode::D3))    terrain_->SetMode(NoiseMode::Cellular);
+        if (input().IsKeyPressed(KeyCode::D4))    terrain_->SetMode(NoiseMode::Value);
+        if (input().IsKeyPressed(KeyCode::D5))    terrain_->SetMode(NoiseMode::FBM);
 
         //--- Scroll control ---------------------------------------------
-        if (GetInput().IsKeyPressed(KeyCode::Space)) autoScroll_ = !autoScroll_;
+        if (input().IsKeyPressed(KeyCode::Space)) autoScroll_ = !autoScroll_;
 
-        if (GetInput().IsKeyDown(KeyCode::Up))
+        if (input().IsKeyDown(KeyCode::Up))
             scrollSpeed_ = Math::MinValue(scrollSpeed_ + 80.0f * dt, 600.0f);
-        if (GetInput().IsKeyDown(KeyCode::Down))
+        if (input().IsKeyDown(KeyCode::Down))
             scrollSpeed_ = Math::MaxValue(scrollSpeed_ - 80.0f * dt, 5.0f);
 
         //--- Reseed - regenerate both sky and terrain -----------------------
-        if (GetInput().IsKeyPressed(KeyCode::R)) {
+        if (input().IsKeyPressed(KeyCode::R)) {
             Math::Random::SeedRandom();
             skyLayer_->Reseed();
             terrain_->Reseed();
@@ -110,7 +105,7 @@ public:
     void OnDraw(float alpha) override
     {
         RS_ASSERT(terrain_.has_value() && skyLayer_.has_value(), "Layers not initialized: was OnStart called?");
-        float skyH = static_cast<float>(GetWindow().GetHeight()) * SKY_HEIGHT_RATIO;
+        float skyH = static_cast<float>(window().GetHeight()) * SKY_HEIGHT_RATIO;
         skyLayer_->SetSkyHeight(skyH);
         skyLayer_->DrawSky();               // gradient background
         skyLayer_->DrawStars();             // twinkling star field
@@ -129,9 +124,11 @@ public:
 RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
 {
     RS::ApplicationConfig config;
-    config.Window.Title  = "Raysim - Noise Landscape Demo";
-    config.Window.Width  = 1000;
-    config.Window.Height = 600;
+    config.Window.Title  = "Raysim - Noise Landscape";
+    config.Window.Width  = 1200;
+    config.Window.Height = 700;
+    config.VSync         = true;
+    config.TargetFPS     = 60;
 
     auto* app = new RS::Application(config);
     app->RegisterScene<NoiseLandscape>();

@@ -98,14 +98,12 @@ void TerrainLayer::DrawFarRidgeline(float skyH) const
 
 void TerrainLayer::DrawTerrain(float skyH) const
 {
-    (void)skyH;
     int   cols  = static_cast<int>(screenW_) / columnW_ + 2;
-    float halfH = screenH_ * 0.5f;
 
     for (int col = 0; col < cols; ++col) {
         float worldX   = scrollX_ + static_cast<float>(col * columnW_);
         float noise    = SampleNoise(worldX);
-        float terrainY = halfH - noise * (halfH * 0.4f);
+        float terrainY = skyH - noise * (skyH * 0.4f);
         float screenX  = static_cast<float>(col * columnW_);
         float groundH  = screenH_ - terrainY;
 
