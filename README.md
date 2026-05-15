@@ -56,8 +56,9 @@ All examples are built alongside the library. See the [Building](#-building) sec
 
 ## 🔧 Building
 
-Minimum requirements: CMake 3.28, C++20, and Ninja. Dependencies are managed via [vcpkg](https://vcpkg.io/), which is included as a Git submodule.
+For detailed system requirements, supported platforms, and dependency information, see the [System & Build Requirements](docs/REQUIREMENTS.md) document.
 
+> [!NOTE]
 > **macOS** support has not been officially tested. The build system and dependencies should work in theory, but compatibility is not guaranteed.
 
 ### 1. Clone with submodules
@@ -73,7 +74,7 @@ git submodule update --init --recursive
 Once the submodule is ready, the setup script bootstraps vcpkg and installs all required dependencies automatically:
 
 ```bash
-./tools/setup_all.sh       # Linux / macOS
+./tools/setup_all.sh       # Linux
 .\tools\setup_all.ps1      # Windows (PowerShell)
 ```
 
