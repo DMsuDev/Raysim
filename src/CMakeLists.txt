@@ -3,7 +3,10 @@ add_library(Raysim ${RS_LIB_TYPE})
 add_library(Raysim::Raysim ALIAS Raysim)
 
 # Group in IDEs
-set_target_properties(Raysim PROPERTIES FOLDER "Raysim")
+set_target_properties(Raysim PROPERTIES
+    FOLDER "Raysim"
+    OUTPUT_NAME "raysim"
+)
 
 # ============================================================
 # SETTINGS
