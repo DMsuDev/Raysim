@@ -30,7 +30,8 @@ private:
     //--- Layout constants ---------------------------------------------------
     static constexpr int   STAR_COUNT       = 200;
     static constexpr int   SKY_GRAD_STEPS   = 60;
-    static constexpr float SKY_HEIGHT_RATIO = 0.65f; // fraction of screen height
+    static constexpr float SKY_HEIGHT_RATIO = 1.0f;  // fraction of screen height (visual sky)
+    static constexpr float HORIZON_RATIO    = 0.60f;  // fraction of screen height (terrain horizon)
 
 #pragma endregion
 
@@ -104,14 +105,20 @@ public:
 
     void OnDraw(float alpha) override
     {
+        renderer().ClearScreen(Colors::DarkBlue);
+
         RS_ASSERT(terrain_.has_value() && skyLayer_.has_value(), "Layers not initialized: was OnStart called?");
-        float skyH = static_cast<float>(window().GetHeight()) * SKY_HEIGHT_RATIO;
+        float skyH      = static_cast<float>(window().GetHeight()) * SKY_HEIGHT_RATIO;
+        float horizonH  = static_cast<float>(window().GetHeight()) * HORIZON_RATIO;
+
         skyLayer_->SetSkyHeight(skyH);
         skyLayer_->DrawSky();               // gradient background
         skyLayer_->DrawStars();             // twinkling star field
         skyLayer_->DrawMoon();              // moon + glow halos
-        terrain_->DrawFarRidgeline(skyH);   // parallax far ridgeline
-        terrain_->DrawTerrain(skyH);        // main scrolling terrain
+
+        terrain_->DrawFarRidgeline(horizonH);   // parallax far ridgeline
+        terrain_->DrawTerrain(horizonH);        // main scrolling terrain
+
         DrawHUD();
     }
 };

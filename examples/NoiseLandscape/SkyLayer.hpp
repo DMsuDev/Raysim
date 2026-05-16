@@ -19,7 +19,7 @@ class SkyLayer
 {
 public:
     SkyLayer() = default;
-    SkyLayer(float width, float skyH, int starCount = 200, int steps = 24);
+    SkyLayer(float width, float skyHeight, int starCount = 200, int steps = 24);
 
     void DrawSky()   const;
     void DrawStars() const;
@@ -28,7 +28,7 @@ public:
     /// Re-randomise the star field (call after re-seeding the RNG).
     void Reseed() { SpawnStars(); }
 
-    void SetSkyHeight(float h) { skyH_ = h; }
+    void SetSkyHeight(float h) { skyHeight_ = h; }
     void SetWidth(float w)     { width_ = w; }
 
 private:
@@ -37,7 +37,7 @@ private:
     int   starCount_ {200};
     int   gradientSteps_ {24};
     float width_     {100.0f};
-    float skyH_      {100.0f};
+    float skyHeight_ {100.0f};
 
     std::vector<Star> stars_;
 
