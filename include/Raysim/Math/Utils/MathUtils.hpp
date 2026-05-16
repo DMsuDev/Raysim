@@ -31,7 +31,7 @@
  *     - Stepping          (MoveTowards, Mod, Wrap, Repeat, PingPong)
  *     - Angular helpers   (NormalizeAngle, DeltaAngle)
  *     - Comparison        (EpsilonEquals)
- *     - Algebraic         (Sqrt, Sqr, Sin, Cos, Exp, Floor, FloorToInt, Fract, Saturate)
+ *     - Algebraic         (Sqrt, Sqr, Sin, Cos, Exp, Pow, Floor, FloorToInt, Fract, Saturate)
  *
  *   This header is included by `Math.hpp` and re-exported as part of the public Math API.
  **********************************************************************************************/
@@ -452,6 +452,16 @@ namespace RS::Math {
      * @return `x^2`.
      */
     [[nodiscard]] constexpr float Sqr(float x) noexcept;
+
+    /**
+     * @brief Computes x raised to an integer exponent using fast exponentiation.
+     *
+     * @param x   Base value.
+     * @param exp Integer exponent. May be negative.
+     *
+     * @return The result of x raised to the given exponent.
+     */
+    [[nodiscard]] constexpr float Pow(float x, int exp) noexcept;
 
     /**
      * @brief Computes the floor of `x` (largest integer not greater than `x`).

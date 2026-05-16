@@ -200,6 +200,28 @@ inline bool EpsilonEquals(float a, float b, float epsilon) noexcept
 inline float Sqrt(float x) noexcept { return std::sqrt(x); }
 constexpr float Sqr(float x) noexcept { return x * x; }
 
+constexpr float Pow(float x, int e) noexcept
+{
+    if (e == 0)
+        return 1.0f;
+
+    const bool negative = (e < 0);
+    // Use unsigned wide type for magnitude to avoid UB when e == INT_MIN
+    unsigned long long exp = negative
+        ? static_cast<unsigned long long>(-(static_cast<long long>(e)))
+        : static_cast<unsigned long long>(e);
+
+    float result = 1.0f;
+    float base = x;
+    while (exp) {
+        if (exp & 1ULL) result *= base;
+        base *= base;
+        exp >>= 1ULL;
+    }
+    return negative ? 1.0f / result : result;
+}
+
+
 inline float Floor(float x) noexcept { return std::floor(x); }
 inline int FloorToInt(float x) noexcept { return static_cast<int>(Floor(x)); }
 
