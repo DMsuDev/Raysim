@@ -66,9 +66,7 @@ private:
 
     // ========================================================================
     // Colour palette (top surface)
-    // ========================================================================
-    static constexpr RS::Color SNOW_COLOR  {220, 230, 245, 255};
-    static constexpr RS::Color ROCK_COLOR  {110, 100,  90, 255};
+    // =====    static constexpr RS::Color SNOW_COLOR  {220, 230, 245, 255};
     static constexpr RS::Color GRASS_COLOR { 58, 140,  48, 255};
 
     // ========================================================================

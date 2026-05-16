@@ -1,6 +1,5 @@
 #include "TerrainLayer.hpp"
 #include <Raysim/Raysim.hpp>
-#include <algorithm>
 
 using namespace RS;
 
@@ -98,36 +97,35 @@ void TerrainLayer::DrawFarRidgeline(float skyH) const
 
 void TerrainLayer::DrawTerrain(float skyH) const
 {
-    int   cols  = static_cast<int>(screenW_) / columnW_ + 2;
+    const int cols = static_cast<int>(screenW_) / columnW_ + 2;
 
-    for (int col = 0; col < cols; ++col) {
-        float worldX   = scrollX_ + static_cast<float>(col * columnW_);
+    for (int col = 0; col < cols; ++col)
+    {
+        const float worldX   = scrollX_ + static_cast<float>(col * columnW_);
+        const float screenX  = static_cast<float>(col * columnW_);
+
         float noise    = SampleNoise(worldX);
         float terrainY = skyH - noise * (skyH * 0.4f);
-        float screenX  = static_cast<float>(col * columnW_);
         float groundH  = screenH_ - terrainY;
-
-        // Surface cap colour (snow / rock / grass by elevation)
-        Color capColor;
-        if      (noise > 0.55f) capColor = SNOW_COLOR;
-        else if (noise > 0.25f) capColor = Color::Lerp(GRASS_COLOR, ROCK_COLOR,
-                                              Math::InverseLerp(0.25f, 0.55f, noise));
-        else                    capColor = GRASS_COLOR;
+        if (groundH <= 0.0f) continue;
 
         Shapes::DrawRect(screenX, terrainY,
-                         static_cast<float>(columnW_), CAP_HEIGHT, capColor);
+                         static_cast<float>(columnW_), CAP_HEIGHT, GRASS_COLOR);
 
         // Underground bands: lerp from light dirt to dark bedrock
         float belowCap = groundH - CAP_HEIGHT;
         if (belowCap <= 0.0f) continue;
 
-        for (int d = 0; d < UNDERGROUND_STEPS; ++d) {
-            float dt = static_cast<float>(d) / static_cast<float>(UNDERGROUND_STEPS);
-            Color band = Color::Lerp(DIRT_LIGHT, DIRT_DARK, dt);
-            float segY = terrainY + CAP_HEIGHT + dt * belowCap;
-            float segH = belowCap / static_cast<float>(UNDERGROUND_STEPS) + 1.0f;
-            Shapes::DrawRect(screenX, segY,
-                             static_cast<float>(columnW_), segH, band);
+        const float bandHeight = belowCap / static_cast<float>(UNDERGROUND_STEPS);
+
+        for (int i = 0; i < UNDERGROUND_STEPS; ++i) {
+            float t = static_cast<float>(i) / static_cast<float>(UNDERGROUND_STEPS - 1);
+            Color bandColor = Color::Lerp(DIRT_LIGHT, DIRT_DARK, t);
+
+            float y = terrainY + CAP_HEIGHT + i * bandHeight;
+
+            Shapes::DrawRect(screenX, y,
+                             static_cast<float>(columnW_), bandHeight + 1.0f, bandColor);
         }
     }
 }
