@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
   - Added `Mod(float a, float b)` and `Mod(int a, int b)`: True mathematical modulus returning values in [0, b) (unlike C++ `%` which can be negative).
   - Added `Wrap(float value, float min, float max)` and `Wrap(int value, int min, int max)`: Wraps values into half-open interval [min, max), works correctly with negative values.
   - Added `Sin`, `Cos`, `Exp` to algebraic helpers.
+  - Added `Math::Pow` function for consistent power calculations.
 
 - **New documentation**:
   - `docs/ARCHITECTURE.es.md` / `docs/ARCHITECTURE.md`: Architecture documentation explaining the engine's design (Core, Scene System, Rendering, Input, Events, Backends).
