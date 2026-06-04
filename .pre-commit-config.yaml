@@ -1,65 +1,169 @@
 # =============================================================================
-# Pre-commit hooks configuration for C++ / CMake project
+# Pre-commit hooks configuration for Raysim project
+# C++ / CMake framework built on raylib
 # https://pre-commit.com
 #
-# Install:  pre-commit install # (runs every time you commit in git)
-# Run all:  pre-commit run --all-files
-# Update:   pre-commit autoupdate
+# Setup:
+#   pip install --user pre-commit
+#   pre-commit install            # installs the git hook (pre-commit)
+#   pre-commit install --hook-type commit-msg  # installs commit-msg hook
+#
+# Run manually:
+#   pre-commit run --all-files    # run every hook on all tracked files
+#   pre-commit run <hook-id>      # run a specific hook only
+#
+# Update all hooks to their latest tagged revisions:
+#   pre-commit autoupdate
 # =============================================================================
 
 default_language_version:
   python: python3
 
+# ============================================================================
+# GLOBAL EXCLUDES: Never touch vendored, generated, or build artifacts.
+# Paths excluded from ALL hooks unless overridden by individual hook config
+# ============================================================================
+exclude: |
+  (?x)^(
+    vcpkg/.*         |   # vcpkg package manager submodule (large binary cache)
+    third_party/.*   |   # bundled third-party libraries (not our code)
+    build/.*         |   # local CMake build directories (generated)
+    _deps/.*         |   # FetchContent / CPM download cache (generated)
+    \.cache/.*       |   # tool caches (e.g. clangd index)
+    docs/gif/.*      |   # binary GIF assets
+    docs/images/.*   |   # binary image assets
+    .*\.png$         |   # PNG images anywhere
+    .*\.gif$             # GIF images anywhere
+  )$
+
+# ============================================================================
+# Pre-commit CI: Automatic hook execution on every PR
+# https://pre-commit.ci
+# ============================================================================
 ci:
-  autofix_commit_msg: "style: auto fixes from pre-commit"
-  autoupdate_commit_msg: "chore: autoupdate pre-commit hooks"
+  autofix_commit_msg: "style: auto-fixes from pre-commit [skip ci]"
+  autoupdate_commit_msg: "chore: pre-commit hook autoupdate [skip ci]"
   autoupdate_schedule: weekly
+  # Important: Don't recurse into vcpkg submodule (very large, slows CI)
   submodules: false
 
 repos:
-  # ─── General file hygiene ──────────────────────────────────────────────
+  # ==========================================================================
+  # Basic file hygiene (runs first, catches obvious issues)
+  # ==========================================================================
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
-      - id: trailing-whitespace # Remove trailing whitespace
+      # Remove trailing whitespace on every line
+      - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
-      - id: end-of-file-fixer # Ensure files end with newline
-      - id: check-yaml # Validate YAML syntax
-      - id: check-json # Validate JSON syntax
-      - id: check-xml # Validate XML syntax
-      - id: check-merge-conflict # Detect merge conflict markers
-      - id: check-added-large-files # Prevent giant files from being committed
-        args: [--maxkb=1024]
-        exclude: ^(build/|_deps/|third_party/|docs/)
-      - id: mixed-line-ending # Detect mixed line endings
-        args: [--fix=auto]
-      - id: check-case-conflict # Check for files that would conflict on case-insensitive FS
-      - id: fix-byte-order-marker # Remove UTF-8 BOM
 
-  # ─── Markdown lint ────────────────────────────────────────────────────
+      # Ensure every file ends with exactly one newline
+      - id: end-of-file-fixer
+
+      # Validate YAML syntax (workflows, pre-commit config, yamlfmt output…)
+      - id: check-yaml
+        args: [--unsafe] # allow custom YAML tags
+
+      # Validate JSON syntax (vcpkg.json, CMakePresets.json, …)
+      - id: check-json
+
+      # Validate XML syntax
+      - id: check-xml
+
+      # Detect leftover Git merge conflict markers
+      - id: check-merge-conflict
+
+      # Prevent accidentally committing files > 1 MB
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+
+      # Warn when filenames differ only in case (breaks macOS ↔ Linux)
+      - id: check-case-conflict
+
+      # Strip UTF-8 BOM (MSVC sometimes adds it; breaks on Linux)
+      - id: fix-byte-order-marker
+
+      # Normalise line endings (LF everywhere; CRLF only in .bat files)
+      - id: mixed-line-ending
+        args: [--fix=lf]
+        exclude: \.bat$ # .bat files MUST keep CRLF
+
+      # Catch files that look like private keys
+      - id: detect-private-key
+
+  # ==========================================================================
+  # Documentation & Code Quality
+  # ==========================================================================
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.47.0
+    rev: v0.48.0
     hooks:
       - id: markdownlint
-        name: Lint markdown files (with --fix)
+        name: "Docs: markdownlint"
         args: [--fix]
         types: [markdown]
-        exclude: ^(build/|_deps/|third_party/)
 
-  # ─── Spell checking ──────────────────────────────────────────────────
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
-    hooks:
-      - id: codespell
-        name: Lint spelling in source files (with --fix)
-        args: [--skip, "build,_deps,*.lock,*.json,*.es.md", --ignore-words-list, "nd,ot,te,ThirdParty"]
-        exclude: ^(build/|_deps/|third_party/)
-
-  # ─── YAML ────────────────────────────────────────────────────────────
   - repo: https://github.com/google/yamlfmt
     rev: v0.21.0
     hooks:
       - id: yamlfmt
-        name: Format YAML files with yamlfmt
-        args: [--formatter, "indent=2,include_document_start=false,retain_line_breaks=true"]
-        exclude: ^(build/|_deps/|third_party/)
+        name: "Config: yamlfmt"
+        # Exclude tool-specific configs (clang-tidy, clang-format, .editorconfig)
+        # These files have custom formatting requirements and shouldn't be auto-formatted
+        exclude: |
+          (?x)^(
+            \.clang-tidy|
+            \.clang-format|
+            \.cmake-format\.yaml|
+            \.editorconfig
+          )$
+        args:
+          - --formatter
+          - indent=2,include_document_start=false,retain_line_breaks=true
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.2
+    hooks:
+      - id: codespell
+        name: "Docs/Code: codespell"
+        args:
+          - --skip=*.lock,*.json,*.es.md,build,_deps
+          - --ignore-words-list=nd,ot,te,ThirdParty,raysim
+        types_or: [text, c, c++, cmake]
+
+  # ==========================================================================
+  # CI/CD & Security Validation
+  # ==========================================================================
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
+    hooks:
+      - id: actionlint
+        name: "CI: actionlint"
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.0
+    hooks:
+      - id: gitleaks
+        name: "Security: gitleaks (detect hardcoded secrets)"
+
+  # ==========================================================================
+  # Commit Message Validation (commit-msg hook)
+  # Run: pre-commit install --hook-type commit-msg
+  # ==========================================================================
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args:
+          - feat
+          - fix
+          - docs
+          - style
+          - refactor
+          - perf
+          - test
+          - build
+          - ci
+          - chore
+          - revert
