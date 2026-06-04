@@ -4,6 +4,62 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.94.2] - 2026-06-05
+
+### Added
+
+- **Build and dependency management scripts** (`tools/`):
+  - `build.sh`: Simplified CMake preset handling for consistent builds across platforms
+  - `check_deps.ps1` and `check_deps.sh`: Verify required and optional tools availability
+  - `clean.ps1` and `clean.sh`: Remove build artifacts and clean build directories
+  - `run_example.ps1` and `run_example.sh`: Execute compiled examples with simplified interface
+  - Enhanced `setup_all.ps1` and `setup_all.sh` for better user experience and error handling with integrated vcpkg bootstrap and pre-commit installation
+
+- **Pre-commit configuration** (`.pre-commit-config.yaml`): Enhanced hooks for code quality with additional tools and exclusions for generated files and third-party directories
+
+- **EditorConfig** (`.editorconfig`): Consistent coding styles and formatting rules across the project for different file types
+
+- **Git attributes configuration** (`.gitattributes`): Configuration for line endings, binary files, and export-ignore rules with enhanced executable script preservation
+
+- **GitHub Actions CI/CD workflows** (`.github/workflows/`):
+  - `build.yml`: Automated build testing across multiple platforms and configurations
+  - `linting.yml`: Code quality checks and static analysis
+  - `codeql.yml`: Security analysis and vulnerability detection
+  - `pre-commit.yml`: Pre-commit hooks validation
+
+- **Dependabot configuration** (`.dependabot/config.yml`): Automated dependency updates for GitHub Actions, pre-commit hooks, and Git submodules
+
+- **DLL API visibility support** (`include/Raysim/Core/API.hpp`, `src/Core/API.cpp`): Added `RS_API` macro for proper DLL export/import visibility control on Windows, enabling shared library builds
+
+### Changed
+
+- **EntryPoint refactoring** (`include/Raysim/Core/EntryPoint.hpp`): Improved application lifecycle management with better profiling session handling
+
+- **Base.hpp enhancement** (`include/Raysim/Core/Base.hpp`): Enhanced documentation and organization of core utilities, includes API header for consistent visibility control
+
+- **CMake configuration**:
+  - ImGui DLL visibility configuration for proper symbol export
+  - Enhanced build settings for better cross-platform support
+  - Applied `RS_API` macro to classes and functions for DLL export/import visibility
+
+- **CMake linker handling** (`cmake/compiler/CompilerOptimization.cmake`, `CMakeLists.txt`): Improved linker configuration for raylib and glfw on different platforms (Windows/MSVC, Linux, macOS)
+
+### Fixed
+
+- **Tool scripts permissions** (`tools/*.sh`): Fixed executable permissions and normalized line endings for shell scripts to work correctly across different shells (bash, dash, sh)
+
+- **CMake platform-specific linking**: Corrected linker flags for raylib and glfw to support multiple platforms properly
+
+- **Documentation**: Updated architecture links in Spanish README and improved setup script instructions for macOS compatibility
+
+- **CMake warnings**: Enhanced warning messages for sanitizer support and prevented duplicate warnings in build output
+
+### Maintenance
+
+- Version bump to 0.94.2 in `CMakeLists.txt` and `vcpkg.json`
+
+---
+
 ## [0.94.1] - 2026-05-15
 
 ### Added
