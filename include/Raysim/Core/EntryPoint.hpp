@@ -35,17 +35,23 @@ int main(int argc, char** argv)
 
 		RS_CORE_INFO("========= LOG START: {} {} =========", RS::Utils::Time::FullDate(), RS::Utils::Time::ClockTime());
 
-		RS_PROFILE_BEGIN_SESSION("Startup", "RaysimProfile-Startup.json");
-		auto app = RS::CreateApplication({ argc, argv });
-		RS_PROFILE_END_SESSION();
+		{
+			// Application and all its smart pointer members are owned within this
+			// scope so they are guaranteed to be destroyed before Log::Shutdown(),
+			// even if an exception propagates out of Run().
 
-		RS_PROFILE_BEGIN_SESSION("Runtime", "RaysimProfile-Runtime.json");
-		app->Run();
-		RS_PROFILE_END_SESSION();
+			RS_PROFILE_BEGIN_SESSION("Startup", "RaysimProfile-Startup.json");
+			auto app = std::unique_ptr<RS::Application>(RS::CreateApplication({ argc, argv }));
+			RS_PROFILE_END_SESSION();
 
-		RS_PROFILE_BEGIN_SESSION("Shutdown", "RaysimProfile-Shutdown.json");
-		delete app;
-		RS_PROFILE_END_SESSION();
+			RS_PROFILE_BEGIN_SESSION("Runtime", "RaysimProfile-Runtime.json");
+			app->Run();
+			RS_PROFILE_END_SESSION();
+
+			RS_PROFILE_BEGIN_SESSION("Shutdown", "RaysimProfile-Shutdown.json");
+			app.reset(); // explicit destruction inside the profiling session
+			RS_PROFILE_END_SESSION();
+		}
 
 		RS_CORE_INFO("========= LOG END: {} {} =========", RS::Utils::Time::FullDate(), RS::Utils::Time::ClockTime());
 
