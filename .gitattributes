@@ -167,3 +167,10 @@ Thumbs.db  export-ignore
 # ===================================================================
 CMakePresets.json  merge=ours
 .gitattributes     merge=ours
+
+# ===================================================================
+# SHELL SCRIPTS - LF line endings, no built-in diff driver for sh
+# Execute bit must be set via: git add --chmod=+x tools/*.sh
+# ===================================================================
+tools/*.sh   text eol=lf
+scripts/*.sh text eol=lf
