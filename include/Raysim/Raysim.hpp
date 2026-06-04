@@ -26,29 +26,6 @@
 #define RAYSIM_VERSION_PATCH 0
 #define RAYSIM_VERSION "0.93.0"
 
-// Function specifiers in case library is build/used as a shared library
-// NOTE: Microsoft specifiers to tell compiler that symbols are imported/exported from a .dll
-// NOTE: visibility("default") attribute makes symbols "visible" when compiled with -fvisibility=hidden
-// TODO: Implement __declspec(dllexport/dllimport) for Windows and visibility attributes for Unix-like systems
-#if defined(_WIN32) || defined(__CYGWIN__)
-    #if defined(RS_BUILD_SHARED)
-        #if defined(RS_BUILD_DLL)
-            #define RS_API __declspec(dllexport)   // We are building the library as a Win32 shared library (.dll)
-        #else
-            #define RS_API __declspec(dllimport)   // We are using the library as a Win32 shared library (.dll)
-        #endif
-    #else
-        // We are building/using the library as a static library (.lib), no special specifier needed
-        #define RS_API
-    #endif
-#else
-    #if defined(RS_BUILD_SHARED)
-        #define RS_API __attribute__((visibility("default"))) // We are building as a Unix shared library (.so/.dylib)
-    #else
-        #define RS_API
-    #endif
-#endif
-
 // Some compilers (mostly macos clang) default to C++98,
 // where aggregate initialization can't be used
 // So, give a more clear error stating how to fix this
