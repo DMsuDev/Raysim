@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include "Raysim/Core/API.hpp"
+
 namespace RS::Math {
 
 /**
@@ -58,7 +60,7 @@ namespace Random {
      *
      * @param seed  The seed value to use.
      */
-    void Seed(unsigned int seed);
+    RS_API void Seed(unsigned int seed);
 
     /**
      * @brief Re-seed with a hardware-random value (non-deterministic).
@@ -67,7 +69,7 @@ namespace Random {
      * std::random_device.  Call this to get a new random landscape or
      * sequence without restarting the application.
      */
-    void SeedRandom();
+    RS_API void SeedRandom();
 
     /**
      * @brief Return the current noise seed.
@@ -79,7 +81,7 @@ namespace Random {
      *
      * @return The active noise seed.
      */
-    unsigned int GetNoiseSeed();
+    RS_API unsigned int GetNoiseSeed();
 
     // ========================================================================
     // Standard RNG
@@ -94,7 +96,7 @@ namespace Random {
      * @param max  Upper bound (exclusive).
      * @return     A random integer in [0, max).
      */
-    int Int(int max);
+    RS_API int Int(int max);
 
     /**
      * @brief Generate a random integer in the range [min, max).
@@ -105,13 +107,13 @@ namespace Random {
      * @param max  Upper bound (exclusive).
      * @return     A random integer in [min, max).
      */
-    int Range(int min, int max);
+    RS_API int Range(int min, int max);
 
     /**
      * @brief Generate a random float in the range [0.0, 1.0).
      * @return A uniformly distributed float in [0.0, 1.0).
      */
-    float Float();
+    RS_API float Float();
 
     /**
      * @brief Generate a random float in the range [0.0, max).
@@ -122,7 +124,7 @@ namespace Random {
      * @param max  Upper bound (exclusive).
      * @return     A random float in [0.0, max).
      */
-    float Float(float max);
+    RS_API float Float(float max);
 
     /**
      * @brief Generate a random float in the range [min, max).
@@ -131,7 +133,7 @@ namespace Random {
      * @param max  Upper bound (exclusive).
      * @return     A uniformly distributed float in [min, max).
      */
-    float Range(float min, float max);
+    RS_API float Range(float min, float max);
 
     /**
      * @brief Pick a random element from a container.
@@ -154,7 +156,7 @@ namespace Random {
      * @brief Generate a random boolean with 50/50 probability.
      * @return true or false, each with 50% chance.
      */
-    bool Bool();
+    RS_API bool Bool();
 
     /**
      * @brief Generate a random boolean with a custom probability of being true.
@@ -163,7 +165,7 @@ namespace Random {
      *                     0.0 always returns false, 1.0 always returns true.
      * @return             true with the given probability, false otherwise.
      */
-    bool Bool(float probability);
+    RS_API bool Bool(float probability);
 
     // ========================================================================
     // Noise Generation (procedural, deterministic, affected by Seed)
@@ -180,7 +182,7 @@ namespace Random {
      * @param y  Y coordinate in noise space.
      * @return   Noise value in approximately [-1, 1].
      */
-    float PerlinNoise(float x, float y);
+    RS_API float PerlinNoise(float x, float y);
 
     /**
      * @brief 3D Perlin noise (gradient noise).
@@ -193,7 +195,7 @@ namespace Random {
      * @param z  Z coordinate in noise space (can be used as time).
      * @return   Noise value in approximately [-1, 1].
      */
-    float PerlinNoise(float x, float y, float z);
+    RS_API float PerlinNoise(float x, float y, float z);
 
     /**
      * @brief 2D Simplex noise.
@@ -207,7 +209,7 @@ namespace Random {
      * @param y  Y coordinate in noise space.
      * @return   Noise value in approximately [-1, 1].
      */
-    float SimplexNoise(float x, float y);
+    RS_API float SimplexNoise(float x, float y);
 
     /**
      * @brief 2D Cellular (Worley) noise.
@@ -221,7 +223,7 @@ namespace Random {
      * @param y  Y coordinate in noise space.
      * @return   Normalised distance value in [0, 1].
      */
-    float CellularNoise(float x, float y);
+    RS_API float CellularNoise(float x, float y);
 
     /**
      * @brief 2D Value noise.
@@ -234,7 +236,7 @@ namespace Random {
      * @param y  Y coordinate in noise space.
      * @return   Noise value in [0, 1].
      */
-    float ValueNoise(float x, float y);
+    RS_API float ValueNoise(float x, float y);
 
     /**
      * @brief Fractal Brownian Motion (fBm) using layered Perlin noise.
@@ -252,7 +254,7 @@ namespace Random {
      *                     Higher values add finer detail sooner.
      * @return             Combined noise value (range depends on octaves and persistence).
      */
-    float FractalBrownianMotion(float x, float y, int octaves = 6,
+    RS_API float FractalBrownianMotion(float x, float y, int octaves = 6,
                                 float persistence = 0.5f, float lacunarity = 2.0f);
 
 } // namespace Random

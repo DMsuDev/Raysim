@@ -78,11 +78,11 @@ enum class LogLevel : uint8_t {
 };
 
 // Forward declaration for macro use (not for user API)
-spdlog::level::level_enum ToSpd(LogLevel level);
+RS_API spdlog::level::level_enum ToSpd(LogLevel level);
 
 /// @brief Registry for logging messages only once per unique key (e.g. function name or event type).
 /// Useful for avoiding log spam from frequently called code paths while still capturing important events.
-class LogOnceRegistry {
+class RS_API LogOnceRegistry {
 public:
     /**
      * @brief Log a message only once per unique key (thread-safe).
@@ -107,7 +107,7 @@ public:
 
 /// @brief Registry for logging messages at most once per TTL (time-to-live) duration for a unique key (thread-safe).
 /// Useful for rate-limiting log messages from frequently called code paths while still capturing important events
-class LogTTLRegistry {
+class RS_API LogTTLRegistry {
 public:
     /**
      * @brief Log a message at most once per TTL (time-to-live) duration for a unique key (thread-safe).
@@ -162,7 +162,7 @@ enum class LogFileMode
 /// Call `Log::Init()` once at startup before any logging macro is used.
 /// Both loggers write to the same console and file sinks by default,
 /// but the client logger name and levels can be customized.
-class Log
+class RS_API Log
 {
 public:
     /// Initialize both Core and Client loggers.

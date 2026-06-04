@@ -21,9 +21,10 @@
 
 #pragma once
 
-#include "Color.hpp"
-#include "Raysim/Math/Types/Vector2.hpp"
-#include "OriginMode.hpp"
+#include "Raysim/Graphics/Color.hpp"
+#include "Raysim/Graphics/OriginMode.hpp"
+
+#include "Raysim/Core/API.hpp"
 
 #include <string>
 
@@ -65,7 +66,7 @@ namespace Text {
      * @param color Text color
      * @see RenderText(const std::string&, float, float, int, const Color&, OriginMode)
      */
-    void RenderText(const std::string& text, float x, float y, int fontSize, const Color& color);
+    RS_API void RenderText(const std::string& text, float x, float y, int fontSize, const Color& color);
 
     /**
      * @brief Draw text with custom origin point
@@ -81,7 +82,7 @@ namespace Text {
      * @param origin Which point of the text bounds is at (x, y)
      * @see OriginMode
      */
-    void RenderText(const std::string& text, float x, float y, int fontSize, const Color& color, OriginMode origin);
+    RS_API void RenderText(const std::string& text, float x, float y, int fontSize, const Color& color, OriginMode origin);
 
 //==============================================================================
 // Extended text
@@ -100,7 +101,7 @@ namespace Text {
      * @param spacing Horizontal space between characters in pixels (negative = tight)
      * @param color Text color
      */
-    void RenderTextEx(const std::string& text, float x, float y, float fontSize, float spacing, const Color& color);
+    RS_API void RenderTextEx(const std::string& text, float x, float y, float fontSize, float spacing, const Color& color);
 
     /**
      * @brief Draw text with custom spacing and origin point
@@ -116,7 +117,7 @@ namespace Text {
      * @param origin Which point of the text bounds is at (x, y)
      * @see OriginMode
      */
-    void RenderTextEx(const std::string& text, float x, float y, float fontSize, float spacing, const Color& color, OriginMode origin);
+    RS_API void RenderTextEx(const std::string& text, float x, float y, float fontSize, float spacing, const Color& color, OriginMode origin);
 
 } // namespace Text
 

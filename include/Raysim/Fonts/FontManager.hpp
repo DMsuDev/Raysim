@@ -36,7 +36,7 @@
 
 namespace RS::Fonts {
 
-class FontManager {
+class RS_API FontManager {
 public:
     FontManager() = delete; // Static-only
 

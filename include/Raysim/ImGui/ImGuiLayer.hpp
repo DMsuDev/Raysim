@@ -52,7 +52,7 @@ class Window;
  *   m_LayerStack.PushOverlay(m_ImGuiLayer);
  * @endcode
  */
-class ImGuiLayer : public Layer {
+class RS_API ImGuiLayer : public Layer {
 public:
     /**
      * @brief Construct an ImGuiLayer with an explicit backend.
