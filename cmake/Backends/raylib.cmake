@@ -15,8 +15,8 @@ find_package(raylib CONFIG REQUIRED)
 
 # vcpkg builds raylib with USE_EXTERNAL_GLFW=ON. CMake places GLFW before
 # raylib in the link command, which breaks single-pass linkers (debug/no-LTO).
-# LINK_GROUP:RESCAN wraps both in --start-group/--end-group to allow
-# multiple passes.
+# We wrap both in --start-group/--end-group on GNU-style linkers to allow
+# multiple resolution passes.
 find_package(glfw3 CONFIG QUIET)
 
 # ===========================================================================
@@ -26,13 +26,20 @@ find_package(glfw3 CONFIG QUIET)
 add_library(rs_windowing_raylib INTERFACE)
 
 if(glfw3_FOUND)
-    # LINK_GROUP:RESCAN uses --start-group/--end-group, only supported by GNU-style linkers (Linux/macOS).
-    # On Windows (MSVC) link both libraries directly without the group wrapper.
-    if(MSVC)
+    # Check if using MSVC linker or lld-link (which don't support --start/end-group)
+    string(TOLOWER "${CMAKE_LINKER}" CMAKE_LINKER_LOWER)
+    if(MSVC OR CMAKE_LINKER_LOWER MATCHES "lld-link")
         target_link_libraries(rs_windowing_raylib INTERFACE raylib glfw)
     else()
+        # Wrap both libs in --start-group/--end-group so single-pass GNU-style
+        # linkers (ld, gold) can resolve the circular dependency between
+        # raylib and glfw without needing LINK_GROUP:RESCAN.
+        # Note: lld-link (LLVM linker on Windows) doesn't support these flags.
         target_link_libraries(rs_windowing_raylib INTERFACE
-            "$<LINK_GROUP:RESCAN,raylib,glfw>"
+            -Wl,--start-group
+            raylib
+            glfw
+            -Wl,--end-group
         )
     endif()
 else()
