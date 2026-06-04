@@ -11,7 +11,7 @@
 [English Readme](https://github.com/DMsuDev/Raysim/blob/main/README.md)
 • [Readme Español](https://github.com/DMsuDev/Raysim/blob/main/README.es.md)
 • [Changelog](docs/CHANGELOG.md)
-• [Architecture](docs/ARCHITECTURE.md)
+• [Arquitectura](docs/ARCHITECTURE.es.md)
 
 Raysim es un framework de C++ para gráficos 2D y aplicaciones interactivas, construido sobre [raylib](https://www.raylib.com/).
 
@@ -52,7 +52,7 @@ Comentarios y contribuciones son bienvenidos. ❤️
 Todos los ejemplos se compilan junto con la librería. Consulta la sección [Compilación](#-compilación) para las instrucciones de configuración.
 
 > [!TIP]
-> ¿Buscas la referencia completa de módulos, callbacks del ciclo de vida y el sistema de eventos? Consulta [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+> ¿Buscas la referencia completa de módulos, callbacks del ciclo de vida y el sistema de eventos? Consulta [docs/ARCHITECTURE.es.md](docs/ARCHITECTURE.es.md).
 
 ## 🔧 Compilación
 
@@ -123,7 +123,7 @@ Visual Studio es un generador multi-config. Ignora `-DCMAKE_BUILD_TYPE` en el ti
 ## 🚀 Inicio Rápido
 
 > [!TIP]
-> El ejemplo a continuación es intencionalmente mínimo. Para una visión más profunda del ciclo de vida de las escenas, layers, eventos y todos los módulos disponibles, consulta [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) y [docs/EXAMPLES.md](docs/EXAMPLES.md).
+> El ejemplo a continuación es intencionalmente mínimo. Para una visión más profunda del ciclo de vida de las escenas, layers, eventos y todos los módulos disponibles, consulta [docs/ARCHITECTURE.es.md](docs/ARCHITECTURE.es.md) y [docs/EXAMPLES.md](docs/EXAMPLES.md).
 
 ```cpp
 #include "Raysim/Raysim.hpp"
@@ -168,7 +168,7 @@ RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
 }
 ```
 
-La semilla es auto-aleatoria al inicio. Llama a `Math::Random::Seed(valor)` en `OnAttach()` solo si necesitas reproducibilidad.
+La semilla es auto-aleatoria al inicio. Llama a `Math::Random::Seed(value)` en `OnAttach()` solo si necesitas reproducibilidad.
 
 ## Licencia
 

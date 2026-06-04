@@ -74,7 +74,7 @@ git submodule update --init --recursive
 Once the submodule is ready, the setup script bootstraps vcpkg and installs all required dependencies automatically:
 
 ```bash
-./tools/setup_all.sh       # Linux
+./tools/setup_all.sh       # Linux / macOS
 .\tools\setup_all.ps1      # Windows (PowerShell)
 ```
 
