@@ -1,0 +1,124 @@
+# =============================================================================
+# Auto-Update vcpkg Baseline
+# Runs weekly and opens a PR when the Microsoft vcpkg HEAD has moved.
+# =============================================================================
+name: Auto-Update vcpkg Baseline
+
+on:
+  schedule:
+    # Run weekly on Monday at 03:00 UTC
+    - cron: "0 3 * * 1"
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-baseline:
+    name: Check & Update vcpkg Baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate vcpkg.json exists
+        run: |
+          if [ ! -f vcpkg.json ]; then
+            echo "::error::vcpkg.json not found in repository root."
+            exit 1
+          fi
+
+      - name: Fetch latest vcpkg baseline
+        id: vcpkg
+        run: |
+          BASELINE=$(git ls-remote https://github.com/microsoft/vcpkg.git HEAD | cut -f1)
+
+          # Guard: ls-remote can return empty on network failure
+          if [ -z "$BASELINE" ]; then
+            echo "::error::Failed to fetch vcpkg HEAD — git ls-remote returned empty."
+            exit 1
+          fi
+
+          # Guard: must look like a 40-char hex SHA
+          if ! echo "$BASELINE" | grep -qE '^[0-9a-f]{40}$'; then
+            echo "::error::Fetched value does not look like a valid SHA: '$BASELINE'"
+            exit 1
+          fi
+
+          echo "baseline=$BASELINE" >> "$GITHUB_OUTPUT"
+          echo "Latest vcpkg baseline: $BASELINE"
+
+      - name: Get current baseline
+        id: current
+        run: |
+          CURRENT=$(jq -r '.["builtin-baseline"] // empty' vcpkg.json)
+
+          if [ -z "$CURRENT" ]; then
+            echo "::error::Could not read builtin-baseline from vcpkg.json."
+            exit 1
+          fi
+
+          echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
+          echo "Current baseline: $CURRENT"
+
+      - name: Compare baselines
+        id: check
+        run: |
+          NEW="${{ steps.vcpkg.outputs.baseline }}"
+          OLD="${{ steps.current.outputs.current }}"
+
+          if [ "$NEW" = "$OLD" ]; then
+            echo "update_needed=false" >> "$GITHUB_OUTPUT"
+            echo "Already up-to-date ($OLD). Nothing to do."
+          else
+            echo "update_needed=true" >> "$GITHUB_OUTPUT"
+            echo "Update available: $OLD -> $NEW"
+          fi
+
+      - name: Update vcpkg.json baseline
+        if: steps.check.outputs.update_needed == 'true'
+        run: |
+          NEW="${{ steps.vcpkg.outputs.baseline }}"
+          jq --arg baseline "$NEW" '.["builtin-baseline"] = $baseline' \
+            vcpkg.json > tmp.json && mv tmp.json vcpkg.json
+
+          # Verify the write actually landed correctly
+          WRITTEN=$(jq -r '.["builtin-baseline"]' vcpkg.json)
+          if [ "$WRITTEN" != "$NEW" ]; then
+            echo "::error::vcpkg.json verification failed: expected '$NEW', got '$WRITTEN'."
+            exit 1
+          fi
+
+          echo "vcpkg.json updated and verified."
+
+      - name: Create pull request
+        if: steps.check.outputs.update_needed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: main
+          branch: chore/update-vcpkg-baseline
+          branch-suffix: timestamp
+          delete-branch: true
+          commit-message: "chore(vcpkg): update baseline to ${{ steps.vcpkg.outputs.baseline }}"
+          title: "chore(vcpkg): update vcpkg baseline"
+          body: |
+            ## Automated vcpkg baseline update
+
+            | | SHA |
+            |---|---|
+            | **Previous** | `${{ steps.current.outputs.current }}` |
+            | **New**      | `${{ steps.vcpkg.outputs.baseline }}` |
+
+            Triggered by the weekly schedule. Please review the
+            [vcpkg changelog](https://github.com/microsoft/vcpkg/commits/HEAD)
+            for breaking changes before merging.
+          labels: |
+            dependencies
+            automated
