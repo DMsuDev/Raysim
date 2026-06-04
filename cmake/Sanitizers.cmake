@@ -60,9 +60,12 @@ function(rs_enable_sanitizers target_name)
 
   if(NOT CMAKE_CONFIGURATION_TYPES)
     if(CMAKE_BUILD_TYPE MATCHES "^(Release|MinSizeRel)$")
-      message(WARNING
-        "[Sanitizers] Active build type is '${CMAKE_BUILD_TYPE}'. "
-        "Sanitizers are applied only to Debug and RelWithDebInfo.")
+      if(NOT _RS_SAN_WARNED_RELEASE_BUILD)
+        message(WARNING
+          "[Sanitizers] Active build type is '${CMAKE_BUILD_TYPE}'. "
+          "Sanitizers are applied only to Debug and RelWithDebInfo.")
+        set(_RS_SAN_WARNED_RELEASE_BUILD TRUE CACHE INTERNAL "")
+      endif()
     endif()
   endif()
 
@@ -91,22 +94,31 @@ function(rs_enable_sanitizers target_name)
   # -------------------------------------------------------------------------
 
   if(MINGW)
-    message(WARNING
-      "[Sanitizers] MinGW sanitizer support is inconsistent across toolchains "
-      "and distributions. Sanitizers are disabled by default on MinGW.")
+    if(NOT _RS_SAN_WARNED_MINGW)
+      message(WARNING
+        "[Sanitizers] MinGW sanitizer support is inconsistent across toolchains "
+        "and distributions. Sanitizers are disabled by default on MinGW.")
+      set(_RS_SAN_WARNED_MINGW TRUE CACHE INTERNAL "")
+    endif()
     return()
   endif()
 
   if(_is_msvc)
-    message(WARNING
-      "[Sanitizers] MSVC does not support sanitizers in this project.")
+    if(NOT _RS_SAN_WARNED_MSVC)
+      message(WARNING
+        "[Sanitizers] MSVC does not support sanitizers in this project.")
+      set(_RS_SAN_WARNED_MSVC TRUE CACHE INTERNAL "")
+    endif()
     return()
   endif()
 
   if(_is_clang_cl)
-    message(WARNING
-      "[Sanitizers] clang-cl sanitizers are intentionally unsupported "
-      "in this project due to LLVM/compiler-rt runtime requirements.")
+    if(NOT _RS_SAN_WARNED_CLANG_CL)
+      message(WARNING
+        "[Sanitizers] clang-cl sanitizers are intentionally unsupported "
+        "in this project due to LLVM/compiler-rt runtime requirements.")
+      set(_RS_SAN_WARNED_CLANG_CL TRUE CACHE INTERNAL "")
+    endif()
     return()
   endif()
 
@@ -178,35 +190,43 @@ function(rs_enable_sanitizers target_name)
     set(_allow_ubsan TRUE)
 
   else()
-    message(WARNING
-      "[Sanitizers] Unrecognised compiler/platform combination "
-      "(compiler: ${CMAKE_CXX_COMPILER_ID}, "
-      "Sanitizers are disabled.")
+    if(NOT _RS_SAN_WARNED_UNKNOWN_COMPILER)
+      message(WARNING
+        "[Sanitizers] Unrecognised compiler/platform combination "
+        "(compiler: ${CMAKE_CXX_COMPILER_ID}, "
+        "Sanitizers are disabled.")
+      set(_RS_SAN_WARNED_UNKNOWN_COMPILER TRUE CACHE INTERNAL "")
+    endif()
     return()
   endif()
 
   # -------------------------------------------------------------------------
   # Warn about requested sanitizers unsupported on this platform
   # -------------------------------------------------------------------------
-  if(RS_ENABLE_ASAN AND NOT _allow_asan)
+  if(RS_ENABLE_ASAN AND NOT _allow_asan AND NOT _RS_SAN_WARNED_ASAN_UNSUPPORTED)
     message(WARNING
       "[Sanitizers] ASan is not supported on this platform/toolchain -> skipped.")
+    set(_RS_SAN_WARNED_ASAN_UNSUPPORTED TRUE CACHE INTERNAL "")
   endif()
-  if(RS_ENABLE_MSAN AND NOT _allow_msan)
+  if(RS_ENABLE_MSAN AND NOT _allow_msan AND NOT _RS_SAN_WARNED_MSAN_UNSUPPORTED)
     message(WARNING
       "[Sanitizers] MSan is not supported on this platform/toolchain -> skipped.")
+    set(_RS_SAN_WARNED_MSAN_UNSUPPORTED TRUE CACHE INTERNAL "")
   endif()
-  if(RS_ENABLE_TSAN AND NOT _allow_tsan)
+  if(RS_ENABLE_TSAN AND NOT _allow_tsan AND NOT _RS_SAN_WARNED_TSAN_UNSUPPORTED)
     message(WARNING
       "[Sanitizers] TSan is not supported on this platform/toolchain -> skipped.")
+    set(_RS_SAN_WARNED_TSAN_UNSUPPORTED TRUE CACHE INTERNAL "")
   endif()
-  if(RS_ENABLE_UBSAN AND NOT _allow_ubsan)
+  if(RS_ENABLE_UBSAN AND NOT _allow_ubsan AND NOT _RS_SAN_WARNED_UBSAN_UNSUPPORTED)
     message(WARNING
       "[Sanitizers] UBSan is not supported on this platform/toolchain -> skipped.")
+    set(_RS_SAN_WARNED_UBSAN_UNSUPPORTED TRUE CACHE INTERNAL "")
   endif()
-  if(RS_ENABLE_LSAN AND NOT _allow_lsan)
+  if(RS_ENABLE_LSAN AND NOT _allow_lsan AND NOT _RS_SAN_WARNED_LSAN_UNSUPPORTED)
     message(WARNING
       "[Sanitizers] LSan is not supported on this platform/toolchain -> skipped.")
+    set(_RS_SAN_WARNED_LSAN_UNSUPPORTED TRUE CACHE INTERNAL "")
   endif()
 
   # -------------------------------------------------------------------------
@@ -232,9 +252,12 @@ function(rs_enable_sanitizers target_name)
 
   if(RS_ENABLE_LSAN AND _allow_lsan)
     if(RS_ENABLE_ASAN)
-      message(WARNING
-        "[Sanitizers] LSan is redundant when ASan is active "
-        "(ASan already includes leak detection) -> skipped.")
+      if(NOT _RS_SAN_WARNED_LSAN_REDUNDANT)
+        message(WARNING
+          "[Sanitizers] LSan is redundant when ASan is active "
+          "(ASan already includes leak detection) -> skipped.")
+        set(_RS_SAN_WARNED_LSAN_REDUNDANT TRUE CACHE INTERNAL "")
+      endif()
     else()
       list(APPEND _sanitizers leak)
     endif()
