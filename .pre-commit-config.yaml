@@ -141,7 +141,7 @@ repos:
         name: "CI: actionlint"
 
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.30.0
+    rev: v8.30.1
     hooks:
       - id: gitleaks
         name: "Security: gitleaks (detect hardcoded secrets)"
