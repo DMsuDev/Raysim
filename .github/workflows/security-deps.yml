@@ -29,19 +29,7 @@ jobs:
           fail-on-severity: high
 
           # Whitelist permissive/open licenses used by project (GLFW, imgui, spdlog, glm, raylib, etc.)
-          allow-licenses: |
-            MIT
-            Apache-2.0
-            BSD-2-Clause
-            BSD-3-Clause
-            ISC
-            Zlib
-            BSL-1.0
-            0BSD
-            Unlicense
-            MPL-2.0
-            GPL-2.0+
-            GPL-3.0+
+          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, Zlib, BSL-1.0, 0BSD, Unlicense, MPL-2.0, GPL-2.0+, GPL-3.0+
 
           # Always add summary to PR for visibility
           comment-summary-in-pr: always
