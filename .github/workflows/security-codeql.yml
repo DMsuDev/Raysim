@@ -51,7 +51,6 @@ jobs:
         with:
           # Install system dependencies required by Raylib, GLFW and related libraries.
           submodules: recursive
-          fetch-depth: 0
 
       # Install system dependencies required by Raylib, GLFW and related libraries.
       - name: Install system dependencies
@@ -64,16 +63,15 @@ jobs:
             libglu1-mesa-dev libwayland-dev libxkbcommon-dev \
             pkg-config
 
-      - name: Cache vcpkg packages (critical for build time)
+      - name: Cache vcpkg packages
         uses: actions/cache@v5
         with:
           path: |
-            ${{ github.workspace }}/vcpkg/installed
-            ${{ github.workspace }}/vcpkg/buildtrees
-            ~/.cache/vcpkg
-          key: vcpkg-codeql-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+            ${{ github.workspace }}/vcpkg_installed
+            ${{ github.workspace }}/vcpkg/downloads
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
           restore-keys: |
-            vcpkg-codeql-${{ runner.os }}-
+            vcpkg-${{ runner.os }}-
 
       - name: Bootstrap vcpkg
         run: ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
