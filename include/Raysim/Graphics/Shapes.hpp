@@ -21,9 +21,10 @@
 
 #pragma once
 
-#include "Color.hpp"
-#include "Raysim/Math/Types/Vector2.hpp"
-#include "OriginMode.hpp"
+#include "Raysim/Graphics/Color.hpp"
+#include "Raysim/Graphics/OriginMode.hpp"
+
+#include "Raysim/Core/API.hpp"
 
 namespace RS {
 
@@ -66,7 +67,7 @@ namespace Shapes {
      * @param color Fill color
      * @see DrawRect(float, float, float, float, const Color&, OriginMode)
      */
-    void DrawRect(float x, float y, float w, float h, const Color& color);
+    RS_API void DrawRect(float x, float y, float w, float h, const Color& color);
 
     /**
      * @brief Draw a filled rectangle with custom origin point
@@ -88,7 +89,7 @@ namespace Shapes {
      * Shapes::DrawRect(10, 470, 100, 20, Color::Black(), OriginMode::BottomLeft);
      * @see OriginMode
      */
-    void DrawRect(float x, float y, float w, float h, const Color& color, OriginMode origin);
+    RS_API void DrawRect(float x, float y, float w, float h, const Color& color, OriginMode origin);
 
     /**
      * @brief Draw a rectangle outline with top-left at specified coordinates
@@ -104,7 +105,7 @@ namespace Shapes {
      * @param thickness Border width in pixels (default: 1.0f)
      * @see DrawRectOutline(float, float, float, float, const Color&, float, OriginMode)
      */
-    void DrawRectOutline(float x, float y, float w, float h, const Color& color, float thickness = 1.0f);
+    RS_API void DrawRectOutline(float x, float y, float w, float h, const Color& color, float thickness = 1.0f);
 
     /**
      * @brief Draw a rectangle outline with custom origin point
@@ -124,7 +125,7 @@ namespace Shapes {
      * Shapes::DrawRectOutline(250, 200, 100, 50, Color::White(), 2.0f, OriginMode::Center);
      * @see OriginMode, DrawRect()
      */
-    void DrawRectOutline(float x, float y, float w, float h, const Color& color, float thickness, OriginMode origin);
+    RS_API void DrawRectOutline(float x, float y, float w, float h, const Color& color, float thickness, OriginMode origin);
 
     /**
      * @brief Draw a filled rectangle with rounded corners
@@ -140,7 +141,7 @@ namespace Shapes {
      * @param color Fill color
      * @see DrawRectRounded(float, float, float, float, float, const Color&, OriginMode)
      */
-    void DrawRectRounded(float x, float y, float w, float h, float roundness, const Color& color);
+    RS_API void DrawRectRounded(float x, float y, float w, float h, float roundness, const Color& color);
 
     /**
      * @brief Draw a filled rounded rectangle with custom origin point
@@ -157,7 +158,7 @@ namespace Shapes {
      * Shapes::DrawRectRounded(300, 300, 120, 40, 0.2f, Color::SkyBlue(), OriginMode::Center);
      * @see OriginMode, DrawRect()
      */
-    void DrawRectRounded(float x, float y, float w, float h, float roundness, const Color& color, OriginMode origin);
+    RS_API void DrawRectRounded(float x, float y, float w, float h, float roundness, const Color& color, OriginMode origin);
 
 
 //==============================================================================
@@ -173,7 +174,7 @@ namespace Shapes {
      * @param color Fill color
      * @see DrawCircle(float, float, float, const Color&, OriginMode)
      */
-    void DrawCircle(float x, float y, float radius, const Color& color);
+    RS_API void DrawCircle(float x, float y, float radius, const Color& color);
 
     /**
      * @brief Draw a filled circle with custom origin point
@@ -191,7 +192,7 @@ namespace Shapes {
      * Shapes::DrawCircle(200, 200, 15, Color::Yellow(), OriginMode::Center);
      * @see OriginMode
      */
-    void DrawCircle(float x, float y, float radius, const Color& color, OriginMode origin);
+    RS_API void DrawCircle(float x, float y, float radius, const Color& color, OriginMode origin);
 
     /**
      * @brief Draw a circle outline (unfilled) with center at specified coordinates
@@ -202,7 +203,7 @@ namespace Shapes {
      * @param color Outline color
      * @see DrawCircleOutline(float, float, float, const Color&, OriginMode)
      */
-    void DrawCircleOutline(float x, float y, float radius, const Color& color);
+    RS_API void DrawCircleOutline(float x, float y, float radius, const Color& color);
 
     /**
      * @brief Draw a circle outline with custom origin point
@@ -217,7 +218,7 @@ namespace Shapes {
      * Shapes::DrawCircleOutline(400, 250, 30, Color::White(), OriginMode::Center);
      * @see OriginMode, DrawCircle()
      */
-    void DrawCircleOutline(float x, float y, float radius, const Color& color, OriginMode origin);
+    RS_API void DrawCircleOutline(float x, float y, float radius, const Color& color, OriginMode origin);
 
 
 //==============================================================================
@@ -236,7 +237,7 @@ namespace Shapes {
      * @example
      * Shapes::DrawLine(10, 10, 100, 100, Color::Red(), 2.0f);
      */
-    void DrawLine(float x1, float y1, float x2, float y2, const Color& color, float thickness = 1.0f);
+    RS_API void DrawLine(float x1, float y1, float x2, float y2, const Color& color, float thickness = 1.0f);
 
     /**
      * @brief Draw a filled triangle
@@ -249,7 +250,7 @@ namespace Shapes {
      * @param y3 Y-coordinate of third vertex
      * @param color Fill color
      */
-    void DrawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, const Color& color);
+    RS_API void DrawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, const Color& color);
 
     /**
      * @brief Draw a triangle outline (unfilled)
@@ -262,7 +263,7 @@ namespace Shapes {
      * @param y3 Y-coordinate of third vertex
      * @param color Outline color
      */
-    void DrawTriangleOutline(float x1, float y1, float x2, float y2, float x3, float y3, const Color& color);
+    RS_API void DrawTriangleOutline(float x1, float y1, float x2, float y2, float x3, float y3, const Color& color);
 
     /**
      * @brief Draw a regular polygon (rhombus, triangle, square, pentagon, hexagon, etc.)
@@ -279,7 +280,7 @@ namespace Shapes {
      * Shapes::DrawPolygon(200, 200, 6, 30, 0, Color::Purple());  // Hexagon
      * Shapes::DrawPolygon(200, 200, 3, 30, 0, Color::Green());   // Triangle
      */
-    void DrawPolygon(float x, float y, int sides, float radius, float rotation, const Color& color);
+    RS_API void DrawPolygon(float x, float y, int sides, float radius, float rotation, const Color& color);
 
 //==============================================================================
 // Point
@@ -292,7 +293,7 @@ namespace Shapes {
      * @param y Y-coordinate of the point
      * @param color Point color
      */
-    void DrawPoint(float x, float y, const Color& color);
+    RS_API void DrawPoint(float x, float y, const Color& color);
 
     /**
      * @brief Draw a point with custom size
@@ -306,7 +307,7 @@ namespace Shapes {
      * @example
      * Shapes::DrawPoint(100, 100, 3.0f, Color::White());  // 3px point
      */
-    void DrawPoint(float x, float y, float size, const Color& color);
+    RS_API void DrawPoint(float x, float y, float size, const Color& color);
 
 } // namespace Shapes
 

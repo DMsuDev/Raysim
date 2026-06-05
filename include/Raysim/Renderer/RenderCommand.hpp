@@ -35,7 +35,7 @@ namespace RS
      *
      * @see RendererAPI
      */
-    class RenderCommand
+    class RS_API RenderCommand
     {
     public:
 

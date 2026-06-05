@@ -69,7 +69,7 @@ public: \
  * access the Window, Renderer, and Input subsystems without going
  * through a global singleton.
  */
-class Scene
+class RS_API Scene
 {
 private:
     // Key pattern: Only the SceneManager can create and manage scenes.
