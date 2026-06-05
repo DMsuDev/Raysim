@@ -102,6 +102,7 @@ jobs:
       - name: Configure CMake
         shell: bash
         run: |
+          # shellcheck disable=SC2193
           BUILD_TYPE="Release"
           [[ "${{ matrix.preset }}" == *"debug"* ]] && BUILD_TYPE="Debug"
 
