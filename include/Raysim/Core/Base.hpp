@@ -21,13 +21,26 @@
 
 #pragma once
 
-#include "Raysim/Core/PlatformDetection.hpp"
+// ============================================================================
+// Core Bootstrap
+// ----------------------------------------------------------------------------
+// API.hpp transitively brings in PlatformDetection.hpp, which defines
+// RS_PLATFORM_WINDOWS / RS_PLATFORM_LINUX before any platform-sensitive
+// code below runs.
+// ============================================================================
+#include "Raysim/Core/API.hpp"
 
 #include <memory>
 
-// Define platform-specific debug break
-// In debug builds, this will trigger a breakpoint in the debugger
-// when an assertion fails.
+// ============================================================================
+// Debug Utilities
+// ----------------------------------------------------------------------------
+// RS_DEBUGBREAK() triggers a hardware breakpoint in the attached debugger.
+// Outside debug builds it expands to nothing, so call sites are always valid.
+//
+// RS_ENABLE_ASSERTS is defined only in debug builds; Assert.hpp gates all
+// assertion macros on this symbol.
+// ============================================================================
 #ifdef RS_BUILD_DEBUG
 	#ifdef RS_PLATFORM_WINDOWS
 		#define RS_DEBUGBREAK() __debugbreak()
@@ -44,55 +57,82 @@
 #endif
 
 // ============================================================================
-// Base Utilities
+// Preprocessor Utilities
+// ----------------------------------------------------------------------------
+// RS_EXPAND_MACRO  -> forces a macro argument to expand before stringification
+//                     or token-pasting; required for the VA_ARGS argument-
+//                     counting trick under MSVC's non-conformant preprocessor.
+//
+// RS_STRINGIFY     -> converts an already-expanded token to a string literal,
+//                     used to embed expression text in diagnostic messages.
+//                     Note: Before called as RS_STRINGIFY_MACRO
+//
+// BIT(n)           -> produces the value 1 << n as a compile-time constant,
+//                     suitable for defining flag enumerations.
+//                     Note: for flags beyond bit 30, prefer BIT64 or an enum.
 // ============================================================================
+#define RS_EXPAND_MACRO(x)  x
+#define RS_STRINGIFY(x)     #x
 
-/// @def RS_EXPAND_MACRO(x)
-/// @brief Forces expansion of a macro argument before further processing.
-/// @details Required by the C++17 argument-counting trick; the MSVC
-///          preprocessor would otherwise treat the comma-separated list
-///          as a single token.
-#define RS_EXPAND_MACRO(x) x
+#define BIT(x) (1 << (x))
 
-/// @def RS_STRINGIFY_MACRO(x)
-/// @brief Converts a macro argument to a string literal.
-/// @details Used to embed the textual representation of an expression
-///          in assertion failure messages (e.g. `"ptr != nullptr"`).
-#define RS_STRINGIFY_MACRO(x) #x
-
-/// @brief Utility macro for defining bit flags.
-#define BIT(x) (1 << x)
-
+// ============================================================================
+// Smart-Pointer Aliases & Factory Helpers
+// ----------------------------------------------------------------------------
+// Scope<T>   -> exclusive ownership (std::unique_ptr).  Prefer this by
+//               default; zero runtime overhead over a raw pointer.
+//
+// Shared<T>  -> shared ownership (std::shared_ptr).  Use only when multiple
+//               owners genuinely exist; carries reference-count overhead.
+//
+// CreateScope / CreateShared -> thin wrappers around make_unique / make_shared
+//               with perfect forwarding.  [[nodiscard]] prevents silently
+//               discarding the returned smart pointer.
+// ============================================================================
 namespace RS
 {
-
-    // Convenience alias for unique pointers (stack-like ownership)
+    /// @brief Exclusive-ownership pointer alias (zero overhead over raw pointer).
+    /// @tparam T Must be a complete type at the point of destruction.
     template <typename T>
-    using Scope = ::std::unique_ptr<T>;
+    using Scope = std::unique_ptr<T>;
 
-    // Convenience alias for shared pointers (reference-counted ownership)
+    /// @brief Shared-ownership pointer alias (reference-counted).
+    /// @tparam T Must be a complete type at the point of destruction.
     template <typename T>
-    using Shared = ::std::shared_ptr<T>;
+    using Shared = std::shared_ptr<T>;
 
-    // Factory function: Creates a unique_ptr with perfect forwarding
-    // Usage: auto myObj = CreateScope<MyClass>(arg1, arg2);
+    /// @brief  Constructs a T in exclusive ownership via perfect forwarding.
+    /// @tparam T    Type to construct; must be a complete type.
+    /// @tparam Args Constructor argument types (deduced).
+    /// @return Scope<T> owning the newly created object.
+    /// @note   Exception-safe alternative to Scope<T>(new T(...)).
     template <typename T, typename... Args>
-    [[nodiscard]] constexpr Scope<T> CreateScope(Args &&...args)
+    [[nodiscard]] constexpr Scope<T> CreateScope(Args&&... args)
     {
-        return ::std::make_unique<T>(::std::forward<Args>(args)...);
+        return std::make_unique<T>(std::forward<Args>(args)...);
     }
 
-    // Factory function: Creates a shared_ptr with perfect forwarding
-    // Usage: auto myObj = CreateShared<MyClass>(arg1, arg2);
+    /// @brief  Constructs a T in shared ownership via perfect forwarding.
+    /// @tparam T    Type to construct; must be a complete type.
+    /// @tparam Args Constructor argument types (deduced).
+    /// @return Shared<T> owning the newly created object.
+    /// @note   Carries reference-count overhead; prefer CreateScope() unless
+    ///         multiple owners genuinely exist.
     template <typename T, typename... Args>
-    [[nodiscard]] constexpr Shared<T> CreateShared(Args &&...args)
+    [[nodiscard]] constexpr Shared<T> CreateShared(Args&&... args)
     {
-        return ::std::make_shared<T>(::std::forward<Args>(args)...);
+        return std::make_shared<T>(std::forward<Args>(args)...);
     }
-
 } // namespace RS
 
-#include "Raysim/Core/Log.hpp"
+// ============================================================================
+// Framework Subsystems
+// ----------------------------------------------------------------------------
+// Assert.hpp -> assertion macros (RS_ASSERT / RS_CORE_ASSERT).
+//               Internally includes Log.hpp; no need to list it here.
+//
+// Instrumentor.hpp -> lightweight scope-based profiler; produces a Chrome
+//                     Tracing JSON file when RS_PROFILE is defined.
+// ============================================================================
 #include "Raysim/Core/Assert.hpp"
-
 #include "Raysim/Debug/Instrumentor.hpp"
