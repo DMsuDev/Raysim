@@ -92,7 +92,7 @@ jobs:
         run: |
           cmake -B build -G Ninja \
             -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
-            -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+            -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
             -DRS_BUILD_EXAMPLES=ON
 
       - name: Build for analysis
