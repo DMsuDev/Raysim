@@ -22,6 +22,7 @@
 #pragma once
 
 #include <cstdint>
+#include "Raysim/Core/API.hpp"
 
 namespace RS {
 
@@ -31,7 +32,7 @@ namespace RS {
  * Provides frame timing, fixed timestep simulation,
  * time scaling and FPS statistics.
  */
-class Time
+class RS_API Time
 {
 public:
 

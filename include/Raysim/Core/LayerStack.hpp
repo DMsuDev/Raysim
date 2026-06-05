@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "Raysim/Core/API.hpp"
 #include "Raysim/Core/Layer.hpp"
 
 #include <cstdint>
@@ -38,7 +39,7 @@ class Event; // Forward declaration
  * This architecture allows for modular separation of concerns such as game logic,
  * UI systems, and debug overlays.
  */
-class LayerStack
+class RS_API LayerStack
 {
 public:
 	LayerStack() = default;

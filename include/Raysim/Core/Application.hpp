@@ -110,7 +110,7 @@ struct ApplicationCommandLineArgs {
  * Backend systems are accessed through the protected interface pointers
  * no Raylib headers needed in user code.
  */
-class Application
+class RS_API Application
 {
 public:
     /// Constructor: initializes application with specification
