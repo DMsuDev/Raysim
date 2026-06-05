@@ -13,30 +13,30 @@ include_guard()
 
 find_package(raylib CONFIG REQUIRED)
 
-# vcpkg builds raylib with USE_EXTERNAL_GLFW=ON, so GLFW symbols are not
-# baked into libraylib.a, we must link it explicitly.
-find_package(glfw3 CONFIG REQUIRED)
+# vcpkg builds raylib with USE_EXTERNAL_GLFW=ON. CMake places GLFW before
+# raylib in the link command, which breaks single-pass linkers (debug/no-LTO).
+# LINK_GROUP:RESCAN wraps both in --start-group/--end-group to allow
+# multiple passes.
+find_package(glfw3 CONFIG QUIET)
 
 # ===========================================================================
-# Windowing
+# Windowing (Raylib handles everything internally)
 # ===========================================================================
 
 add_library(rs_windowing_raylib INTERFACE)
 
-if(APPLE)
-    # ld64 (macOS) resolves circular refs automatically; no grouping needed.
-    target_link_libraries(rs_windowing_raylib INTERFACE raylib glfw)
-
-elseif(MSVC)
-    # lld-link / link.exe do multi-pass resolution by default.
-    target_link_libraries(rs_windowing_raylib INTERFACE raylib glfw)
-
+if(glfw3_FOUND)
+    # LINK_GROUP:RESCAN uses --start-group/--end-group, only supported by GNU-style linkers (Linux/macOS).
+    # On Windows (MSVC) link both libraries directly without the group wrapper.
+    if(MSVC)
+        target_link_libraries(rs_windowing_raylib INTERFACE raylib glfw)
+    else()
+        target_link_libraries(rs_windowing_raylib INTERFACE
+            "$<LINK_GROUP:RESCAN,raylib,glfw>"
+        )
+    endif()
 else()
-    # GNU ld / gold are single-pass by default; --start-group forces
-    # multiple resolution passes to break the raylib <-> glfw cycle.
-    target_link_libraries(rs_windowing_raylib INTERFACE
-        -Wl,--start-group raylib glfw -Wl,--end-group
-    )
+    target_link_libraries(rs_windowing_raylib INTERFACE raylib)
 endif()
 
 # ===========================================================================

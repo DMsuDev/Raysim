@@ -2,7 +2,7 @@
 # Target declaration
 #
 # RS_LIB_TYPE is STATIC or SHARED, resolved by ProjectOptions.cmake based on
-# the RS_BUILD_SHARED option.  The alias Raysim::Raysim lets consumers use
+# the RS_BUILD_SHARED option. The alias Raysim::Raysim lets consumers use
 # the namespaced form whether they find the library via add_subdirectory or
 # find_package.
 # ============================================================================
@@ -11,8 +11,8 @@ add_library(Raysim ${RS_LIB_TYPE})
 add_library(Raysim::Raysim ALIAS Raysim)
 
 set_target_properties(Raysim PROPERTIES
-    FOLDER      "Raysim"
-    OUTPUT_NAME "raysim"   # produces raysim.dll / libraysim.so / raysim.lib
+  FOLDER      "Raysim"
+  OUTPUT_NAME "raysim" # produces raysim.dll / libraysim.so / raysim.lib
 )
 
 # ============================================================================
@@ -46,12 +46,12 @@ rs_enable_rdynamic(Raysim)
 # ============================================================================
 
 target_compile_definitions(Raysim
-    PUBLIC
-        $<$<BOOL:${RS_BUILD_SHARED}>:RS_BUILD_SHARED>
-        $<$<BOOL:${RS_BUILD_SHARED}>:IMGUI_BUILD_SHARED>
-    PRIVATE
-        $<$<BOOL:${RS_BUILD_SHARED}>:RS_BUILD_DLL>
-        $<$<BOOL:${RS_BUILD_SHARED}>:IMGUI_BUILD_DLL>
+  PUBLIC
+    $<$<BOOL:${RS_BUILD_SHARED}>:RS_BUILD_SHARED>
+    $<$<BOOL:${RS_BUILD_SHARED}>:IMGUI_BUILD_SHARED>
+  PRIVATE
+    $<$<BOOL:${RS_BUILD_SHARED}>:RS_BUILD_DLL>
+    $<$<BOOL:${RS_BUILD_SHARED}>:IMGUI_BUILD_DLL>
 )
 
 # ============================================================================
@@ -63,7 +63,7 @@ target_compile_definitions(Raysim
 # ============================================================================
 
 if(RS_ENABLE_PCH)
-    target_precompile_headers(Raysim PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/rspch.hpp)
+  target_precompile_headers(Raysim PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/rspch.hpp)
 endif()
 
 # ============================================================================
@@ -73,47 +73,47 @@ endif()
 set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 
 set(RAYSIM_SOURCES
-    # --- Graphics & Renderer -------------------------------------------------
-    ${SRC_DIR}/Graphics/Shapes.cpp          # 2D shape drawing helpers
-    ${SRC_DIR}/Graphics/Texts.cpp           # text rendering helpers
-    ${SRC_DIR}/Renderer/RenderCommand.cpp   # backend-agnostic render API
+  # --- Graphics & Renderer -------------------------------------------------
+  ${SRC_DIR}/Graphics/Shapes.cpp # 2D shape drawing helpers
+  ${SRC_DIR}/Graphics/Texts.cpp # text rendering helpers
+  ${SRC_DIR}/Renderer/RenderCommand.cpp # backend-agnostic render API
 
-    # --- Debug ---------------------------------------------------------------
-    ${SRC_DIR}/Debug/Instrumentor.cpp       # Chrome-trace profiler
+  # --- Debug ---------------------------------------------------------------
+  ${SRC_DIR}/Debug/Instrumentor.cpp # Chrome-trace profiler
 
-    # --- Core ----------------------------------------------------------------
-    ${SRC_DIR}/Core/Log.cpp                 # spdlog wrapper (RS::Log)
-    ${SRC_DIR}/Core/BackendFactory.cpp      # creates the active IBackend
-    ${SRC_DIR}/Core/Time.cpp               # frame-time / delta-time
-    ${SRC_DIR}/Core/Application.cpp        # main application loop
-    ${SRC_DIR}/Core/LayerStack.cpp         # ordered layer container
+  # --- Core ----------------------------------------------------------------
+  ${SRC_DIR}/Core/Log.cpp # spdlog wrapper (RS::Log)
+  ${SRC_DIR}/Core/BackendFactory.cpp # creates the active IBackend
+  ${SRC_DIR}/Core/Time.cpp # frame-time / delta-time
+  ${SRC_DIR}/Core/Application.cpp # main application loop
+  ${SRC_DIR}/Core/LayerStack.cpp # ordered layer container
 
-    # --- Math ----------------------------------------------------------------
-    ${SRC_DIR}/Math/Random.cpp             # PRNG + noise functions
+  # --- Math ----------------------------------------------------------------
+  ${SRC_DIR}/Math/Random.cpp # PRNG + noise functions
 
-    # --- Scene ---------------------------------------------------------------
-    ${SRC_DIR}/Scene/SceneManager.cpp      # scene lifecycle management
-    ${SRC_DIR}/Scene/Scene.cpp             # base Scene class
+  # --- Scene ---------------------------------------------------------------
+  ${SRC_DIR}/Scene/SceneManager.cpp # scene lifecycle management
+  ${SRC_DIR}/Scene/Scene.cpp # base Scene class
 
-    # --- Input ---------------------------------------------------------------
-    ${SRC_DIR}/Input/EventDrivenInput.cpp  # event-queue input adapter
+  # --- Input ---------------------------------------------------------------
+  ${SRC_DIR}/Input/EventDrivenInput.cpp # event-queue input adapter
 
-    # --- Backend: Raylib -----------------------------------------------------
-    ${SRC_DIR}/Backend/Raylib/RaylibInput.cpp
-    ${SRC_DIR}/Backend/Raylib/RaylibRendererAPI.cpp
-    ${SRC_DIR}/Backend/Raylib/RaylibWindow.cpp
-    ${SRC_DIR}/Backend/Raylib/RaylibFontRenderer.cpp
-    ${SRC_DIR}/Backend/Raylib/RaylibImGuiBackend.cpp
+  # --- Backend: Raylib -----------------------------------------------------
+  ${SRC_DIR}/Backend/Raylib/RaylibInput.cpp
+  ${SRC_DIR}/Backend/Raylib/RaylibRendererAPI.cpp
+  ${SRC_DIR}/Backend/Raylib/RaylibWindow.cpp
+  ${SRC_DIR}/Backend/Raylib/RaylibFontRenderer.cpp
+  ${SRC_DIR}/Backend/Raylib/RaylibImGuiBackend.cpp
 
-    # --- ImGui layer ---------------------------------------------------------
-    ${SRC_DIR}/ImGui/ImGuiLayer.cpp        # wraps Dear ImGui begin/end frame
+  # --- ImGui layer ---------------------------------------------------------
+  ${SRC_DIR}/ImGui/ImGuiLayer.cpp # wraps Dear ImGui begin/end frame
 
-    # --- Font system ---------------------------------------------------------
-    ${SRC_DIR}/Fonts/Providers/STBTrueTypeProvider.cpp
-    ${SRC_DIR}/Fonts/FontManager.cpp
+  # --- Font system ---------------------------------------------------------
+  ${SRC_DIR}/Fonts/Providers/STBTrueTypeProvider.cpp
+  ${SRC_DIR}/Fonts/FontManager.cpp
 
-    # --- Utilities -----------------------------------------------------------
-    ${SRC_DIR}/Utils/PathUtils.cpp
+  # --- Utilities -----------------------------------------------------------
+  ${SRC_DIR}/Utils/PathUtils.cpp
 )
 
 target_sources(Raysim PRIVATE ${RAYSIM_SOURCES})
@@ -135,13 +135,13 @@ target_sources(Raysim PRIVATE ${RAYSIM_SOURCES})
 # ============================================================================
 
 target_include_directories(Raysim
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
-        $<BUILD_INTERFACE:${IMGUI_DIR}>
-        $<INSTALL_INTERFACE:include>
-    PRIVATE
-        ${CMAKE_SOURCE_DIR}/src
-        ${IMGUI_DIR}
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${IMGUI_DIR}>
+    $<INSTALL_INTERFACE:include>
+  PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+    ${IMGUI_DIR}
 )
 
 # ============================================================================
@@ -167,16 +167,16 @@ target_include_directories(Raysim
 # ============================================================================
 
 target_link_libraries(Raysim
-    PUBLIC
-        spdlog                                              # header-only INTERFACE target
-        $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:imgui>         # static build only
-        $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:rs_backend>    # static build only
-    PRIVATE
-        $<$<BOOL:${RS_BUILD_SHARED}>:imgui>                # shared build: embedded in DLL
-        $<$<BOOL:${RS_BUILD_SHARED}>:rs_backend>           # shared build: embedded in DLL
-        rs_warnings
-        stb
-        $<$<PLATFORM_ID:Windows>:winmm>
+  PUBLIC
+    spdlog # header-only INTERFACE target
+    $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:imgui> # static build only
+    $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:rs_backend> # static build only
+  PRIVATE
+    $<$<BOOL:${RS_BUILD_SHARED}>:imgui> # shared build: embedded in DLL
+    $<$<BOOL:${RS_BUILD_SHARED}>:rs_backend> # shared build: embedded in DLL
+    rs_warnings
+    stb
+    $<$<PLATFORM_ID:Windows>:winmm>
 )
 
 # ============================================================================
@@ -194,5 +194,5 @@ target_link_libraries(Raysim
 # ============================================================================
 
 target_compile_definitions(Raysim PUBLIC
-    IMGUI_USER_CONFIG="Raysim/imgui_config.hpp"
+  IMGUI_USER_CONFIG="Raysim/imgui_config.hpp"
 )

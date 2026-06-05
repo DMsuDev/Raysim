@@ -23,21 +23,10 @@ include(${CMAKE_SOURCE_DIR}/cmake/modules/add_glad.cmake)
 
 add_library(rs_windowing_glfw_opengl INTERFACE)
 
-if(APPLE)
-    # ld64 (macOS) resolves circular refs automatically; no grouping needed.
-    target_link_libraries(rs_windowing_glfw_opengl INTERFACE glfw OpenGL::GL)
-
-elseif(MSVC)
-    # lld-link / link.exe do multi-pass resolution by default.
-    target_link_libraries(rs_windowing_glfw_opengl INTERFACE glfw OpenGL::GL)
-
-else()
-    # GNU ld / gold are single-pass by default; --start-group forces
-    # multiple resolution passes for any potential circular deps.
-    target_link_libraries(rs_windowing_glfw_opengl INTERFACE
-        -Wl,--start-group glfw OpenGL::GL -Wl,--end-group
-    )
-endif()
+target_link_libraries(rs_windowing_glfw_opengl INTERFACE
+    glfw
+    OpenGL::GL
+)
 
 # ===========================================================================
 # Graphics (OpenGL + GLAD)

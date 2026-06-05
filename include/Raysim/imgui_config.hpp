@@ -28,37 +28,37 @@
 //
 // Define these macros BEFORE including any ImGui header (or via CMake):
 //
-//   IMGUI_BUILD_SHARED   — defined in all targets that link ImGui as a DLL
-//                          (both the DLL itself and every consumer).
-//   IMGUI_BUILD_DLL      — defined ONLY when compiling the ImGui DLL itself;
-//                          triggers dllexport instead of dllimport on Windows.
+//   IMGUI_BUILD_SHARED   -> defined in all targets that link ImGui as a DLL
+//                           (both the DLL itself and every consumer).
+//   IMGUI_BUILD_DLL      -> defined ONLY when compiling the ImGui DLL itself;
+//                           triggers dllexport instead of dllimport on Windows.
 //
 // If neither is defined, ImGui is assumed to be linked statically and
 // IMGUI_API is left empty (no-op), which is the default ImGui behavior.
 // ============================================================================
 
 #ifndef IMGUI_API
-  #if defined(IMGUI_BUILD_SHARED)
+    #if defined(IMGUI_BUILD_SHARED)
 
-    // ---- Windows / Cygwin ------------------------------------------------
-    #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
-      #if defined(IMGUI_BUILD_DLL)
-        #define IMGUI_API __declspec(dllexport)
+        // ---- Windows / Cygwin ------------------------------------------------
+        #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
+            #if defined(IMGUI_BUILD_DLL)
+                #define IMGUI_API __declspec(dllexport)
+            #else
+                #define IMGUI_API __declspec(dllimport)
+            #endif
+
+        // ---- GCC/Clang visible platforms (Linux, macOS, etc.) ----------------
+        #elif defined(__GNUC__) || defined(__clang__)
+            #define IMGUI_API __attribute__((visibility("default")))
+
+        // ---- Unknown platform ------------------------------------------------
+        #else
+            #define IMGUI_API
+        #endif
+
       #else
-        #define IMGUI_API __declspec(dllimport)
+            // Static linking: IMGUI_API is intentionally empty
+            #define IMGUI_API
       #endif
-
-    // ---- GCC/Clang visible platforms (Linux, macOS, etc.) ----------------
-    #elif defined(__GNUC__) || defined(__clang__)
-      #define IMGUI_API __attribute__((visibility("default")))
-
-    // ---- Unknown platform ------------------------------------------------
-    #else
-      #define IMGUI_API
-    #endif
-
-  #else
-    // Static linking — IMGUI_API is intentionally empty
-    #define IMGUI_API
-  #endif
-#endif // IMGUI_API
+#endif  // IMGUI_API

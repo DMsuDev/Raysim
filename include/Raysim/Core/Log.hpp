@@ -228,12 +228,12 @@ private:
 // define LOG_ERROR, LOG_INFO, etc. as plain constants/macros.
 
 // Core log macros (engine internals)
-#define RS_CORE_TRACE(...)     ::RS::Log::GetCoreLogger()->trace(__VA_ARGS__)
-#define RS_CORE_DEBUG(...)     ::RS::Log::GetCoreLogger()->debug(__VA_ARGS__)
-#define RS_CORE_INFO(...)      ::RS::Log::GetCoreLogger()->info(__VA_ARGS__)
-#define RS_CORE_WARN(...)      ::RS::Log::GetCoreLogger()->warn(__VA_ARGS__)
-#define RS_CORE_ERROR(...)     ::RS::Log::GetCoreLogger()->error(__VA_ARGS__)
-#define RS_CORE_CRITICAL(...)  ::RS::Log::GetCoreLogger()->critical(__VA_ARGS__)
+#define RS_CORE_TRACE(...)      ::RS::Log::GetCoreLogger()->trace(__VA_ARGS__)
+#define RS_CORE_DEBUG(...)      ::RS::Log::GetCoreLogger()->debug(__VA_ARGS__)
+#define RS_CORE_INFO(...)       ::RS::Log::GetCoreLogger()->info(__VA_ARGS__)
+#define RS_CORE_WARN(...)       ::RS::Log::GetCoreLogger()->warn(__VA_ARGS__)
+#define RS_CORE_ERROR(...)      ::RS::Log::GetCoreLogger()->error(__VA_ARGS__)
+#define RS_CORE_CRITICAL(...)   ::RS::Log::GetCoreLogger()->critical(__VA_ARGS__)
 #define RS_CORE_LOG(level, ...) ::RS::Log::GetCoreLogger()->log(::RS::ToSpd(level), __VA_ARGS__)
 
 // Client log macros (application code)

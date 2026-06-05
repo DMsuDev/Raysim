@@ -30,25 +30,28 @@
 //   RS_API void MyFunction();
 //
 // Build-time control (set by CMake):
-//   RS_BUILD_SHARED  - defined when Raysim is built as a shared library
-//   RS_BUILD_DLL     - defined only when compiling the library itself (export)
-//                      not defined in consumer code (import)
+//   RS_BUILD_SHARED  -> defined when Raysim is built as a shared library
+//   RS_BUILD_DLL     -> defined only when compiling the library itself (export)
+//                       not defined in consumer code (import)
 // ============================================================================
 
-#if defined(RS_PLATFORM_WINDOWS)
-    #if defined(RS_BUILD_SHARED)
+#if defined(RS_BUILD_SHARED)
+    // ---- Windows / Cygwin ------------------------------------------------
+    #if defined(RS_PLATFORM_WINDOWS)
         #if defined(RS_BUILD_DLL)
             #define RS_API __declspec(dllexport)
         #else
             #define RS_API __declspec(dllimport)
         #endif
+
+    // ---- GCC/Clang visible platforms (Linux, macOS, etc.) ----------------
+    #elif defined(__GNUC__) || defined(__clang__)
+        #define RS_API __attribute__((visibility("default")))
+
+    // ---- Unknown platform ------------------------------------------------
     #else
         #define RS_API
     #endif
 #else
-    #if defined(RS_BUILD_SHARED)
-        #define RS_API __attribute__((visibility("default")))
-    #else
-        #define RS_API
-    #endif
+    #define RS_API
 #endif

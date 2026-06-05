@@ -19,13 +19,13 @@ include_guard()
 # ===========================================================================
 # Paths
 #
-# IMGUI_DIR          – root of the vendored ImGui source tree.
-# IMGUI_BACKENDS_DIR – backends/ sub-directory; referenced by individual
-#                      backend cmake files (Backends/*.cmake) to locate
-#                      imgui_impl_*.cpp / *.h files.
+# IMGUI_DIR          -> root of the vendored ImGui source tree.
+# IMGUI_BACKENDS_DIR -> backends/ sub-directory; referenced by individual
+#                       backend cmake files (Backends/*.cmake) to locate
+#                       imgui_impl_*.cpp / *.h files.
 # ===========================================================================
 
-set(IMGUI_DIR          ${CMAKE_SOURCE_DIR}/third_party/imgui)
+set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/third_party/imgui)
 set(IMGUI_BACKENDS_DIR ${IMGUI_DIR}/backends)
 
 # ===========================================================================
@@ -35,11 +35,11 @@ set(IMGUI_BACKENDS_DIR ${IMGUI_DIR}/backends)
 # ===========================================================================
 
 add_library(imgui STATIC
-    ${IMGUI_DIR}/imgui.cpp
-    ${IMGUI_DIR}/imgui_draw.cpp
-    ${IMGUI_DIR}/imgui_demo.cpp
-    ${IMGUI_DIR}/imgui_tables.cpp
-    ${IMGUI_DIR}/imgui_widgets.cpp
+  ${IMGUI_DIR}/imgui.cpp
+  ${IMGUI_DIR}/imgui_draw.cpp
+  ${IMGUI_DIR}/imgui_demo.cpp
+  ${IMGUI_DIR}/imgui_tables.cpp
+  ${IMGUI_DIR}/imgui_widgets.cpp
 )
 
 # ===========================================================================
@@ -53,8 +53,8 @@ add_library(imgui STATIC
 # ===========================================================================
 
 target_include_directories(imgui SYSTEM PUBLIC
-    ${IMGUI_DIR}
-    ${CMAKE_SOURCE_DIR}/include
+  ${IMGUI_DIR}
+  ${CMAKE_SOURCE_DIR}/include
 )
 
 # ===========================================================================
@@ -74,7 +74,7 @@ target_include_directories(imgui SYSTEM PUBLIC
 # ===========================================================================
 
 target_compile_definitions(imgui PUBLIC
-    IMGUI_USER_CONFIG="Raysim/imgui_config.hpp"
+  IMGUI_USER_CONFIG="Raysim/imgui_config.hpp"
 )
 
 # ===========================================================================
@@ -92,11 +92,11 @@ target_compile_definitions(imgui PUBLIC
 # ===========================================================================
 
 if(RS_BUILD_SHARED)
-    target_compile_definitions(imgui
-        PRIVATE
-            IMGUI_BUILD_SHARED   # triggers shared-build branch in imconfig
-            IMGUI_BUILD_DLL      # triggers dllexport in imconfig
-    )
+  target_compile_definitions(imgui
+    PRIVATE
+      IMGUI_BUILD_SHARED # triggers shared-build branch in imconfig
+      IMGUI_BUILD_DLL # triggers dllexport in imconfig
+  )
 endif()
 
 # ===========================================================================

@@ -72,17 +72,17 @@ function(rs_enable_sanitizers target_name)
   # -------------------------------------------------------------------------
   # Toolchain detection
   # -------------------------------------------------------------------------
-  set(_is_gcc      FALSE)
-  set(_is_clang    FALSE)
+  set(_is_gcc FALSE)
+  set(_is_clang FALSE)
   set(_is_clang_cl FALSE)
-  set(_is_msvc     FALSE)
+  set(_is_msvc FALSE)
 
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(_is_gcc TRUE)
   elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(_is_clang TRUE)
     if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC" OR
-       CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
+      CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
       set(_is_clang_cl TRUE)
     endif()
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
@@ -132,7 +132,7 @@ function(rs_enable_sanitizers target_name)
   endif()
 
   if(RS_ENABLE_MSAN AND
-     (RS_ENABLE_ASAN OR RS_ENABLE_UBSAN OR RS_ENABLE_TSAN OR RS_ENABLE_LSAN))
+    (RS_ENABLE_ASAN OR RS_ENABLE_UBSAN OR RS_ENABLE_TSAN OR RS_ENABLE_LSAN))
     message(FATAL_ERROR
       "[Sanitizers] MSan must not be combined with any other sanitizer.")
   endif()
@@ -141,11 +141,11 @@ function(rs_enable_sanitizers target_name)
   # Capability matrix
   # -------------------------------------------------------------------------
 
-  set(_allow_asan  FALSE)
+  set(_allow_asan FALSE)
   set(_allow_ubsan FALSE)
-  set(_allow_tsan  FALSE)
-  set(_allow_msan  FALSE)
-  set(_allow_lsan  FALSE)
+  set(_allow_tsan FALSE)
+  set(_allow_msan FALSE)
+  set(_allow_lsan FALSE)
 
   # ---------------------------------------------------------
   # GCC / Linux
@@ -153,22 +153,22 @@ function(rs_enable_sanitizers target_name)
 
   if(_is_gcc AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
     # GCC on Linux: ASan, UBSan, TSan, LSan. MSan requires compiler-rt.
-    set(_allow_asan  TRUE)
+    set(_allow_asan TRUE)
     set(_allow_ubsan TRUE)
-    set(_allow_tsan  TRUE)
-    set(_allow_lsan  TRUE)
+    set(_allow_tsan TRUE)
+    set(_allow_lsan TRUE)
 
-  # ---------------------------------------------------------
-  # Clang / Linux
-  # ---------------------------------------------------------
+    # ---------------------------------------------------------
+    # Clang / Linux
+    # ---------------------------------------------------------
 
   elseif(_is_clang AND NOT _is_clang_cl AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
-    set(_allow_asan  TRUE)
+    set(_allow_asan TRUE)
     set(_allow_ubsan TRUE)
-    set(_allow_tsan  TRUE)
-    set(_allow_msan  TRUE)
-    set(_allow_lsan  TRUE)
+    set(_allow_tsan TRUE)
+    set(_allow_msan TRUE)
+    set(_allow_lsan TRUE)
 
     if(RS_ENABLE_MSAN)
       message(STATUS
@@ -177,16 +177,16 @@ function(rs_enable_sanitizers target_name)
         "See https://clang.llvm.org/docs/MemorySanitizer.html for setup details.")
     endif()
 
-  # ---------------------------------------------------------
-  # Clang / Windows (clang-cl)
-  # ---------------------------------------------------------
+    # ---------------------------------------------------------
+    # Clang / Windows (clang-cl)
+    # ---------------------------------------------------------
 
   elseif(_is_clang AND WIN32)
 
     # Windows Clang GNU-style support is partial.
     # Only ASan and UBSan are considered reasonably usable.
 
-    set(_allow_asan  TRUE)
+    set(_allow_asan TRUE)
     set(_allow_ubsan TRUE)
 
   else()
