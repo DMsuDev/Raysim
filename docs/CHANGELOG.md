@@ -4,6 +4,52 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.94.2] - 2026-06-06
+
+### Added
+
+- **DLL Export/Import Visibility** (`include/Raysim/Core/Base.hpp`, multiple headers): Introduced `RS_API` macro for consistent symbol export/import across the Windows DLL boundary. Applied to all public API classes including `Application`, `Log`, `Time`, `LayerStack`, `Scene`, `FontManager`, `Shapes`, `Texts`, `RenderCommand`, `ImGuiLayer`, and `Random` to ensure proper visibility control and prevent C4251 warnings when exporting classes containing STL members. Macro expands to `__declspec(dllexport)` when building the library and `__declspec(dllimport)` when consuming it.
+
+- **Build Tooling Suite** (`tools/build.ps1`, `tools/build.sh`, `tools/clean.ps1`, `tools/clean.sh`, `tools/check_deps.ps1`, `tools/check_deps.sh`, `tools/run_example.ps1`, `tools/run_example.sh`): Added unified cross-platform build, clean, dependency check, and run scripts for PowerShell and Bash. Simplifies project setup and execution workflows with consistent command interface across Windows and Unix-like systems.
+
+- **EditorConfig** (`.editorconfig`): Added comprehensive EditorConfig file defining consistent coding styles (indentation, line endings, charset, trim whitespace) across different file types and editors for team consistency.
+
+- **Git Attributes** (`.gitattributes`): Added Git attributes configuration to standardize line ending normalization (CRLF on Windows, LF on Unix) and mark build/third-party directories for export-ignore.
+
+- **MathUtils Enhancement** (`include/Raysim/Math/Utils/MathUtils.hpp`, `include/Raysim/Math/Utils/MathUtils.inl`): Added `Pow(base, exponent)` function for consistent power calculations with proper type handling and fast exponentiation optimization for integer exponents.
+
+- **ImGui DLL Visibility Configuration** (`include/Raysim/ImGui/ImGuiLayer.hpp`, ImGui CMake setup): Enhanced ImGui integration with DLL export markers and proper include directory configuration for consistent symbol visibility across the DLL boundary.
+
+### Changed
+
+- **Application Lifecycle Management** (`include/Raysim/Core/EntryPoint.hpp`): Improved application lifecycle with explicit resource cleanup in profiling sessions. Enhanced deterministic destruction order to ensure all subsystems are properly cleaned up before program termination, particularly important for memory profilers and debug builds.
+
+- **Platform Detection** (`include/Raysim/Core/PlatformDetection.hpp`): Refactored platform detection with clearer error messages, improved validation logic, and experimental macOS support. Better compile-time platform identification and user-friendly error reporting for unsupported platforms.
+
+- **Core Utilities Documentation** (`include/Raysim/Core/Base.hpp`): Enhanced documentation and organization of core utilities. Improved inline comments for memory utilities, assert macros, and scope helpers for better API discoverability.
+
+- **Pre-commit Hooks** (`.pre-commit-config.yaml`): Improved configuration with additional exclusions for third-party directories and build artifacts, updated hook versions for better compatibility.
+
+- **VCpkg Integration** (`vcpkg.json`, `tools/init_vcpkg.ps1`): Updated vcpkg baseline and improved PowerShell initialization script structure with better error handling and informative messages.
+
+- **Example Refinements** (`examples/NoiseLandscape/SkyLayer`, `examples/NoiseLandscape/TerrainLayer`): Renamed `skyH` to `skyHeight` for code clarity; updated related calculations for consistency.
+
+- **CMake Warnings** (`cmake/Sanitizers.cmake`): Improved warning messages for sanitizer configurations to reduce console clutter and avoid duplicate warnings.
+
+### Fixed
+
+- **Assert Macro Naming** (`include/Raysim/Core/Assert.hpp`): Fixed macro name inconsistency by replacing `RS_STRINGIFY_MACRO` with `RS_STRINGIFY` following the new naming convention for consistency across the codebase.
+
+- **Documentation Links** (`docs/ARCHITECTURE.md`): Updated links to Spanish architecture documentation (`ARCHITECTURE.es.md`) and corrected minor cross-reference issues.
+
+- **Mouse Grid Detection** (`examples/Mouse2D`): Adjusted grid movement offset values to improve visual alignment and interaction responsiveness.
+
+### Build
+
+- Version bump to 0.94.2 across build configuration files (`CMakeLists.txt`, `vcpkg.json`, `include/Raysim/Raysim.hpp`).
+- Enhanced build system consistency with improved CMake warning handling.
+- Optimized DLL export configuration for Windows builds.
+
 ## [0.94.1] - 2026-05-15
 
 ### Added
