@@ -1,56 +1,107 @@
 #!/usr/bin/env bash
-# Setup all development tools: Python env, pre-commit, vcpkg.
-# Cross-platform (Linux/macOS). Verifies system dependencies before setup.
-# Stops on first error (set -euo pipefail).
-
+# =============================================================================
+# Raysim - setup_all.sh
+# Bootstraps vcpkg and installs pre-commit hooks (no Python venv needed).
+# Usage: ./tools/setup_all.sh [--skip-vcpkg] [--skip-precommit]
+# =============================================================================
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-TOOLS_DIR="$ROOT_DIR/tools"
+# =============================================================================
+# Colors
+# =============================================================================
 
-# === System Tool Verification ===
-# Check for required build tools before proceeding
-echo "Checking system dependencies..."
-MISSING=()
-for tool in cmake ninja gcc g++ curl zip unzip tar pkg-config git python3; do
-    command -v "$tool" &>/dev/null || MISSING+=("$tool")
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; CYAN='\033[0;36m'
+BOLD='\033[1m'; RESET='\033[0m'
+
+info()    { echo -e "${CYAN}[setup]${RESET} $*"; }
+success() { echo -e "${GREEN}[setup]${RESET} $*"; }
+warn()    { echo -e "${YELLOW}[setup]${RESET} $*"; }
+die()     { echo -e "${RED}[setup] ERROR:${RESET} $*" >&2; exit 1; }
+
+# =============================================================================
+# Argument parsing
+# =============================================================================
+
+SKIP_VCPKG=0
+SKIP_PRECOMMIT=0
+for arg in "$@"; do
+    case "$arg" in
+        --skip-vcpkg)      SKIP_VCPKG=1 ;;
+        --skip-precommit)  SKIP_PRECOMMIT=1 ;;
+        --help|-h)
+            echo "Usage: $0 [--skip-vcpkg] [--skip-precommit]"
+            exit 0 ;;
+        *) die "Unknown argument: $arg" ;;
+    esac
 done
 
-if [ ${#MISSING[@]} -ne 0 ]; then
-    echo "Missing required tools: ${MISSING[*]}"
-    echo ""
-    echo "Install them on Debian/Ubuntu with:"
-    echo "  sudo apt install -y build-essential cmake ninja-build curl \\"
-    echo "    zip unzip tar pkg-config git python3 libxinerama-dev libxcursor-dev \\"
-    echo "    xorg-dev libglu1-mesa-dev"
-    echo ""
-    exit 1
+# =============================================================================
+# Repo root
+# =============================================================================
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$REPO_ROOT"
+
+echo -e "\n${BOLD}=== Raysim Setup ===${RESET}\n"
+
+# =============================================================================
+# Git submodules
+# =============================================================================
+
+if [[ ! -f "vcpkg/bootstrap-vcpkg.sh" ]]; then
+    info "Initialising git submodules..."
+    git submodule update --init --recursive
 fi
 
-echo "All system dependencies found."
-echo ""
+# =============================================================================
+# vcpkg bootstrap and dependency install
+# =============================================================================
 
-# === Python Environment ===
-echo "Setting up Python environment..."
-if ! python3 "$TOOLS_DIR/setup_python_env.py"; then
-    echo "Python environment setup failed. Check the output above for details."
-    exit 1
+if [[ $SKIP_VCPKG -eq 0 ]]; then
+    info "Bootstrapping vcpkg..."
+    bash vcpkg/bootstrap-vcpkg.sh -disableMetrics
+
+    TRIPLET="$(bash tools/_detect_triplet.sh)"
+    info "Installing vcpkg dependencies for triplet: $TRIPLET (this may take a while on first run)..."
+    ./vcpkg/vcpkg install --triplet "$TRIPLET"
+    success "vcpkg ready."
+else
+    warn "Skipping vcpkg (--skip-vcpkg)."
 fi
 
-# === Pre-commit Hooks ===
-echo "Configuring pre-commit hooks..."
-if ! python3 "$TOOLS_DIR/install_precommit.py"; then
-    echo "Pre-commit setup failed. Check the output above for details."
-    exit 1
+# =============================================================================
+# pre-commit hooks
+# =============================================================================
+# pre-commit is a Python tool but does NOT require a project-local venv.
+# Install it once globally: pip install pre-commit  OR  pipx install pre-commit
+
+if [[ $SKIP_PRECOMMIT -eq 0 ]]; then
+    if ! command -v pre-commit &>/dev/null; then
+        warn "pre-commit not found. Attempting global install via pip..."
+        if command -v pipx &>/dev/null; then
+            pipx install pre-commit
+        elif command -v pip3 &>/dev/null; then
+            pip3 install --user pre-commit
+        elif command -v pip &>/dev/null; then
+            pip install --user pre-commit
+        else
+            die "Cannot install pre-commit: pip/pipx not found. Install it manually:\n  pip install pre-commit"
+        fi
+    fi
+    info "Installing pre-commit hooks..."
+    pre-commit install
+    success "pre-commit hooks installed."
+else
+    warn "Skipping pre-commit (--skip-precommit)."
 fi
 
-# === vcpkg Bootstrap ===
-echo "Initializing vcpkg..."
-if ! bash "$TOOLS_DIR/init_vcpkg.sh"; then
-    echo "vcpkg initialization failed. Check the output above for details."
-    exit 1
-fi
+# =============================================================================
+# Done
+# =============================================================================
 
-echo ""
-echo "Setup complete. Run: cmake --preset release"
-echo ""
+echo -e "\n${GREEN}${BOLD}Setup complete!${RESET}"
+echo -e "Next steps:"
+echo -e "  cmake --preset debug          # configure"
+echo -e "  cmake --build --preset debug  # build"
+echo -e "  # or use the helper:"
+echo -e "  ./tools/build.sh debug\n"
