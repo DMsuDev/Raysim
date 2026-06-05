@@ -46,6 +46,16 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- **Raylib GLFW linker error on Linux** (`cmake/Backends/raylib.cmake`): Fixed undefined reference to GLFW functions on Linux builds by:
+  - Making `glfw3` a required dependency (not optional) when raylib is used, since raylib is built with `USE_EXTERNAL_GLFW=ON`
+  - Improved platform-specific linker detection to properly apply `--start-group/--end-group` on GNU-style linkers (Linux) while avoiding unsupported flags on MSVC and Apple linkers
+  - This resolves the "undefined reference to `glfwGetPrimaryMonitor`" and related linker errors on Linux CI builds
+
+- **GLFW/OpenGL backend linker robustness** (`cmake/Backends/glfw_opengl.cmake`): Enhanced linker configuration with platform-specific handling:
+  - Added `--start-group/--end-group` wrapper for GNU-style linkers (Linux) to ensure proper symbol resolution
+  - Properly detects MSVC and Apple linker capabilities to avoid unsupported flags
+  - Improves consistency with raylib backend configuration
+
 - **Tool scripts permissions** (`tools/*.sh`): Fixed executable permissions and normalized line endings for shell scripts to work correctly across different shells (bash, dash, sh)
 
 - **CMake platform-specific linking**: Corrected linker flags for raylib and glfw to support multiple platforms properly
