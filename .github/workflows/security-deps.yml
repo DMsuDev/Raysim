@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Review dependencies for vulnerabilities
-        uses: actions/dependency-review-action@v4
+        uses: actions/dependency-review-action@v5
         with:
           # Fail on high or critical vulnerabilities (blocks PR merge if required)
           fail-on-severity: high
