@@ -86,7 +86,7 @@
         do { \
             if (!(check)) { \
                 RS##type##ERROR("Assertion failed: '{}' at {}:{} ({})", \
-                    RS_STRINGIFY_MACRO(check), \
+                    RS_STRINGIFY(check), \
                     (loc).file_name(), \
                     (loc).line(), \
                     (loc).function_name()); \
@@ -131,7 +131,7 @@
         do { \
             if (!(check)) { \
                 RS##type##ERROR("Assertion failed: '{}' at {}:{} ({})", \
-                    RS_STRINGIFY_MACRO(check), \
+                    RS_STRINGIFY(check), \
                     (loc).file_name(), \
                     (loc).line(), \
                     (loc).function_name()); \
@@ -144,7 +144,7 @@
         do { \
             if (!(check)) { \
                 RS##type##ERROR("Assertion failed: '{}' at {}:{} ({})", \
-                    RS_STRINGIFY_MACRO(check), \
+                    RS_STRINGIFY(check), \
                     (loc).file_name(), \
                     (loc).line(), \
                     (loc).function_name()); \
@@ -228,13 +228,13 @@
 /// @brief Asserts that @p ptr is not `nullptr` (core logger).
 /// @param ptr  Pointer expression to validate.
 #define RS_CORE_ASSERT_NOT_NULL(ptr) \
-    RS_CORE_ASSERT((ptr) != nullptr, "Pointer must not be null: {}", RS_STRINGIFY_MACRO(ptr))
+    RS_CORE_ASSERT((ptr) != nullptr, "Pointer must not be null: {}", RS_STRINGIFY(ptr))
 
 /// @def RS_ASSERT_NOT_NULL(ptr)
 /// @brief Asserts that @p ptr is not `nullptr` (client logger).
 /// @param ptr  Pointer expression to validate.
 #define RS_ASSERT_NOT_NULL(ptr) \
-    RS_ASSERT((ptr) != nullptr, "Pointer must not be null: {}", RS_STRINGIFY_MACRO(ptr))
+    RS_ASSERT((ptr) != nullptr, "Pointer must not be null: {}", RS_STRINGIFY(ptr))
 
 /// @}
 /// @name Range Validation
@@ -249,7 +249,7 @@
     RS_CORE_ASSERT(((val) >= (min_val)) && ((val) <= (max_val)), \
         "Value '{}' is out of range [{} - {}] (check: {} >= {} && {} <= {})", \
         val, min_val, max_val, \
-        RS_STRINGIFY_MACRO(val), RS_STRINGIFY_MACRO(min_val), RS_STRINGIFY_MACRO(val), RS_STRINGIFY_MACRO(max_val));
+        RS_STRINGIFY(val), RS_STRINGIFY(min_val), RS_STRINGIFY(val), RS_STRINGIFY(max_val));
 
 /// @def RS_ASSERT_IN_RANGE(val, min_val, max_val)
 /// @brief Asserts that @p val is within [`min_val`, `max_val`] inclusive (client logger).
@@ -260,7 +260,7 @@
     RS_ASSERT(((val) >= (min_val)) && ((val) <= (max_val)), \
         "Value '{}' is out of range [{} - {}] (check: {} >= {} && {} <= {})", \
         val, min_val, max_val, \
-        RS_STRINGIFY_MACRO(val), RS_STRINGIFY_MACRO(min_val), RS_STRINGIFY_MACRO(val), RS_STRINGIFY_MACRO(max_val));
+        RS_STRINGIFY(val), RS_STRINGIFY(min_val), RS_STRINGIFY(val), RS_STRINGIFY(max_val));
 
 /// @}
 /// @name Exception Validation
