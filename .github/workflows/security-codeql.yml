@@ -51,6 +51,7 @@ jobs:
         with:
           # Install system dependencies required by Raylib, GLFW and related libraries.
           submodules: recursive
+          fetch-depth: 0
 
       # Install system dependencies required by Raylib, GLFW and related libraries.
       - name: Install system dependencies
