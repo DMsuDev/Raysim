@@ -1,6 +1,4 @@
 # ===========================================================================
-# add_imgui.cmake
-#
 # Builds the backend-agnostic ImGui core library as a STATIC target named
 # 'imgui'.  This module is included exactly once (include_guard) and is
 # responsible only for the core translation units:
@@ -58,7 +56,7 @@ target_include_directories(imgui SYSTEM PUBLIC
 )
 
 # ===========================================================================
-# IMGUI_USER_CONFIG — custom imconfig hook
+# IMGUI_USER_CONFIG - custom imconfig hook
 #
 # ImGui includes IMGUI_USER_CONFIG before anything else (imgui.h line 66),
 # letting us override IMGUI_API without touching third-party source files.
@@ -99,9 +97,18 @@ if(RS_BUILD_SHARED)
   )
 endif()
 
-# ===========================================================================
-# Third-party hardening & IDE grouping
-# ===========================================================================
+# ---------------------------------------------------------------------------
+# Engine-wide third-party setup (warnings, compile options, etc.)
+# ---------------------------------------------------------------------------
 
 rs_third_party_setup(imgui)
-set_target_properties(imgui PROPERTIES FOLDER "ThirdParty/ImGui")
+
+# ---------------------------------------------------------------------------
+# IDE folder grouping
+# ---------------------------------------------------------------------------
+
+set_target_properties(imgui PROPERTIES
+  FOLDER "ThirdParty/ImGui"
+)
+
+message(STATUS "[rs] ImGui core library loaded: (${IMGUI_DIR})")
