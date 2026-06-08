@@ -1,93 +1,102 @@
-# ================================================
-# Warnings configuration
-# https://github.com/lefticus/cppbestpractices/blob/master/02-Use_the_Tools_Available.md
-# ================================================
+# ===========================================================================
+# Defines the `rs_warnings` INTERFACE target that centralises the project's
+# warning policy. Link any first-party target against it to inherit all flags.
+#
+# Usage:
+#   target_link_libraries(my_target PRIVATE rs_warnings)
+#
+# Reference:
+#   https://github.com/lefticus/cppbestpractices/blob/master/02-Use_the_Tools_Available.md
+# ===========================================================================
 
-# Interface target (GLOBAL warnings container)
+include_guard()
+
 add_library(rs_warnings INTERFACE)
+add_library(rs::warnings ALIAS rs_warnings)
 
-# Common warnings for all compilers
-set(COMMON_WARNINGS
-  -Wall                # Enable most basic warnings
-  -Wextra              # Extra warnings not included in -Wall
-  -Wshadow             # Warn if variable shadows another variable
-  -Wnon-virtual-dtor   # Warn if class with virtual functions lacks virtual destructor
-  -Wold-style-cast     # Warn on C-style casts (prefer static_cast, etc.)
-  -Wcast-align         # Warn for potential performance issues due to misaligned casts
-  -Wunused             # Warn on unused variables, parameters, functions
-  -Woverloaded-virtual # Warn when a virtual function is hidden instead of overridden
-  -Wpedantic           # Enforce strict ISO C++ compliance
-  -Wconversion         # Warn on implicit type conversions that may lose data
-  -Wsign-conversion    # Warn on sign changes (unsigned ↔ signed)
-  -Wnull-dereference   # Warn if null pointer dereference is detected
-  -Wdouble-promotion   # Warn when float is implicitly promoted to double
-  -Wformat=2           # Strong format string checking (printf-like)
+# ---------------------------------------------------------------------------
+# Flag sets
+# ---------------------------------------------------------------------------
+
+set(_RS_COMMON_WARNINGS         # GCC + Clang
+  -Wall
+  -Wextra
+  -Wpedantic
+  -Wshadow                    # Local variable shadows outer scope
+  -Wnon-virtual-dtor          # Virtual class without virtual destructor
+  -Wold-style-cast            # C-style casts (prefer static_cast / reinterpret_cast)
+  -Wcast-align                # Misaligned pointer casts (potential perf issue)
+  -Wunused                    # Unused variables, parameters, functions
+  -Woverloaded-virtual        # Hidden virtual (overloaded instead of overridden)
+  -Wconversion                # Implicit narrowing conversions
+  -Wsign-conversion           # Signed ↔ unsigned implicit conversions
+  -Wnull-dereference          # Statically-detectable null dereferences
+  -Wdouble-promotion          # Implicit float -> double promotion
+  -Wformat=2                  # Strict printf/scanf format-string checking
 )
 
-set(CLANG_WARNINGS
-  -Wdocumentation    # Warn about invalid/malformed Doxygen comments
-  -Wcomma            # Warn about suspicious comma operator usage
+set(_RS_CLANG_WARNINGS
+  -Wdocumentation             # Malformed Doxygen / documentation comments
+  -Wcomma                     # Suspicious comma-operator usage
 )
 
-set(GCC_WARNINGS
-  -Wmisleading-indentation # Warn if indentation does not match actual code blocks
-  -Wduplicated-cond        # Warn if identical conditions appear in if/else chains
-  -Wduplicated-branches    # Warn if both branches of if/else are identical
-  -Wlogical-op             # Warn about suspicious logical expressions
-  -Wuseless-cast           # Warn when casting to the same type
+set(_RS_GCC_WARNINGS
+  -Wmisleading-indentation    # Indentation does not match block structure
+  -Wduplicated-cond           # Identical conditions in if / else-if chain
+  -Wduplicated-branches       # Both branches of if/else are identical
+  -Wlogical-op                # Suspicious use of logical operators
+  -Wuseless-cast              # Cast to the same type
 )
 
-set(MSVC_WARNINGS
-  /W4           # High warning level (recommended baseline)
-  # Type safety / conversions
-  /w14242       # Possible loss of data during conversion
-  /w14254       # Bitfield conversion may lose data
-  /w14287       # Unsigned/negative mismatch
-  # Virtual / OOP correctness
-  /w14263       # Function does not override base virtual function
-  /w14265       # Class has virtual functions but no virtual destructor
-  # Logic / correctness
-  /w14296       # Expression always evaluates to constant
-  /w14311       # Pointer truncation
-  /w14826       # Sign-extension may cause unexpected behavior
-  # Comma / expressions
-  /w14545       # Function missing argument list before comma
-  /w14546       # Function call missing argument list
-  /w14547       # Operator before comma has no effect
-  /w14549       # Suspicious comma operator usage
-  /w14555       # Expression has no effect
-  # Misc
-  /w14619       # Invalid pragma warning number
-  /w14640       # Thread-unsafe static initialization
-  /w14905       # Wide string cast to narrow string
-  /w14906       # Narrow string cast to wide string
-  /w14928       # Illegal copy initialization (multiple conversions)
+set(_RS_MSVC_WARNINGS
+  /W4                         # High warning level (recommended baseline)
+  /permissive-                # Enforce standards conformance (also set globally)
+  # --- Type safety / conversions ---
+  /w14242                     # Possible data loss during conversion
+  /w14254                     # Bitfield conversion may lose data
+  /w14287                     # Unsigned / negative constant mismatch
+  /w14826                     # Sign-extension may cause unexpected behaviour
+  # --- Virtual / OOP correctness ---
+  /w14263                     # Member function does not override base virtual
+  /w14265                     # Virtual functions but no virtual destructor
+  # --- Logic / correctness ---
+  /w14296                     # Expression always evaluates to a constant
+  /w14311                     # Pointer truncation to smaller type
+  /w14640                     # Thread-unsafe static member initialisation
+  # --- Comma / expression side-effects ---
+  /w14545                     # Function call missing argument list before comma
+  /w14546                     # Function call missing argument list
+  /w14547                     # Operator before comma has no effect
+  /w14549                     # Suspicious comma-operator usage
+  /w14555                     # Expression has no effect; expected side-effect
+  # --- Miscellaneous ---
+  /w14619                     # Invalid pragma warning number
+  /w14905                     # Wide string literal cast to LPSTR
+  /w14906                     # String literal cast to LPWSTR
+  /w14928                     # Illegal copy-initialisation (multiple conversions)
 )
 
-# ================================
-# Common warnings (GCC/Clang)
-# ================================
+# ---------------------------------------------------------------------------
+# Apply flags via generator expressions
+# ---------------------------------------------------------------------------
+
 target_compile_options(rs_warnings INTERFACE
-
-  # GCC / Clang
-  $<$<CXX_COMPILER_ID:GNU,Clang>:${COMMON_WARNINGS}>
-
-  # Clang extras
-  $<$<CXX_COMPILER_ID:Clang>:${CLANG_WARNINGS}>
-
-  # GCC extras
-  $<$<CXX_COMPILER_ID:GNU>:${GCC_WARNINGS}>
-
-  # MSVC
-  $<$<CXX_COMPILER_ID:MSVC>:${MSVC_WARNINGS}>
+  $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:${_RS_COMMON_WARNINGS}>
+  $<$<CXX_COMPILER_ID:Clang,AppleClang>:${_RS_CLANG_WARNINGS}>
+  $<$<CXX_COMPILER_ID:GNU>:${_RS_GCC_WARNINGS}>
+  $<$<CXX_COMPILER_ID:MSVC>:${_RS_MSVC_WARNINGS}>
 )
 
-# ================================
-# Warnings as errors
-# ================================
+# ---------------------------------------------------------------------------
+# Warnings as errors  (opt-in via RS_WARNINGS_AS_ERRORS)
+# ---------------------------------------------------------------------------
+
 if(RS_WARNINGS_AS_ERRORS)
   target_compile_options(rs_warnings INTERFACE
-    $<$<CXX_COMPILER_ID:GNU,Clang>:-Werror>
+    $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Werror>
     $<$<CXX_COMPILER_ID:MSVC>:/WX>
   )
+  message(STATUS "[rs] Warnings treated as errors: ON")
 endif()
+
+message(STATUS "[rs] Warnings configured")
