@@ -25,7 +25,7 @@ set_target_properties(Raysim PROPERTIES
 
 rs_apply_build_defines(Raysim)
 
-rs_enable_sanitizers(Raysim)
+sanitizers_enable(Raysim)
 rs_enable_coverage(Raysim)
 rs_enable_optimizations(Raysim)
 rs_enable_lto(Raysim)
