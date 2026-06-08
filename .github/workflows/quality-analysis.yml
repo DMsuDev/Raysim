@@ -127,8 +127,8 @@ jobs:
       - name: Run codespell
         uses: codespell-project/actions-codespell@v2
         with:
-          skip: build,_deps,vendor,third_party,vcpkg,cmake,*.lock,.git,CMakeFiles.txt
-          ignore_words_list: nd,ot,te
+          skip: build,_deps,vendor,third_party,vcpkg,cmake,*.lock,*.json,*.es.md
+          ignore_words_list: nd,ot,te,ThirdParty,raysim
           check_filenames: true
 
   quality-gate:
