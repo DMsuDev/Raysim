@@ -1,0 +1,108 @@
+name: CodeQL Security Analysis
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "include/**"
+      - "examples/**"
+      - "CMakeLists.txt"
+      - "CMakePresets.json"
+      - "vcpkg.json"
+      - ".github/workflows/security-codeql.yml"
+
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "include/**"
+      - "examples/**"
+      - "CMakeLists.txt"
+      - "CMakePresets.json"
+      - "vcpkg.json"
+
+  schedule:
+    # Run weekly on Monday at 08:00 UTC to detect newly added CodeQL queries
+    - cron: "0 8 * * 1"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  analyze:
+    name: Analyze C++ (Linux - Release)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    env:
+      CC: gcc-14
+      CXX: g++-14
+      BUILD_TYPE: Release
+
+    steps:
+      # Checkout repository and initialize submodules (vcpkg).
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v6
+        with:
+          # Install system dependencies required by Raylib, GLFW and related libraries.
+          submodules: recursive
+          fetch-depth: 0
+
+      # Install system dependencies required by Raylib, GLFW and related libraries.
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends \
+            ninja-build \
+            libx11-dev libxrandr-dev libxinerama-dev \
+            libxcursor-dev libxi-dev libgl1-mesa-dev \
+            libglu1-mesa-dev libwayland-dev libxkbcommon-dev \
+            pkg-config
+
+      - name: Cache vcpkg packages
+        uses: actions/cache@v5
+        with:
+          path: |
+            ${{ github.workspace }}/vcpkg_installed
+            ${{ github.workspace }}/vcpkg/downloads
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-
+
+      - name: Bootstrap vcpkg
+        run: ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: c-cpp
+          queries: security-and-quality
+          config: |
+            paths-ignore:
+              - third_party/**
+              - vcpkg/**
+              - docs/**
+              - tools/**
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+            -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
+            -DRS_BUILD_EXAMPLES=ON
+
+      - name: Build for analysis
+        run: cmake --build build --parallel
+
+      # Upload SARIF results to GitHub Security.
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:c-cpp"
+          # Upload results to GitHub Security (requires security-events: write permission).
+          upload: always
