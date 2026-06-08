@@ -105,6 +105,14 @@ jobs:
 
           echo "vcpkg.json updated and verified."
 
+      - name: Update vcpkg submodule
+        if: steps.check.outputs.update_needed == 'true'
+        run: |
+          NEW="${{ steps.vcpkg.outputs.baseline }}"
+          git -C vcpkg fetch origin
+          git -C vcpkg checkout "$NEW"
+          git add vcpkg
+
       - name: Create pull request
         if: steps.check.outputs.update_needed == 'true'
         uses: peter-evans/create-pull-request@v8
