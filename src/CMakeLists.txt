@@ -170,10 +170,10 @@ target_link_libraries(Raysim
   PUBLIC
     spdlog # header-only INTERFACE target
     $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:imgui> # static build only
-    $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:rs_backend> # static build only
+    $<$<NOT:$<BOOL:${RS_BUILD_SHARED}>>:rs::backend> # static build only
   PRIVATE
     $<$<BOOL:${RS_BUILD_SHARED}>:imgui> # shared build: embedded in DLL
-    $<$<BOOL:${RS_BUILD_SHARED}>:rs_backend> # shared build: embedded in DLL
+    $<$<BOOL:${RS_BUILD_SHARED}>:rs::backend> # shared build: embedded in DLL
     rs_warnings
     stb
     $<$<PLATFORM_ID:Windows>:winmm>
