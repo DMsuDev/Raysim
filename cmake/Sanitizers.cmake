@@ -2,33 +2,36 @@
 # C++ Sanitizers configuration
 # ================================================
 #
-# Supported matrix:
-#
+# SUPPORTED MATRIX
+# ----------------
 #   Toolchain              | ASan | UBSan | TSan | MSan | LSan
 #   -----------------------|------|-------|------|------|------
 #   GCC / Linux            |  yes |  yes  |  yes |  no  |  yes
 #   Clang / Linux          |  yes |  yes  |  yes | (1)  |  yes
-#   Clang / Windows (GNU)  |  yes |  yes  |  no  |  no  |  no
+#   Clang / Windows (GNU)  |  yes |  no   |  no  |  no  |  no
 #   MSVC                   |  no  |  no   |  no  |  no  |  no
+#   clang-cl               |  no  |  no   |  no  |  no  |  no
 #   MinGW                  |  --  |  --   |  --  |  --  |  --
 #
 #   (1) MSan on Clang/Linux requires a fully instrumented LLVM environment:
-#       libc++ and all dependencies must be built with MSan.
+#       libc++ and all dependencies must be built with MSan instrumentation.
+#       See https://clang.llvm.org/docs/MemorySanitizer.html
 #
-#   clang-cl:
-#       Sanitizers require linking against LLVM/compiler-rt instead of the
-#       default MSVC CRT. This is intentionally unsupported in this project.
+# INCOMPATIBLE COMBINATIONS
+# -------------------------
+#   - ASan  + TSan
+#   - MSan  + any other sanitizer
 #
-# Incompatible combinations:
-#
-#   - ASan + TSan
-#   - MSan + ANY other sanitizer
-#
-# Notes:
-#
-#   - Sanitizers are applied only to non-Release configurations.
-#   - Uses target-scoped flags only (no global CMAKE_CXX_FLAGS).
-#   - Designed for Windows + Linux only.
+# NOTES
+# -----
+#   - Sanitizers are applied only to Debug / RelWithDebInfo configurations.
+#     Release and MinSizeRel are always skipped (via generator expressions in
+#     multi-config generators, or a warning in single-config generators).
+#   - Flags are scoped to the target (PRIVATE). No global CMAKE_CXX_FLAGS
+#     pollution.
+#   - On Windows + Clang/GNU, the ASan runtime DLL is copied next to the
+#     executable automatically. If the DLL is not found, linking falls back
+#     to -static-libsan.
 # ================================================
 
 include_guard()
@@ -38,51 +41,81 @@ include_guard()
 # TRUE for every config except Release and MinSizeRel.
 # Supports both single-config and multi-config generators.
 # -----------------------------------------------------------------------------
-function(_rs_san_config_genex out_var)
+function(_san_config_genex out_var)
   set(${out_var} "$<NOT:$<CONFIG:Release,MinSizeRel>>" PARENT_SCOPE)
 endfunction()
 
-function(rs_enable_sanitizers target_name)
+# -----------------------------------------------------------------------
+# Internal helper: apply a list of flags to a target under a genex guard
+# -----------------------------------------------------------------------
+function(_san_apply_flags target_name cfg_genex compile_flags link_flags)
 
-  # -------------------------------------------------------------------
-  # Validation and early exits
-  # (before any platform-specific logic or flag generation)
-  # -------------------------------------------------------------------
+  foreach(_flag IN LISTS compile_flags)
+    target_compile_options(${target_name} PRIVATE $<${cfg_genex}:${_flag}>)
+  endforeach()
 
+  foreach(_flag IN LISTS link_flags)
+    target_link_options(${target_name} PRIVATE $<${cfg_genex}:${_flag}>)
+  endforeach()
+
+endfunction()
+
+# -----------------------------------------------------------------------
+# Public API
+# -----------------------------------------------------------------------
+function(sanitizers_enable target_name)
+
+  # --- target must exist ------------------------------------------------
   if(NOT TARGET ${target_name})
-    message(FATAL_ERROR "[Sanitizers] Target '${target_name}' does not exist")
+    message(FATAL_ERROR "[Sanitizers] Target '${target_name}' does not exist.")
   endif()
 
-  if(NOT RS_ENABLE_SANITIZERS)
-    message(STATUS "[Sanitizers] Sanitizers are globally disabled -> skipping target '${target_name}'.")
+  # --- bail out if nothing is requested ---------------------------------
+  if(NOT RS_SANITIZE_ASAN  AND NOT RS_SANITIZE_UBSAN AND
+     NOT RS_SANITIZE_TSAN  AND NOT RS_SANITIZE_MSAN  AND NOT RS_SANITIZE_LSAN)
+    message(STATUS "[Sanitizers] All sanitizers OFF -> skipping '${target_name}'.")
     return()
   endif()
 
-  if(NOT CMAKE_CONFIGURATION_TYPES)
-    if(CMAKE_BUILD_TYPE MATCHES "^(Release|MinSizeRel)$")
-      if(NOT _RS_SAN_WARNED_RELEASE_BUILD)
+  # --- warn once when sanitizers are ineffective in Release/MinSizeRel ---------
+
+  # Warn only once per configure
+  if(NOT _SAN_WARNED_RELEASE_BUILD)
+    if(NOT CMAKE_CONFIGURATION_TYPES)
+
+      # Single-config generators (Make, Ninja)
+      if(CMAKE_BUILD_TYPE MATCHES "^(Release|MinSizeRel)$")
         message(WARNING
           "[Sanitizers] Active build type is '${CMAKE_BUILD_TYPE}'. "
-          "Sanitizers are applied only to Debug and RelWithDebInfo.")
-        set(_RS_SAN_WARNED_RELEASE_BUILD TRUE CACHE INTERNAL "")
+          "Sanitizers apply only to Debug and RelWithDebInfo.")
+        set(_SAN_WARNED_RELEASE_BUILD TRUE CACHE INTERNAL "")
       endif()
+
+    else()
+
+      # Multi-config generators (VS, Xcode, Ninja Multi-Config)
+      message(STATUS
+        "[Sanitizers] Multi-config generator detected. "
+        "Sanitizers will be disabled automatically for Release/MinSizeRel "
+        "via generator expressions.")
+      set(_SAN_WARNED_RELEASE_BUILD TRUE CACHE INTERNAL "")
+
     endif()
   endif()
 
   # -------------------------------------------------------------------------
   # Toolchain detection
   # -------------------------------------------------------------------------
-  set(_is_gcc FALSE)
-  set(_is_clang FALSE)
+  set(_is_gcc      FALSE)
+  set(_is_clang    FALSE)
   set(_is_clang_cl FALSE)
-  set(_is_msvc FALSE)
+  set(_is_msvc     FALSE)
 
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(_is_gcc TRUE)
   elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(_is_clang TRUE)
-    if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC" OR
-      CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
+    if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
       set(_is_clang_cl TRUE)
     endif()
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
@@ -94,30 +127,28 @@ function(rs_enable_sanitizers target_name)
   # -------------------------------------------------------------------------
 
   if(MINGW)
-    if(NOT _RS_SAN_WARNED_MINGW)
+    if(NOT _SAN_WARNED_MINGW)
       message(WARNING
-        "[Sanitizers] MinGW sanitizer support is inconsistent across toolchains "
-        "and distributions. Sanitizers are disabled by default on MinGW.")
-      set(_RS_SAN_WARNED_MINGW TRUE CACHE INTERNAL "")
+        "[Sanitizers] MinGW sanitizer support is inconsistent. Skipping '${target_name}'.")
+      set(_SAN_WARNED_MINGW TRUE CACHE INTERNAL "")
     endif()
     return()
   endif()
 
   if(_is_msvc)
-    if(NOT _RS_SAN_WARNED_MSVC)
-      message(WARNING
-        "[Sanitizers] MSVC does not support sanitizers in this project.")
-      set(_RS_SAN_WARNED_MSVC TRUE CACHE INTERNAL "")
+    if(NOT _SAN_WARNED_MSVC)
+      message(WARNING "[Sanitizers] MSVC does not support sanitizers. Skipping.")
+      set(_SAN_WARNED_MSVC TRUE CACHE INTERNAL "")
     endif()
     return()
   endif()
 
   if(_is_clang_cl)
-    if(NOT _RS_SAN_WARNED_CLANG_CL)
+    if(NOT _SAN_WARNED_CLANG_CL)
       message(WARNING
-        "[Sanitizers] clang-cl sanitizers are intentionally unsupported "
-        "in this project due to LLVM/compiler-rt runtime requirements.")
-      set(_RS_SAN_WARNED_CLANG_CL TRUE CACHE INTERNAL "")
+        "[Sanitizers] clang-cl sanitizers are unsupported (requires LLVM/compiler-rt CRT). "
+        "Skipping '${target_name}'.")
+      set(_SAN_WARNED_CLANG_CL TRUE CACHE INTERNAL "")
     endif()
     return()
   endif()
@@ -126,137 +157,109 @@ function(rs_enable_sanitizers target_name)
   # Global incompatibility checks (before per-platform filtering)
   # -------------------------------------------------------------------------
 
-  if(RS_ENABLE_ASAN AND RS_ENABLE_TSAN)
-    message(FATAL_ERROR
-      "[Sanitizers] ASan and TSan cannot be enabled at the same time.")
+  if(RS_SANITIZE_ASAN AND RS_SANITIZE_TSAN)
+    message(FATAL_ERROR "[Sanitizers] ASan and TSan cannot be enabled simultaneously.")
   endif()
 
-  if(RS_ENABLE_MSAN AND
-    (RS_ENABLE_ASAN OR RS_ENABLE_UBSAN OR RS_ENABLE_TSAN OR RS_ENABLE_LSAN))
-    message(FATAL_ERROR
-      "[Sanitizers] MSan must not be combined with any other sanitizer.")
+  set(_other_san FALSE)
+  if(RS_SANITIZE_ASAN OR RS_SANITIZE_UBSAN OR RS_SANITIZE_TSAN OR RS_SANITIZE_LSAN)
+    set(_other_san TRUE)
+  endif()
+
+  if(RS_SANITIZE_MSAN AND _other_san)
+    message(FATAL_ERROR "[Sanitizers] MSan cannot be combined with any other sanitizer.")
   endif()
 
   # -------------------------------------------------------------------------
   # Capability matrix
   # -------------------------------------------------------------------------
 
-  set(_allow_asan FALSE)
+  set(_allow_asan  FALSE)
   set(_allow_ubsan FALSE)
-  set(_allow_tsan FALSE)
-  set(_allow_msan FALSE)
-  set(_allow_lsan FALSE)
+  set(_allow_tsan  FALSE)
+  set(_allow_msan  FALSE)
+  set(_allow_lsan  FALSE)
 
-  # ---------------------------------------------------------
-  # GCC / Linux
-  # ---------------------------------------------------------
+  # --- GCC / Linux -------------------------------------------------------
 
   if(_is_gcc AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    # GCC on Linux: ASan, UBSan, TSan, LSan. MSan requires compiler-rt.
-    set(_allow_asan TRUE)
+    set(_allow_asan  TRUE)
     set(_allow_ubsan TRUE)
-    set(_allow_tsan TRUE)
-    set(_allow_lsan TRUE)
+    set(_allow_tsan  TRUE)
+    set(_allow_lsan  TRUE)
 
-    # ---------------------------------------------------------
-    # Clang / Linux
-    # ---------------------------------------------------------
+  # --- Clang / Linux -------------------------------------------------------
 
   elseif(_is_clang AND NOT _is_clang_cl AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
-
-    set(_allow_asan TRUE)
+    set(_allow_asan  TRUE)
     set(_allow_ubsan TRUE)
-    set(_allow_tsan TRUE)
-    set(_allow_msan TRUE)
-    set(_allow_lsan TRUE)
+    set(_allow_tsan  TRUE)
+    set(_allow_msan  TRUE)
+    set(_allow_lsan  TRUE)
 
-    if(RS_ENABLE_MSAN)
+    if(RS_SANITIZE_MSAN)
       message(STATUS
-        "[Sanitizers] Note: MSan requires a fully instrumented LLVM environment. "
-        "libc++ and all dependencies must be built with MSan instrumentation. "
-        "See https://clang.llvm.org/docs/MemorySanitizer.html for setup details.")
+        "[Sanitizers] MSan requires a fully instrumented LLVM environment. "
+        "See https://clang.llvm.org/docs/MemorySanitizer.html")
     endif()
 
-    # ---------------------------------------------------------
-    # Clang / Windows (clang-cl)
-    # ---------------------------------------------------------
+  # --- Clang / Windows (GNU frontend) --------------------------------------
 
+  # Windows Clang GNU-style support is partial.
+  # Only ASan and UBSan are considered reasonably usable.
   elseif(_is_clang AND WIN32)
-
-    # Windows Clang GNU-style support is partial.
-    # Only ASan and UBSan are considered reasonably usable.
-
-    set(_allow_asan TRUE)
-    set(_allow_ubsan TRUE)
+    set(_allow_asan  TRUE)
+    set(_allow_ubsan FALSE)
 
   else()
-    if(NOT _RS_SAN_WARNED_UNKNOWN_COMPILER)
+    if(NOT _SAN_WARNED_UNKNOWN)
       message(WARNING
-        "[Sanitizers] Unrecognised compiler/platform combination "
-        "(compiler: ${CMAKE_CXX_COMPILER_ID}, "
-        "Sanitizers are disabled.")
-      set(_RS_SAN_WARNED_UNKNOWN_COMPILER TRUE CACHE INTERNAL "")
+        "[Sanitizers] Unrecognised compiler/platform "
+        "(${CMAKE_CXX_COMPILER_ID} / ${CMAKE_SYSTEM_NAME}). Sanitizers disabled.")
+      set(_SAN_WARNED_UNKNOWN TRUE CACHE INTERNAL "")
     endif()
     return()
   endif()
 
-  # -------------------------------------------------------------------------
-  # Warn about requested sanitizers unsupported on this platform
-  # -------------------------------------------------------------------------
-  if(RS_ENABLE_ASAN AND NOT _allow_asan AND NOT _RS_SAN_WARNED_ASAN_UNSUPPORTED)
-    message(WARNING
-      "[Sanitizers] ASan is not supported on this platform/toolchain -> skipped.")
-    set(_RS_SAN_WARNED_ASAN_UNSUPPORTED TRUE CACHE INTERNAL "")
-  endif()
-  if(RS_ENABLE_MSAN AND NOT _allow_msan AND NOT _RS_SAN_WARNED_MSAN_UNSUPPORTED)
-    message(WARNING
-      "[Sanitizers] MSan is not supported on this platform/toolchain -> skipped.")
-    set(_RS_SAN_WARNED_MSAN_UNSUPPORTED TRUE CACHE INTERNAL "")
-  endif()
-  if(RS_ENABLE_TSAN AND NOT _allow_tsan AND NOT _RS_SAN_WARNED_TSAN_UNSUPPORTED)
-    message(WARNING
-      "[Sanitizers] TSan is not supported on this platform/toolchain -> skipped.")
-    set(_RS_SAN_WARNED_TSAN_UNSUPPORTED TRUE CACHE INTERNAL "")
-  endif()
-  if(RS_ENABLE_UBSAN AND NOT _allow_ubsan AND NOT _RS_SAN_WARNED_UBSAN_UNSUPPORTED)
-    message(WARNING
-      "[Sanitizers] UBSan is not supported on this platform/toolchain -> skipped.")
-    set(_RS_SAN_WARNED_UBSAN_UNSUPPORTED TRUE CACHE INTERNAL "")
-  endif()
-  if(RS_ENABLE_LSAN AND NOT _allow_lsan AND NOT _RS_SAN_WARNED_LSAN_UNSUPPORTED)
-    message(WARNING
-      "[Sanitizers] LSan is not supported on this platform/toolchain -> skipped.")
-    set(_RS_SAN_WARNED_LSAN_UNSUPPORTED TRUE CACHE INTERNAL "")
-  endif()
+  # --- warn about unsupported requests ----------------------------------
+
+  foreach(_san IN ITEMS ASAN UBSAN TSAN MSAN LSAN)
+    if(SANITIZE_${_san} AND NOT _allow_${_san} AND NOT _SAN_WARNED_${_san}_UNSUPPORTED)  # cmake-lint: disable=E1120
+      string(TOLOWER "${_san}" _san_lower)
+      message(WARNING
+        "[Sanitizers] ${_san} is not supported on this platform/toolchain -> skipped.")
+      set(_SAN_WARNED_${_san}_UNSUPPORTED TRUE CACHE INTERNAL "")
+    endif()
+  endforeach()
 
   # -------------------------------------------------------------------------
   # Build the final sanitizer list (requested AND supported)
   # -------------------------------------------------------------------------
   set(_sanitizers)
 
-  if(RS_ENABLE_ASAN AND _allow_asan)
+  if(RS_SANITIZE_ASAN AND _allow_asan)
     list(APPEND _sanitizers address)
   endif()
 
-  if(RS_ENABLE_UBSAN AND _allow_ubsan)
+  if(RS_SANITIZE_UBSAN AND _allow_ubsan)
     list(APPEND _sanitizers undefined)
   endif()
 
-  if(RS_ENABLE_TSAN AND _allow_tsan)
+  if(RS_SANITIZE_TSAN AND _allow_tsan)
     list(APPEND _sanitizers thread)
   endif()
 
-  if(RS_ENABLE_MSAN AND _allow_msan)
+  if(RS_SANITIZE_MSAN AND _allow_msan)
     list(APPEND _sanitizers memory)
   endif()
 
-  if(RS_ENABLE_LSAN AND _allow_lsan)
-    if(RS_ENABLE_ASAN)
-      if(NOT _RS_SAN_WARNED_LSAN_REDUNDANT)
+  if(RS_SANITIZE_LSAN AND _allow_lsan)
+    if(RS_SANITIZE_ASAN)
+      if(NOT _SAN_WARNED_LSAN_REDUNDANT)
         message(WARNING
-          "[Sanitizers] LSan is redundant when ASan is active "
-          "(ASan already includes leak detection) -> skipped.")
-        set(_RS_SAN_WARNED_LSAN_REDUNDANT TRUE CACHE INTERNAL "")
+          "[Sanitizers] LSan is redundant when ASan is active (ASan includes leak detection). "
+          "Skipping LSan.")
+        set(_SAN_WARNED_LSAN_REDUNDANT TRUE CACHE INTERNAL "")
       endif()
     else()
       list(APPEND _sanitizers leak)
@@ -264,42 +267,89 @@ function(rs_enable_sanitizers target_name)
   endif()
 
   if(NOT _sanitizers)
-    message(STATUS
-      "[Sanitizers] No sanitizers were enabled for target '${target_name}'.")
+    message(STATUS "[Sanitizers] No sanitizers active for '${target_name}'.")
     return()
   endif()
 
-  # -------------------------------------------------------------------------
-  # Build flags
-  # -------------------------------------------------------------------------
-
   list(JOIN _sanitizers "," _san_list)
 
+  # --- Windows/Clang: locate ASan DLL before building flags -------------
+  set(_extra_compile_flags)
+  set(_extra_link_flags)
+
+  if(RS_SANITIZE_ASAN AND _allow_asan AND WIN32)
+    execute_process(
+      COMMAND ${CMAKE_CXX_COMPILER} --print-runtime-dir
+      OUTPUT_VARIABLE _clang_rt_dir
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    get_filename_component(_clang_rt_parent "${_clang_rt_dir}" DIRECTORY)
+    set(_search_dirs
+      "${_clang_rt_dir}"
+      "${_clang_rt_parent}/x86_64-pc-windows-msvc"
+      "${_clang_rt_parent}/x86_64-unknown-windows-msvc"
+      "${_clang_rt_parent}/x86_64-unknown-windows-gnu"
+      "${_clang_rt_parent}/x86_64-w64-windows-gnu"
+    )
+
+    set(_asan_dlls)
+    foreach(_dir IN LISTS _search_dirs)
+      file(GLOB _found
+        "${_dir}/clang_rt.asan_dynamic-x86_64.dll"
+        "${_dir}/clang_rt.asan*.dll"
+      )
+      if(_found)
+        list(APPEND _asan_dlls ${_found})
+        break()
+      endif()
+    endforeach()
+
+    if(NOT _asan_dlls)
+      if(NOT _SAN_WARNED_ASAN_DLL_MISSING)
+        message(WARNING
+          "[Sanitizers] ASan runtime DLL not found. "
+          "ASan will be disabled for '${target_name}'.\n"
+          "To fix: ensure clang_rt.asan_dynamic-x86_64.dll is accessible.\n"
+          "Searched: ${_search_dirs}")
+        set(_SAN_WARNED_ASAN_DLL_MISSING TRUE CACHE INTERNAL "")
+      endif()
+      list(REMOVE_ITEM _sanitizers address)
+      list(JOIN _sanitizers "," _san_list)
+      if(NOT _san_list)
+        return()
+      endif()
+    endif()
+
+  endif()
+
+  # --- assemble flags ---------------------------------------------------
   set(_compile_flags
     "-fsanitize=${_san_list}"
     "-fno-omit-frame-pointer"
+    ${_extra_compile_flags}
   )
-
   set(_link_flags
     "-fsanitize=${_san_list}"
+    ${_extra_link_flags}
   )
 
-  # -------------------------------------------------------------------------
-  # Apply flags (scoped to the target, respecting build config)
-  # -------------------------------------------------------------------------
+  # --- apply flags ------------------------------------------------------
+  _san_config_genex(_cfg_genex)
+  _san_apply_flags(${target_name} "${_cfg_genex}" "${_compile_flags}" "${_link_flags}")
 
-  _rs_san_config_genex(_cfg_genex)
+  message(STATUS "[Sanitizers] '${_san_list}' enabled for target '${target_name}'")
 
-  message(STATUS
-    "[Sanitizers] Enabling '${_san_list}' for target '${target_name}'")
-
-  # GCC / plain Clang: GCC-compatible flags.
-  target_compile_options(${target_name} PRIVATE
-    $<${_cfg_genex}:${_compile_flags}>
-  )
-
-  target_link_options(${target_name} PRIVATE
-    $<${_cfg_genex}:${_link_flags}>
-  )
+  # --- post-build: copy ASan DLLs if found ------------------------------
+  if(DEFINED _asan_dlls AND _asan_dlls)
+    foreach(_dll IN LISTS _asan_dlls)
+      add_custom_command(TARGET ${target_name} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+          "${_dll}"
+          "$<TARGET_FILE_DIR:${target_name}>"
+        COMMENT "[Sanitizers] Copying ASan runtime: ${_dll}"
+      )
+    endforeach()
+  endif()
 
 endfunction()

@@ -1,8 +1,9 @@
 # ===========================================================================
 # Backend: raylib
-# Raylib es "all-in-one": windowing + input + rendering en una lib.
+# Raylib is "all-in-one": windowing + input + rendering in a single lib.
 #
-# Required vcpkg packages: raylib
+# Required vcpkg packages: raylib (glfw3 pulled in automatically when
+#                          USE_EXTERNAL_GLFW=ON is set by vcpkg)
 # ===========================================================================
 
 include_guard()
@@ -13,63 +14,58 @@ include_guard()
 
 find_package(raylib CONFIG REQUIRED)
 
-# vcpkg builds raylib with USE_EXTERNAL_GLFW=ON. CMake places GLFW before
-# raylib in the link command, which breaks single-pass linkers (debug/no-LTO).
-# LINK_GROUP:RESCAN wraps both in --start-group/--end-group to allow
-# multiple passes.
+# vcpkg builds raylib with USE_EXTERNAL_GLFW=ON, so GLFW symbols are NOT
+# baked into libraylib.a and must be linked explicitly to avoid undefined
+# symbol errors at link time.
 find_package(glfw3 CONFIG QUIET)
 
 # ===========================================================================
-# Windowing (Raylib handles everything internally)
+# Windowing target  (Raylib + optional explicit GLFW)
 # ===========================================================================
 
 add_library(rs_windowing_raylib INTERFACE)
+add_library(rs::windowing       ALIAS rs_windowing_raylib)
 
 if(glfw3_FOUND)
-    # LINK_GROUP:RESCAN uses --start-group/--end-group, only supported by GNU-style linkers (Linux/macOS).
-    # On Windows (MSVC) link both libraries directly without the group wrapper.
-    if(MSVC)
-        target_link_libraries(rs_windowing_raylib INTERFACE raylib glfw)
-    else()
-        target_link_libraries(rs_windowing_raylib INTERFACE
-            "$<LINK_GROUP:RESCAN,raylib,glfw>"
-        )
-    endif()
+  # LINK_GROUP:RESCAN emits --start-group/--end-group, which is only
+  # supported by GNU-style linkers (GCC/Clang on Linux and macOS).
+  # On Windows we link both libraries directly to stay MSVC-compatible.
+  if(WIN32)
+    target_link_libraries(rs_windowing_raylib INTERFACE raylib glfw)
+  else()
+    target_link_libraries(rs_windowing_raylib INTERFACE
+      "$<LINK_GROUP:RESCAN,raylib,glfw>"
+    )
+  endif()
 else()
-    target_link_libraries(rs_windowing_raylib INTERFACE raylib)
+  # Fallback: assume GLFW is baked into the raylib static archive.
+  target_link_libraries(rs_windowing_raylib INTERFACE raylib)
 endif()
 
 # ===========================================================================
-# Graphics (Raylib handles OpenGL internally - no GLAD needed)
+# Graphics target  (Raylib manages OpenGL internally - no GLAD needed)
 # ===========================================================================
 
 add_library(rs_graphics_raylib INTERFACE)
+add_library(rs::graphics       ALIAS rs_graphics_raylib)
 
+# Graphics intentionally reuses the windowing target: Raylib bundles both
+# concerns, so there is no separate graphics library to link against.
 target_link_libraries(rs_graphics_raylib INTERFACE
-    rs_windowing_raylib
+  rs_windowing_raylib
 )
 
 # ===========================================================================
-# ImGui backend
+# ImGui backend  (rlImGui binding)
 # ===========================================================================
 
-include(${CMAKE_SOURCE_DIR}/cmake/imgui_backends/imgui_raylib.cmake)
+include("${CMAKE_SOURCE_DIR}/cmake/imgui_backends/imgui_raylib.cmake")
 
-# ===========================================================================
-# Meta-target: rs_backend (combines everything)
-# ===========================================================================
+# ---------------------------------------------------------------------------
+# IDE folder grouping
+# ---------------------------------------------------------------------------
 
-add_library(rs_backend INTERFACE)
-
-target_link_libraries(rs_backend INTERFACE
-    rs_windowing_raylib
-    rs_graphics_raylib
-    ${RS_IMGUI_BACKEND_TARGET}
-)
-
-# Grouping for IDEs
-set_target_properties(rs_backend PROPERTIES FOLDER "Backends")
 set_target_properties(rs_windowing_raylib PROPERTIES FOLDER "Backends/Windowing")
-set_target_properties(rs_graphics_raylib PROPERTIES FOLDER "Backends/Graphics")
+set_target_properties(rs_graphics_raylib  PROPERTIES FOLDER "Backends/Graphics")
 
-message(STATUS "Backend raylib configured")
+message(STATUS "[rs] Backend configured: raylib")
