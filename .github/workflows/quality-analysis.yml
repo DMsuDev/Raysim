@@ -141,21 +141,23 @@ jobs:
     steps:
       - name: Evaluate quality checks
         run: |
-          echo "### Code Quality Report" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Clang-Tidy | ${{ needs.clang-tidy.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Cppcheck | ${{ needs.cppcheck.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Codespell | ${{ needs.codespell.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "### Code Quality Report"
+            echo
+            echo "| Check | Status |"
+            echo "|-------|--------|"
+            echo "| Clang-Tidy | ${{ needs.clang-tidy.result }} |"
+            echo "| Cppcheck | ${{ needs.cppcheck.result }} |"
+            echo "| Codespell | ${{ needs.codespell.result }} |"
+            echo
+          } >> "$GITHUB_STEP_SUMMARY"
 
           if [[ "${{ needs.clang-tidy.result }}" == "failure" || \
                 "${{ needs.cppcheck.result }}" == "failure" || \
                 "${{ needs.codespell.result }}" == "failure" ]]; then
-            echo "Some quality checks failed" >> $GITHUB_STEP_SUMMARY
+            echo "Some quality checks failed" >> "$GITHUB_STEP_SUMMARY"
             echo "::error::One or more quality checks failed"
             exit 1
           fi
 
-          echo "All quality checks passed" >> $GITHUB_STEP_SUMMARY
+          echo "All quality checks passed" >> "$GITHUB_STEP_SUMMARY"
