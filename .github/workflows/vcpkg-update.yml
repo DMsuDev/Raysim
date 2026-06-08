@@ -15,6 +15,9 @@ permissions:
   contents: write
   pull-requests: write
 
+env:
+  VCPKG_DAYS: 5
+
 jobs:
   update-baseline:
     name: Check & Update vcpkg Baseline
@@ -38,17 +41,21 @@ jobs:
       - name: Fetch latest vcpkg baseline
         id: vcpkg
         run: |
-          BASELINE=$(git ls-remote https://github.com/microsoft/vcpkg.git HEAD | cut -f1)
+          CUTOFF=$(date -u -d "${VCPKG_DAYS} days ago" +"%Y-%m-%dT%H:%M:%SZ")
 
-          # Guard: ls-remote can return empty on network failure
-          if [ -z "$BASELINE" ]; then
-            echo "::error::Failed to fetch vcpkg HEAD — git ls-remote returned empty."
+          BASELINE=$(curl -sf \
+            "https://api.github.com/repos/microsoft/vcpkg/commits?sha=master&until=${CUTOFF}&per_page=1" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            | jq -r '.[0].sha')
+
+          if [ -z "$BASELINE" ] || [ "$BASELINE" = "null" ]; then
+            echo "::error::Failed to fetch vcpkg baseline from GitHub API."
             exit 1
           fi
 
           # Guard: must look like a 40-char hex SHA
           if ! echo "$BASELINE" | grep -qE '^[0-9a-f]{40}$'; then
-            echo "::error::Fetched value does not look like a valid SHA: '$BASELINE'"
+            echo "::error::Value does not look like a valid SHA: '$BASELINE'"
             exit 1
           fi
 
@@ -105,7 +112,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           base: main
           branch: chore/update-vcpkg-baseline
-          branch-suffix: timestamp
           delete-branch: true
           commit-message: "chore(vcpkg): update baseline to ${{ steps.vcpkg.outputs.baseline }}"
           title: "chore(vcpkg): update vcpkg baseline"
