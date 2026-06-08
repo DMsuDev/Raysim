@@ -44,11 +44,11 @@
         "RS_ENABLE_PROFILE":     "OFF",
         "RS_ENABLE_LTO":         "OFF",
         "RS_ENABLE_SANITIZERS":  "ON",
-        "RS_ENABLE_ASAN":        "ON",
-        "RS_ENABLE_UBSAN":       "ON",
-        "RS_ENABLE_TSAN":        "OFF",
-        "RS_ENABLE_MSAN":        "OFF",
-        "RS_ENABLE_LSAN":        "OFF"
+        "RS_SANITIZE_ASAN":        "ON",
+        "RS_SANITIZE_UBSAN":       "ON",
+        "RS_SANITIZE_TSAN":        "OFF",
+        "RS_SANITIZE_MSAN":        "OFF",
+        "RS_SANITIZE_LSAN":        "OFF"
       }
     },
     {
@@ -67,11 +67,11 @@
         "RS_ENABLE_PROFILE":     "OFF",
         "RS_ENABLE_LTO":         "ON",
         "RS_ENABLE_SANITIZERS":  "OFF",
-        "RS_ENABLE_ASAN":        "OFF",
-        "RS_ENABLE_UBSAN":       "OFF",
-        "RS_ENABLE_TSAN":        "OFF",
-        "RS_ENABLE_MSAN":        "OFF",
-        "RS_ENABLE_LSAN":        "OFF"
+        "RS_SANITIZE_ASAN":        "OFF",
+        "RS_SANITIZE_UBSAN":       "OFF",
+        "RS_SANITIZE_TSAN":        "OFF",
+        "RS_SANITIZE_MSAN":        "OFF",
+        "RS_SANITIZE_LSAN":        "OFF"
       }
     },
     {
@@ -90,11 +90,11 @@
         "RS_ENABLE_PROFILE":     "OFF",
         "RS_ENABLE_LTO":         "ON",
         "RS_ENABLE_SANITIZERS":  "OFF",
-        "RS_ENABLE_ASAN":        "OFF",
-        "RS_ENABLE_UBSAN":       "OFF",
-        "RS_ENABLE_TSAN":        "OFF",
-        "RS_ENABLE_MSAN":        "OFF",
-        "RS_ENABLE_LSAN":        "OFF"
+        "RS_SANITIZE_ASAN":        "OFF",
+        "RS_SANITIZE_UBSAN":       "OFF",
+        "RS_SANITIZE_TSAN":        "OFF",
+        "RS_SANITIZE_MSAN":        "OFF",
+        "RS_SANITIZE_LSAN":        "OFF"
       }
     },
 
@@ -113,11 +113,11 @@
         "RS_ENABLE_PROFILE":     "OFF",
         "RS_ENABLE_LTO":         "OFF",
         "RS_ENABLE_SANITIZERS":  "OFF",
-        "RS_ENABLE_ASAN":        "OFF",
-        "RS_ENABLE_UBSAN":       "OFF",
-        "RS_ENABLE_TSAN":        "OFF",
-        "RS_ENABLE_MSAN":        "OFF",
-        "RS_ENABLE_LSAN":        "OFF"
+        "RS_SANITIZE_ASAN":        "OFF",
+        "RS_SANITIZE_UBSAN":       "OFF",
+        "RS_SANITIZE_TSAN":        "OFF",
+        "RS_SANITIZE_MSAN":        "OFF",
+        "RS_SANITIZE_LSAN":        "OFF"
       }
     },
     {
@@ -135,11 +135,11 @@
         "RS_ENABLE_PROFILE":     "OFF",
         "RS_ENABLE_LTO":         "ON",
         "RS_ENABLE_SANITIZERS":  "OFF",
-        "RS_ENABLE_ASAN":        "OFF",
-        "RS_ENABLE_UBSAN":       "OFF",
-        "RS_ENABLE_TSAN":        "OFF",
-        "RS_ENABLE_MSAN":        "OFF",
-        "RS_ENABLE_LSAN":        "OFF"
+        "RS_SANITIZE_ASAN":        "OFF",
+        "RS_SANITIZE_UBSAN":       "OFF",
+        "RS_SANITIZE_TSAN":        "OFF",
+        "RS_SANITIZE_MSAN":        "OFF",
+        "RS_SANITIZE_LSAN":        "OFF"
       }
     }
   ],
