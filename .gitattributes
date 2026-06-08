@@ -39,7 +39,7 @@ CMakeLists.txt text eol=lf
 # Git hooks (if committed) should also be LF to avoid issues on Unix systems
 .git/hooks/* text eol=lf
 
-# SVG is XML/text — normalize like source code
+# SVG is XML/text -: normalize like source code
 *.svg text eol=lf
 
 # Pre-commit & Git config
@@ -153,7 +153,7 @@ Thumbs.db  export-ignore
 # ===================================================================
 # DIFF STRATEGY
 # Only built-in drivers are used (cpp, markdown ship with Git).
-# cmake/json require manual .gitconfig setup — omitted to avoid
+# cmake/json require manual .gitconfig setup, omitted to avoid
 # silent no-ops on machines without those drivers configured.
 # ===================================================================
 *.md  diff=markdown
