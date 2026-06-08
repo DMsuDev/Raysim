@@ -140,10 +140,12 @@ static int Hash3DInt(int x, int y, int z)
 static float GradientDot2D(int hash, float dx, float dy)
 {
     // 8 evenly-spaced unit gradients
+    // clang-format off
     static constexpr float grads[8][2] = {
-        { 1, 0}, { 0, 1}, {-1, 0}, { 0,-1},
-        { 1, 1}, {-1, 1}, { 1,-1}, {-1,-1}
+        { 1, 0 }, { 0, 1 }, {-1, 0 }, { 0,-1 },
+        { 1, 1 }, {-1, 1 }, { 1,-1 }, {-1,-1 }
     };
+    // clang-format on
     int h = hash & 7;
     return grads[h][0] * dx + grads[h][1] * dy;
 }
