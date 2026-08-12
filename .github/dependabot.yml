@@ -13,7 +13,7 @@ updates:
     directory: "/"
 
     schedule:
-      interval: "weekly"
+      interval: "monthly"
       day: "monday"
       time: "09:00"
       timezone: "Europe/Madrid"
@@ -38,10 +38,9 @@ updates:
           - "*"
 
   # =========================================================================
-  # Pre-commit hooks: Keep linting/formatting tools current
+  # vcpkg: Keep builtin-baseline up-to-date
   # =========================================================================
-  # Pre-commit versions don't break compatibility like major version bumps
-  - package-ecosystem: "pre-commit"
+  - package-ecosystem: "vcpkg"
     directory: "/"
 
     schedule:
@@ -50,29 +49,22 @@ updates:
       time: "09:00"
       timezone: "Europe/Madrid"
 
-    open-pull-requests-limit: 2
+    open-pull-requests-limit: 1
 
     pull-request-branch-name:
       separator: "/"
 
     labels:
       - "dependencies"
-      - "pre-commit"
+      - "vcpkg"
 
     commit-message:
-      prefix: "chore"
+      prefix: "deps"
       include: "scope"
 
-    groups:
-      # Single PR for all pre-commit hook updates
-      pre-commit:
-        patterns:
-          - "*"
-
   # =========================================================================
-  # Git Submodules: Monitor vcpkg version updates
+  # vcpkg submodule: Keep the tooling itself up-to-date
   # =========================================================================
-  # Slower cadence (monthly) since vcpkg is a large binary cache
   - package-ecosystem: "gitsubmodule"
     directory: "/"
 
@@ -89,8 +81,8 @@ updates:
 
     labels:
       - "dependencies"
-      - "submodule"
+      - "vcpkg"
 
     commit-message:
-      prefix: "chore"
+      prefix: "deps"
       include: "scope"
