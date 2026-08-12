@@ -21,7 +21,7 @@
       "name": "msvc",
       "hidden": true,
       "inherits": "base",
-      "generator": "Visual Studio 17 2022",
+      "generator": "Visual Studio 18 2026",
       "architecture": "x64",
       "cacheVariables": {
         "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel"
@@ -150,5 +150,13 @@
     { "name": "relwithdebinfo", "configurePreset": "relwithdebinfo"                           },
     { "name": "msvc-debug",     "configurePreset": "msvc-debug",   "configuration": "Debug"   },
     { "name": "msvc-release",   "configurePreset": "msvc-release", "configuration": "Release" }
+  ],
+
+  "testPresets": [
+    { "name": "debug",          "configurePreset": "debug",                                   "output": { "outputOnFailure": true } },
+    { "name": "release",        "configurePreset": "release",                                 "output": { "outputOnFailure": true } },
+    { "name": "relwithdebinfo", "configurePreset": "relwithdebinfo",                          "output": { "outputOnFailure": true } },
+    { "name": "msvc-debug",     "configurePreset": "msvc-debug",   "configuration": "Debug",  "output": { "outputOnFailure": true } },
+    { "name": "msvc-release",   "configurePreset": "msvc-release", "configuration": "Release","output": { "outputOnFailure": true } }
   ]
 }
