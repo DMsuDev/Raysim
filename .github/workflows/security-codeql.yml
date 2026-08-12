@@ -1,3 +1,7 @@
+# =============================================================================
+# CodeQL Security Analysis
+# Analyzes C/C++ source code for security vulnerabilities
+# =============================================================================
 name: CodeQL Security Analysis
 
 on:
@@ -21,39 +25,30 @@ on:
       - "CMakeLists.txt"
       - "CMakePresets.json"
       - "vcpkg.json"
-
-  schedule:
-    # Run weekly on Monday at 08:00 UTC to detect newly added CodeQL queries
-    - cron: "0 8 * * 1"
+      - ".github/workflows/security-codeql.yml"
 
   workflow_dispatch:
 
 permissions:
-  contents: read
-  security-events: write
-  actions: read
+  contents: read # Read-only access to repository contents
+  security-events: write # Allow upload of CodeQL analysis results to GitHub Security.
+  actions: read # Read-only access to GitHub Actions workflow files and logs.
 
 jobs:
   analyze:
-    name: Analyze C++ (Linux - Release)
+    name: CodeQL Analysis (C/C++)
     runs-on: ubuntu-24.04
     timeout-minutes: 60
 
     env:
       CC: gcc-14
       CXX: g++-14
-      BUILD_TYPE: Release
 
     steps:
-      # Checkout repository and initialize submodules (vcpkg).
-      - name: Checkout repository (with submodules)
-        uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # Install system dependencies required by Raylib, GLFW and related libraries.
           submodules: recursive
-          fetch-depth: 0
 
-      # Install system dependencies required by Raylib, GLFW and related libraries.
       - name: Install system dependencies
         run: |
           sudo apt-get update -q
@@ -65,44 +60,42 @@ jobs:
             pkg-config
 
       - name: Cache vcpkg packages
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ${{ github.workspace }}/vcpkg_installed
-            ${{ github.workspace }}/vcpkg/downloads
-          key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
+          key: vcpkg-codeql-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
-            vcpkg-${{ runner.os }}-
+            vcpkg-codeql-${{ runner.os }}-
 
       - name: Bootstrap vcpkg
-        run: ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
+        run: |
+          ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4.37.3
+        uses: github/codeql-action/init@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
         with:
           languages: c-cpp
-          queries: security-and-quality
+          # security-extended: security alerts only, without code quality noise
+          queries: security-extended
           config: |
             paths-ignore:
-              - third_party/**
               - vcpkg/**
+              - vcpkg_installed/**
+              - build/**
+              - third_party/**
               - docs/**
               - tools/**
 
       - name: Configure CMake
-        run: |
-          cmake -B build -G Ninja \
-            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" \
-            -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
-            -DRS_BUILD_EXAMPLES=ON
+        run: cmake --preset release
 
       - name: Build for analysis
-        run: cmake --build build --parallel
+        run: cmake --build --preset release --parallel
 
       # Upload SARIF results to GitHub Security.
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4.37.3
+        uses: github/codeql-action/analyze@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
         with:
           category: "/language:c-cpp"
-          # Upload results to GitHub Security (requires security-events: write permission).
           upload: always

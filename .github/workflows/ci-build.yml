@@ -25,6 +25,7 @@ on:
       - "CMakeLists.txt"
       - "CMakePresets.json"
       - "vcpkg.json"
+      - ".github/workflows/ci-build.yml"
 
   workflow_dispatch:
 
@@ -37,11 +38,13 @@ concurrency:
 
 jobs:
   build:
-    name: Build (${{ matrix.os }}, ${{ matrix.preset }})
+    name: >-
+      Build (${{ matrix.os }}, ${{ matrix.preset }})
     timeout-minutes: 45
 
     strategy:
       fail-fast: false
+
       matrix:
         include:
           - os: ubuntu-latest
@@ -59,15 +62,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout repository (with submodules)
-        uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
-          fetch-depth: 0
 
-      # ===================================================================
-      # Install platform-specific dependencies
-      # ===================================================================
       - name: Install system dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -80,17 +78,15 @@ jobs:
             pkg-config
 
       - name: Cache vcpkg packages
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ${{ github.workspace }}/vcpkg_installed
-            ${{ github.workspace }}/vcpkg/downloads
-          key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
             vcpkg-${{ runner.os }}-
 
       - name: Bootstrap vcpkg
-        # Bootstrap vcpkg package manager
         run: |
           if [ "${{ runner.os }}" = "Linux" ]; then
             ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
@@ -99,36 +95,11 @@ jobs:
           fi
         shell: bash
 
-      # Configure CMake with vcpkg toolchain
       - name: Configure CMake
-        shell: bash
-        run: |
-          BUILD_TYPE="Release"
-          [[ "${{ matrix.preset }}" == *debug* ]] && BUILD_TYPE="Debug"
-
-          echo "BUILD_TYPE=$BUILD_TYPE" >> "$GITHUB_ENV"
-
-          CMAKE_ARGS=(
-            -B build
-            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake"
-          )
-
-          if [[ "${{ runner.os }}" == "Linux" ]]; then
-            CMAKE_ARGS+=(
-              -G Ninja
-              -DCMAKE_BUILD_TYPE="$BUILD_TYPE"
-            )
-          fi
-
-          cmake "${CMAKE_ARGS[@]}"
+        run: cmake --preset "${{ matrix.preset }}"
 
       - name: Build
-        # Build all targets
-        run: cmake --build build --config "$BUILD_TYPE" --parallel
-        shell: bash
+        run: cmake --build --preset "${{ matrix.preset }}" --parallel
 
-      # Run tests (non-blocking)
-      - name: Run basic tests
-        run: cmake --build build --target test --config "$BUILD_TYPE"
-        continue-on-error: true
-        shell: bash
+      - name: Test
+        run: ctest --preset "${{ matrix.preset }}"
