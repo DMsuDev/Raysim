@@ -58,6 +58,6 @@ add_subdirectory(src)
 # ============================================================================
 
 if(RS_BUILD_EXAMPLES)
-    message(STATUS "Building examples is enabled")
-    add_subdirectory(examples)
+  message(STATUS "Building examples is enabled")
+  add_subdirectory(examples)
 endif()
