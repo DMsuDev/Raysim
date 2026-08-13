@@ -21,17 +21,14 @@
 
 #pragma once
 
-#define RAYSIM_VERSION_MAJOR 0
-#define RAYSIM_VERSION_MINOR 93
-#define RAYSIM_VERSION_PATCH 0
-#define RAYSIM_VERSION "0.93.0"
-
 // Some compilers (mostly macos clang) default to C++98,
 // where aggregate initialization can't be used
 // So, give a more clear error stating how to fix this
 #if __cplusplus < 201103L
     #error "Raysim requires C++11 or later. Please enable C++11 support in your compiler settings (e.g. -std=c++11)."
 #endif
+
+#include "Raysim/Version.hpp"
 
 #include "Raysim/Core/Base.hpp"
 
