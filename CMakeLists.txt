@@ -197,10 +197,10 @@ include(PlatformDetection)
 # Helper functions (for third-party setup)
 include(Helpers)
 
-# Compiler configuration
-include(compiler/CompilerWarnings)
-include(compiler/CompilerOptimization)
-include(compiler/CompilerOptions)
+# Set compiler warning flags and options
+include(Warnings)
+include(CompilerOptimization)
+include(CompilerOptions)
 
 # Sanitizers for runtime error detection
 include(Sanitizers)

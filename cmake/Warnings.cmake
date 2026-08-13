@@ -1,13 +1,12 @@
-# ===========================================================================
-# Defines the `rs_warnings` INTERFACE target that centralises the project's
-# warning policy. Link any first-party target against it to inherit all flags.
+# ==============================================================================
+#  RAYSIM - COMPILER WARNINGS
+# ==============================================================================
+#  Description: Defines Raysim's warning policy and provides the `rs_warnings`
+#               INTERFACE target
 #
-# Usage:
-#   target_link_libraries(my_target PRIVATE rs_warnings)
-#
-# Reference:
-#   https://github.com/lefticus/cppbestpractices/blob/master/02-Use_the_Tools_Available.md
-# ===========================================================================
+#  Copyright (c) 2026 @DMsuDev. Licensed under the Apache License, Version 2.0.
+#  See LICENSE file in the project root for full license text.
+# ==============================================================================
 
 include_guard()
 
@@ -18,7 +17,7 @@ add_library(rs::warnings ALIAS rs_warnings)
 # Flag sets
 # ---------------------------------------------------------------------------
 
-set(_RS_COMMON_WARNINGS         # GCC + Clang
+set(_RS_COMMON_WARNINGS       # GCC + Clang
   -Wall
   -Wextra
   -Wpedantic
@@ -98,5 +97,3 @@ if(RS_WARNINGS_AS_ERRORS)
   )
   message(STATUS "[rs] Warnings treated as errors: ON")
 endif()
-
-message(STATUS "[rs] Warnings configured")
