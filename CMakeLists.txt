@@ -211,9 +211,6 @@ include(Coverage)
 # Link Time Optimization (LTO) configuration
 include(LTO)
 
-# Dynamic symbol export for better backtraces (Linux)
-include(RDynamic)
-
 # ============================================================================
 # DEPENDENCIES
 # ============================================================================
