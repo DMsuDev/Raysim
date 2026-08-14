@@ -1,48 +1,58 @@
-# ================================================
-# Code coverage configuration (gcov/llvm-cov)
-# ================================================
+# ==============================================================================
+#  RAYSIM - CODE COVERAGE
+# ==============================================================================
+#  Description: Enables code coverage instrumentation using GCC or Clang.
+#
+#  Copyright (c) 2026 Dayron Mustelier (@DMsuDev)
+#  Licensed under the Apache License, Version 2.0.
+# ==============================================================================
 
 include_guard()
 
-function(rs_enable_coverage target_name)
-  if(NOT TARGET ${target_name})
-    message(FATAL_ERROR "Target '${target_name}' does not exist")
+# ------------------------------------------------------------------------------
+#  Target Coverage Instrumentation
+# ------------------------------------------------------------------------------
+
+function(rs_enable_coverage target)
+  if(NOT TARGET ${target})
+    message(FATAL_ERROR "[rs] Target '${target}' does not exist.")
   endif()
 
   if(NOT RS_ENABLE_COVERAGE)
     return()
   endif()
 
-  # Check if the compiler supports coverage flags
+  # ----------------------------------------------------------------------------
+  #  Compiler Compatibility Check
+  # ----------------------------------------------------------------------------
   if(NOT CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    message(WARNING "Coverage is only supported on GCC and Clang")
+    message(WARNING "[rs] Code coverage is only supported with GCC and Clang.")
     return()
   endif()
 
-  # Coverage and sanitizers can interfere with each other, so warn if both are enabled
+  # ----------------------------------------------------------------------------
+  #  Sanitizer Interaction Warning
+  # ----------------------------------------------------------------------------
   if(RS_ENABLE_SANITIZERS)
-    message(WARNING "Coverage + Sanitizers may produce unreliable results")
+    message(WARNING
+      "[rs] Coverage is enabled together with sanitizers; "
+      "coverage results may be affected."
+    )
   endif()
 
-  message(STATUS "Coverage enabled for ${target_name}")
+  message(STATUS "[rs] Code coverage enabled for '${target}'")
 
-  # Flags for coverage instrumentation
-  set(COVERAGE_COMPILE_FLAGS
-    -O0
-    -g
-    --coverage
+  # ----------------------------------------------------------------------------
+  #  Instrumentation Options
+  # ----------------------------------------------------------------------------
+  target_compile_options(${target}
+    PRIVATE
+      -g
+      --coverage
   )
 
-  set(COVERAGE_LINK_FLAGS
-    --coverage
+  target_link_options(${target}
+    PRIVATE
+      --coverage
   )
-
-  # Add coverage flags to the target
-  target_compile_options(${target_name} PRIVATE
-    $<$<CONFIG:Debug,RelWithDebInfo>:${COVERAGE_COMPILE_FLAGS}>
-  )
-  target_link_options(${target_name} PRIVATE
-    $<$<CONFIG:Debug,RelWithDebInfo>:${COVERAGE_LINK_FLAGS}>
-  )
-
 endfunction()
