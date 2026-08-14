@@ -1,51 +1,43 @@
-# === Raysim Examples CMakeLists.txt ===
-# This CMakeLists.txt is responsible for building the examples.
+# ==============================================================================
+#  RAYSIM - EXAMPLES BUILDER
+# ==============================================================================
+#  Description: Builds all Raysim examples and manages shared assets.
+#
+#  Copyright (c) 2026 Dayron Mustelier (@DMsuDev)
+#  Licensed under the Apache License, Version 2.0.
+# ==============================================================================
 
 include_guard()
 
-# =======================================================
-# Base Path.
-# =======================================================
+# ------------------------------------------------------------------------------
+#  Shared Assets Directories
+# ------------------------------------------------------------------------------
+set(EXAMPLES_ASSETS_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/shared/assets")
+set(EXAMPLES_ASSETS_DEST   "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets")
 
-set(EXAMPLES_ASSETS_SOURCE ${CMAKE_SOURCE_DIR}/examples/shared/assets)
-
-# =======================================================
-# Destination for shared assets.
-# =======================================================
-
-set(ASSETS_DEST "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets")
-
-# =======================================================
-# Asset copying
-# =======================================================
-
+# ------------------------------------------------------------------------------
+#  Assets Copy Target
+# ------------------------------------------------------------------------------
 add_custom_target(copy_shared_assets ALL
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${EXAMPLES_ASSETS_SOURCE} ${ASSETS_DEST}
+    "${EXAMPLES_ASSETS_SOURCE}"
+    "${EXAMPLES_ASSETS_DEST}"
   COMMENT "Copying shared assets to output directory"
 )
 
-# =======================================================
-# List of example subdirectories.
-# =======================================================
-
+# ------------------------------------------------------------------------------
+#  Example Targets
+# ------------------------------------------------------------------------------
 set(RS_EXAMPLES
-    LissajousCurves
-    Mouse2D
-    NoiseLandscape
-    BouncingBalls
-    SceneShowcase
+  LissajousCurves
+  Mouse2D
+  NoiseLandscape
+  BouncingBalls
+  SceneShowcase
 )
 
 foreach(example IN LISTS RS_EXAMPLES)
   add_subdirectory(${example})
-endforeach()
-
-# =======================================================
-# Make all example targets depend on the asset copying target.
-# This ensures assets are copied before any example runs.
-# =======================================================
-
-foreach(example IN LISTS RS_EXAMPLES)
+  # Add dependency to ensure shared assets are copied before building the example
   add_dependencies(${example} copy_shared_assets)
 endforeach()
