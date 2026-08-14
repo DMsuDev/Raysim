@@ -2,13 +2,44 @@
 # Backend Registry
 #
 # Resolves and loads the CMake file that corresponds to the backend
-# selected via RS_BACKEND (validated earlier in ProjectOptions.cmake).
+# selected via RS_BACKEND.
 #
 # Convention: each backend lives at cmake/Backends/<name>.cmake.
 # To add a new backend, simply create that file, no changes needed here.
 # ===========================================================================
 
 include_guard()
+
+# ---------------------------------------------------------------------------
+# Backend selection
+# ---------------------------------------------------------------------------
+
+set(_RS_AVAILABLE_BACKENDS
+  raylib
+  glfw_opengl
+  sfml
+  sdl2
+)
+
+set(RS_BACKEND
+  "raylib"
+  CACHE STRING
+  "Windowing/rendering backend to use"
+)
+
+set_property(
+  CACHE RS_BACKEND
+  PROPERTY STRINGS ${_RS_AVAILABLE_BACKENDS}
+)
+
+# Fail immediately before any find_package() or backend file is touched.
+if(NOT RS_BACKEND IN_LIST _RS_AVAILABLE_BACKENDS)
+  message(FATAL_ERROR
+    "[rs] Unsupported backend: '${RS_BACKEND}'.\n"
+    "     Available backends: ${_RS_AVAILABLE_BACKENDS}\n"
+    "     Usage: cmake -DRS_BACKEND=<name> ."
+  )
+endif()
 
 # ---------------------------------------------------------------------------
 # Resolve backend file
@@ -23,6 +54,31 @@ if(NOT EXISTS "${_backend_file}")
     "To add support : create cmake/Backends/${RS_BACKEND}.cmake\n"
     "Available backends: ${CMAKE_CURRENT_LIST_DIR}/*.cmake")
 endif()
+
+# ---------------------------------------------------------------------------
+# Backend preprocessor definition
+# ---------------------------------------------------------------------------
+
+set(_backend_defines
+  raylib      RS_BACKEND_RAYLIB
+  glfw_opengl RS_BACKEND_GLFW_OPENGL
+  sfml        RS_BACKEND_SFML
+  sdl2        RS_BACKEND_SDL2
+)
+
+list(FIND _backend_defines "${RS_BACKEND}" _backend_index)
+
+if(_backend_index GREATER_EQUAL 0)
+  math(EXPR _backend_define_index "${_backend_index} + 1")
+  list(GET _backend_defines ${_backend_define_index} _backend_define)
+
+  add_compile_definitions(${_backend_define})
+endif()
+
+unset(_backend_defines)
+unset(_backend_index)
+unset(_backend_define_index)
+unset(_backend_define)
 
 # ---------------------------------------------------------------------------
 # Load backend
