@@ -189,7 +189,10 @@ configure_file(
 #  Global Core Modules & System Paths
 # ------------------------------------------------------------------------------
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules
+)
 
 # Set platform-specific variables and options
 include(PlatformDetection)
