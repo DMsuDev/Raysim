@@ -59,18 +59,8 @@ jobs:
             libglu1-mesa-dev libwayland-dev libxkbcommon-dev \
             pkg-config
 
-      - name: Cache vcpkg packages
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: |
-            ${{ github.workspace }}/vcpkg_installed
-          key: vcpkg-codeql-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
-          restore-keys: |
-            vcpkg-codeql-${{ runner.os }}-
-
-      - name: Bootstrap vcpkg
-        run: |
-          ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6

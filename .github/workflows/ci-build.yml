@@ -77,23 +77,8 @@ jobs:
             libglu1-mesa-dev libwayland-dev libxkbcommon-dev \
             pkg-config
 
-      - name: Cache vcpkg packages
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: |
-            ${{ github.workspace }}/vcpkg_installed
-          key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
-          restore-keys: |
-            vcpkg-${{ runner.os }}-
-
-      - name: Bootstrap vcpkg
-        run: |
-          if [ "${{ runner.os }}" = "Linux" ]; then
-            ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
-          else
-            ./vcpkg/bootstrap-vcpkg.bat -disableMetrics
-          fi
-        shell: bash
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
 
       - name: Configure CMake
         run: cmake --preset "${{ matrix.preset }}"
