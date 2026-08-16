@@ -1,27 +1,28 @@
-# ===========================================================================
-# Adds spdlog as a header-only INTERFACE library.
-# spdlog is used as header-only (no pre-compiled core) to keep the build
-# simple; if compile times become an issue, enable SPDLOG_COMPILED_LIB.
+# ============================================================================
+#  RAYSIM - ADD SPDLOG
+# ============================================================================
+#  Description: Adds the spdlog third-party library as a header-only INTERFACE target.
 #
-# Expects the submodule at: third_party/spdlog/
-#   third_party/spdlog/include/
+#  Creates:
+#    spdlog         - INTERFACE library
+#    spdlog::spdlog - namespaced alias
 #
-# Exposes:
-#   spdlog        - INTERFACE library target
-#   spdlog::spdlog - namespaced alias
-# ===========================================================================
+#  Copyright (c) 2026 Dayron Mustelier (@DMsuDev)
+#  Licensed under the Apache License, Version 2.0.
+# ============================================================================
 
 include_guard()
 
 # ---------------------------------------------------------------------------
-# Locate submodule
+# Locate
 # ---------------------------------------------------------------------------
 
-set(SPDLOG_DIR "${CMAKE_SOURCE_DIR}/third_party/spdlog")
+set(SPDLOG_DIR "${PROJECT_SOURCE_DIR}/third_party/spdlog")
 
-if(NOT EXISTS "${SPDLOG_DIR}/include")
-  message(FATAL_ERROR
-    "[rs] add_spdlog: include directory not found at '${SPDLOG_DIR}/include'.")
+# Guard against multiple inclusion of this module (for future-proofing)
+if(TARGET spdlog)
+  message(STATUS "[rs] spdlog target already exists — skipping configuration.")
+  return()
 endif()
 
 # ---------------------------------------------------------------------------
@@ -35,20 +36,11 @@ target_include_directories(spdlog SYSTEM INTERFACE
   "${SPDLOG_DIR}/include"
 )
 
-# spdlog's async features and the default thread-safe logger require threads.
 target_link_libraries(spdlog INTERFACE Threads::Threads)
 
-# ---------------------------------------------------------------------------
-# Optional: compile-time configuration
-# Uncomment to switch from header-only to pre-compiled mode (faster builds
-# in large projects at the cost of adding a .cpp TU to the build).
-# ---------------------------------------------------------------------------
-
-# target_compile_definitions(spdlog INTERFACE SPDLOG_COMPILED_LIB)
-
-# ---------------------------------------------------------------------------
-# Engine-wide third-party setup (silence warnings, IDE folder, etc.)
-# ---------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+# Engine-wide third-party setup (silence warnings, etc.)
+# ----------------------------------------------------------------------------
 
 rs_third_party_setup(spdlog)
 

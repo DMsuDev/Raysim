@@ -1,81 +1,84 @@
-# ===========================================================================
-# ImGui backend: Raylib  (via rlImGui)
+# ============================================================================
+#  RAYSIM - IMGUI BACKEND: RAYLIB (rlImGui)
+# ============================================================================
+#  Description: Compiles rlImGui as the glue layer between Raylib and Dear
+#               ImGui. Exposes rs::imgui_backend as the canonical alias so
+#               BackendRegistry can link it without knowing the concrete name.
 #
-# rlImGui acts as the glue layer between Raylib and Dear ImGui.
-# Compiles rlImGui.cpp into a static library and exposes the two
-# conventional variables consumed by BackendRegistry:
+#  Requires (set by add_imgui.cmake before this file is included):
+#    IMGUI_DIR          - root of the ImGui source tree
 #
-#   RS_IMGUI_BACKEND_TARGET          - CMake target to link against
-#   RS_IMGUI_BACKEND_EXTRA_INCLUDES  - additional include dirs for the engine
+#  Requires (set by raylib.cmake before this file is included):
+#    raylib             - CMake target
 #
-# Required vcpkg packages: raylib  (already resolved by the Raylib backend)
-# ===========================================================================
+#  Copyright (c) 2026 Dayron Mustelier (@DMsuDev)
+#  Licensed under the Apache License, Version 2.0.
+# ============================================================================
 
 include_guard()
 
-# ---------------------------------------------------------------------------
-# Validate upstream variables
-# Defined by add_imgui.cmake; fail early with a clear message if missing.
-# ---------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+# Precondition: add_imgui.cmake must have run first
+# ----------------------------------------------------------------------------
 
-foreach(_var IN ITEMS IMGUI_DIR IMGUI_BACKENDS_DIR)
-  if(NOT DEFINED ${_var} OR "${${_var}}" STREQUAL "")
-    message(FATAL_ERROR
-      "[rs] imgui_raylib.cmake: '${_var}' is not set. "
-      "Make sure add_imgui.cmake is included before this file.")
-  endif()
-endforeach()
-
-# ---------------------------------------------------------------------------
-# rlImGui source directory
-# ---------------------------------------------------------------------------
-
-set(RLIMGUI_DIR "${CMAKE_SOURCE_DIR}/third_party/rlImGui")
-
-if(NOT EXISTS "${RLIMGUI_DIR}/rlImGui.cpp")
+if(NOT DEFINED IMGUI_DIR OR "${IMGUI_DIR}" STREQUAL "")
   message(FATAL_ERROR
-    "[rs] rlImGui source not found at '${RLIMGUI_DIR}'. "
-    "Run: git submodule update --init --recursive")
+    "[rs] imgui_raylib.cmake: 'IMGUI_DIR' is not set.\n"
+    "     Include add_imgui.cmake (via ThirdParty.cmake) before loading any backend."
+  )
 endif()
 
-# ---------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+# Precondition: raylib must already be a target
+# ----------------------------------------------------------------------------
+
+if(NOT TARGET raylib)
+  message(FATAL_ERROR
+    "[rs] imgui_raylib.cmake: target 'raylib' does not exist.\n"
+    "     raylib.cmake must include() this file after its find_package/FetchContent call."
+  )
+endif()
+
+# ----------------------------------------------------------------------------
+# rlImGui source
+# ----------------------------------------------------------------------------
+
+set(_rlimgui_dir "${PROJECT_SOURCE_DIR}/third_party/rlImGui")
+
+if(NOT EXISTS "${_rlimgui_dir}/rlImGui.cpp")
+  message(FATAL_ERROR
+    "[rs] imgui_raylib.cmake: rlImGui source not found at '${_rlimgui_dir}'.\n"
+    "     Run: git submodule update --init --recursive"
+  )
+endif()
+
+# ----------------------------------------------------------------------------
 # Static library: imgui_backend_raylib
-# ---------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 add_library(imgui_backend_raylib STATIC
-  "${RLIMGUI_DIR}/rlImGui.cpp"
+  "${_rlimgui_dir}/rlImGui.cpp"
 )
 
 add_library(rs::imgui_backend ALIAS imgui_backend_raylib)
 
 target_include_directories(imgui_backend_raylib SYSTEM PUBLIC
-  "${RLIMGUI_DIR}"
+  "${_rlimgui_dir}"
   "${IMGUI_DIR}"
 )
 
 target_link_libraries(imgui_backend_raylib
-  PUBLIC  imgui raylib
+  PUBLIC imgui raylib
 )
 
-# ---------------------------------------------------------------------------
-# Engine-wide helper (compile options, warnings, folder, etc.)
-# ---------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+# Engine-wide third-party setup (silence warnings, etc.)
+# ----------------------------------------------------------------------------
 
 rs_third_party_setup(imgui_backend_raylib)
-
-# ---------------------------------------------------------------------------
-# IDE folder grouping
-# ---------------------------------------------------------------------------
 
 set_target_properties(imgui_backend_raylib PROPERTIES
   FOLDER "ThirdParty/ImGui/Backends"
 )
-
-# ---------------------------------------------------------------------------
-# Outputs consumed by BackendRegistry
-# ---------------------------------------------------------------------------
-
-set(RS_IMGUI_BACKEND_TARGET         imgui_backend_raylib  CACHE INTERNAL "")
-set(RS_IMGUI_BACKEND_EXTRA_INCLUDES "${RLIMGUI_DIR}"      CACHE INTERNAL "")
 
 message(STATUS "[rs] ImGui backend loaded: Raylib (rlImGui)")

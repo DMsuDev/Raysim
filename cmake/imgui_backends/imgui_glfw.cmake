@@ -1,33 +1,54 @@
-# ===========================================================================
-# ImGui backend: GLFW + OpenGL3
+# ============================================================================
+#  RAYSIM - IMGUI BACKEND: GLFW + OPENGL3
+# ============================================================================
+#  Description: Compiles imgui_impl_glfw and imgui_impl_opengl3 into a static
+#               library. Exposes rs::imgui_backend as the canonical alias so
+#               BackendRegistry can link it without knowing the concrete name.
 #
-# Compiles imgui_impl_glfw + imgui_impl_opengl3 into a static library and
-# exposes the two conventional variables consumed by BackendRegistry:
+#  Requires (set by add_imgui.cmake before this file is included):
+#    IMGUI_DIR          - root of the ImGui source tree
+#    IMGUI_BACKENDS_DIR - ImGui backends/ subdirectory
 #
-#   RS_IMGUI_BACKEND_TARGET          - CMake target to link against
-#   RS_IMGUI_BACKEND_EXTRA_INCLUDES  - additional include dirs for the engine
+#  Requires (set by glfw_opengl.cmake before this file is included):
+#    glfw               - CMake target
+#    glad               - CMake target
+#    OpenGL::GL         - CMake target
 #
-# Required vcpkg packages: glfw3, OpenGL (system), glad (third_party)
-# ===========================================================================
+#  Copyright (c) 2026 Dayron Mustelier (@DMsuDev)
+#  Licensed under the Apache License, Version 2.0.
+# ============================================================================
 
 include_guard()
 
-# ---------------------------------------------------------------------------
-# Validate upstream variables
-# Defined by add_imgui.cmake; fail early with a clear message if missing.
-# ---------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+# Precondition: add_imgui.cmake must have run first
+# ----------------------------------------------------------------------------
 
 foreach(_var IN ITEMS IMGUI_DIR IMGUI_BACKENDS_DIR)
   if(NOT DEFINED ${_var} OR "${${_var}}" STREQUAL "")
     message(FATAL_ERROR
-      "[rs] imgui_glfw.cmake: '${_var}' is not set. "
-      "Make sure add_imgui.cmake is included before this file.")
+      "[rs] imgui_glfw.cmake: '${_var}' is not set.\n"
+      "     Include add_imgui.cmake (via ThirdParty.cmake) before loading any backend."
+    )
   endif()
 endforeach()
 
-# ---------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+# Precondition: backend dependencies must already be targets
+# ----------------------------------------------------------------------------
+
+foreach(_target IN ITEMS glfw glad OpenGL::GL)
+  if(NOT TARGET ${_target})
+    message(FATAL_ERROR
+      "[rs] imgui_glfw.cmake: target '${_target}' does not exist.\n"
+      "     glfw_opengl.cmake must include() this file after its find_package/FetchContent calls."
+    )
+  endif()
+endforeach()
+
+# ----------------------------------------------------------------------------
 # Static library: imgui_backend_glfw_opengl
-# ---------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 add_library(imgui_backend_glfw_opengl STATIC
   "${IMGUI_BACKENDS_DIR}/imgui_impl_glfw.cpp"
@@ -37,8 +58,8 @@ add_library(imgui_backend_glfw_opengl STATIC
 add_library(rs::imgui_backend ALIAS imgui_backend_glfw_opengl)
 
 target_include_directories(imgui_backend_glfw_opengl SYSTEM PUBLIC
-  "${IMGUI_DIR}"
   "${IMGUI_BACKENDS_DIR}"
+  "${IMGUI_DIR}"
 )
 
 target_link_libraries(imgui_backend_glfw_opengl
@@ -46,25 +67,14 @@ target_link_libraries(imgui_backend_glfw_opengl
   PRIVATE glfw glad OpenGL::GL
 )
 
-# ---------------------------------------------------------------------------
-# Engine-wide helper (compile options, warnings, folder, etc.)
-# ---------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+# Engine-wide third-party setup (silence warnings, etc.)
+# ----------------------------------------------------------------------------
 
 rs_third_party_setup(imgui_backend_glfw_opengl)
-
-# ---------------------------------------------------------------------------
-# IDE folder grouping
-# ---------------------------------------------------------------------------
 
 set_target_properties(imgui_backend_glfw_opengl PROPERTIES
   FOLDER "ThirdParty/ImGui/Backends"
 )
-
-# ---------------------------------------------------------------------------
-# Outputs consumed by BackendRegistry
-# ---------------------------------------------------------------------------
-
-set(RS_IMGUI_BACKEND_TARGET         imgui_backend_glfw_opengl  CACHE INTERNAL "")
-set(RS_IMGUI_BACKEND_EXTRA_INCLUDES "${IMGUI_BACKENDS_DIR}"    CACHE INTERNAL "")
 
 message(STATUS "[rs] ImGui backend loaded: GLFW + OpenGL3")

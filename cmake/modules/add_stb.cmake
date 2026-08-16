@@ -1,30 +1,33 @@
 # ===========================================================================
-# Adds the stb single-header libraries as a header-only INTERFACE library.
+#  RAYSIM - ADD STB
+# ===========================================================================
+#  Description: Adds the stb third-party library as a header-only INTERFACE target.
 #
-# stb headers are implementation-only: each header requires exactly one
-# translation unit to define the implementation via a macro before including
-# it. This target only provides the include path; each consuming target is
-# responsible for defining the implementation macro in one of its own .cpp
-# files, e.g.:
+#  Creates:
+#    stb      - INTERFACE library
+#    stb::stb - namespaced alias
 #
-#   // stb_impl.cpp  (compiled once, in YOUR target)
-#   #define STB_IMAGE_IMPLEMENTATION
-#   #include <stb_image.h>
-#
-# Expects the submodule at: third_party/stb/
-#
-# Exposes:
-#   stb        - INTERFACE library target
-#   stb::stb   - namespaced alias
+#  Copyright (c) 2026 Dayron Mustelier (@DMsuDev)
+#  Licensed under the Apache License, Version 2.0.
 # ===========================================================================
 
 include_guard()
 
 # ---------------------------------------------------------------------------
-# Locate submodule
+# Locate
 # ---------------------------------------------------------------------------
 
-set(STB_DIR "${CMAKE_SOURCE_DIR}/third_party/stb")
+set(STB_DIR "${PROJECT_SOURCE_DIR}/third_party/stb")
+
+# Guard against multiple inclusion of this module (for future-proofing)
+if(TARGET stb)
+  message(STATUS "[rs] stb target already exists — skipping configuration.")
+  return()
+endif()
+
+# ---------------------------------------------------------------------------
+# Verify required headers exist
+# ---------------------------------------------------------------------------
 
 foreach(_header IN ITEMS
   "${STB_DIR}/stb_image.h"

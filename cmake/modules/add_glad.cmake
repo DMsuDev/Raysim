@@ -1,42 +1,37 @@
-# ===========================================================================
-# Builds the GLAD OpenGL loader from source as a static library.
+# ============================================================================
+#  RAYSIM - ADD GLAD
+# ============================================================================
+#  Description: Adds the glad third-party library as a STATIC target.
 #
-# Expects the submodule at: third_party/glad/
-#   third_party/glad/src/gl.c
-#   third_party/glad/include/
+#  Creates:
+#    glad        - STATIC library
+#    glad::glad  - namespaced alias
 #
-# Exposes:
-#   glad        - static library target
-#   glad::glad  - namespaced alias
-# ===========================================================================
+#  Copyright (c) 2026 Dayron Mustelier (@DMsuDev)
+#  Licensed under the Apache License, Version 2.0.
+# ============================================================================
 
 include_guard()
 
 # ---------------------------------------------------------------------------
-# Locate submodule
+# Paths
 # ---------------------------------------------------------------------------
 
-set(GLAD_DIR "${CMAKE_SOURCE_DIR}/third_party/glad")
+set(GLAD_DIR "${PROJECT_SOURCE_DIR}/third_party/glad")
 
-foreach(_path IN ITEMS
-    "${GLAD_DIR}/src/gl.c"
-    "${GLAD_DIR}/include"
-)
-  if(NOT EXISTS "${_path}")
-    message(FATAL_ERROR
-      "[rs] add_glad: required path not found: '${_path}'.\n"
-      "Run: git submodule update --init --recursive")
-  endif()
-endforeach()
+# Guard against multiple inclusion of this module (for future-proofing)
+if(TARGET glad)
+  message(STATUS "[rs] glad target already exists — skipping configuration.")
+  return()
+endif()
 
 # ---------------------------------------------------------------------------
-# Static library
+# Target: glad (STATIC)
 # ---------------------------------------------------------------------------
 
 add_library(glad STATIC
   "${GLAD_DIR}/src/gl.c"
 )
-
 add_library(glad::glad ALIAS glad)
 
 # Force C so the TU is never compiled as C++ (avoids name-mangling issues
@@ -49,15 +44,11 @@ target_include_directories(glad SYSTEM PUBLIC
   "${GLAD_DIR}/include"
 )
 
-# ---------------------------------------------------------------------------
-# Engine-wide third-party setup (warnings, compile options, etc.)
-# ---------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+# Engine-wide third-party setup (silence warnings, etc.)
+# ----------------------------------------------------------------------------
 
 rs_third_party_setup(glad)
-
-# ---------------------------------------------------------------------------
-# IDE folder grouping
-# ---------------------------------------------------------------------------
 
 set_target_properties(glad PROPERTIES
   FOLDER "ThirdParty/GLAD"
