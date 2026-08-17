@@ -1,28 +1,85 @@
 {
   "version": 6,
   "cmakeMinimumRequired": { "major": 3, "minor": 28, "patch": 0 },
+
   "configurePresets": [
+
     {
       "name": "base",
       "hidden": true,
-      "description": "Common infrastructure: vcpkg toolchain and compile-commands export. No feature flags.",
+      "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
       }
     },
+
     {
-      "name": "ninja",
+      "name": "base-features",
       "hidden": true,
-      "inherits": "base",
-      "generator": "Ninja"
+      "cacheVariables": {
+        "RS_BUILD_EXAMPLES":     "ON",
+        "RS_BUILD_SHARED":       "OFF",
+        "RS_ENABLE_PCH":         "ON",
+        "RS_WARNINGS_AS_ERRORS": "OFF",
+        "RS_ENABLE_COVERAGE":    "OFF",
+        "RS_ENABLE_PROFILE":     "OFF"
+      }
     },
     {
-      "name": "msvc",
+      "name": "base-sanitizers-on",
       "hidden": true,
-      "inherits": "base",
+      "cacheVariables": {
+        "RS_ENABLE_SANITIZERS": "ON",
+        "RS_SANITIZE_ASAN":     "ON",
+        "RS_SANITIZE_UBSAN":    "ON",
+        "RS_SANITIZE_TSAN":     "OFF",
+        "RS_SANITIZE_MSAN":     "OFF",
+        "RS_SANITIZE_LSAN":     "OFF"
+      }
+    },
+    {
+      "name": "base-sanitizers-off",
+      "hidden": true,
+      "cacheVariables": {
+        "RS_ENABLE_SANITIZERS": "OFF",
+        "RS_SANITIZE_ASAN":     "OFF",
+        "RS_SANITIZE_UBSAN":    "OFF",
+        "RS_SANITIZE_TSAN":     "OFF",
+        "RS_SANITIZE_MSAN":     "OFF",
+        "RS_SANITIZE_LSAN":     "OFF"
+      }
+    },
+
+    {
+      "name": "linux",
+      "hidden": true,
+      "generator": "Ninja",
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" }
+    },
+    {
+      "name": "macos",
+      "hidden": true,
+      "generator": "Ninja",
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Darwin" }
+    },
+    {
+      "name": "windows-ninja",
+      "hidden": true,
+      "generator": "Ninja",
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" },
+      "cacheVariables": {
+        "CMAKE_C_COMPILER":     "cl",
+        "CMAKE_CXX_COMPILER":   "cl"
+      }
+    },
+    {
+      "name": "windows-vs",
+      "hidden": true,
       "generator": "Visual Studio 18 2026",
       "architecture": "x64",
+      "binaryDir": "${sourceDir}/build/msvc",
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" },
       "cacheVariables": {
         "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel"
       }
@@ -30,116 +87,51 @@
 
     {
       "name": "debug",
-      "displayName": "Debug (Ninja)",
-      "description": "Debug build with ASan + UBSan. LTO and profiling disabled. Backend must be set by user preset.",
-      "inherits": "ninja",
-      "binaryDir": "${sourceDir}/build/ninja/debug",
+      "displayName": "Debug (Linux, Ninja)",
+      "description": "Debug build with ASan + UBSan. Targets Linux/GCC or Clang via Ninja.",
+      "inherits": ["base", "linux", "base-features", "base-sanitizers-on"],
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE":      "Debug",
-        "RS_BUILD_EXAMPLES":     "ON",
-        "RS_BUILD_SHARED":       "OFF",
-        "RS_ENABLE_PCH":         "ON",
-        "RS_WARNINGS_AS_ERRORS": "OFF",
-        "RS_ENABLE_COVERAGE":    "OFF",
-        "RS_ENABLE_PROFILE":     "OFF",
-        "RS_ENABLE_LTO":         "OFF",
-        "RS_ENABLE_SANITIZERS":  "ON",
-        "RS_SANITIZE_ASAN":        "ON",
-        "RS_SANITIZE_UBSAN":       "ON",
-        "RS_SANITIZE_TSAN":        "OFF",
-        "RS_SANITIZE_MSAN":        "OFF",
-        "RS_SANITIZE_LSAN":        "OFF"
+        "CMAKE_BUILD_TYPE": "Debug",
+        "RS_ENABLE_LTO":    "OFF"
       }
     },
     {
       "name": "release",
-      "displayName": "Release (Ninja)",
-      "description": "Optimized release build with LTO. All sanitizers and profiling disabled.",
-      "inherits": "ninja",
-      "binaryDir": "${sourceDir}/build/ninja/release",
+      "displayName": "Release (Linux, Ninja)",
+      "description": "Optimized release build with LTO. Sanitizers disabled.",
+      "inherits": ["base", "linux", "base-features", "base-sanitizers-off"],
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE":      "Release",
-        "RS_BUILD_EXAMPLES":     "ON",
-        "RS_BUILD_SHARED":       "OFF",
-        "RS_ENABLE_PCH":         "ON",
-        "RS_WARNINGS_AS_ERRORS": "OFF",
-        "RS_ENABLE_COVERAGE":    "OFF",
-        "RS_ENABLE_PROFILE":     "OFF",
-        "RS_ENABLE_LTO":         "ON",
-        "RS_ENABLE_SANITIZERS":  "OFF",
-        "RS_SANITIZE_ASAN":        "OFF",
-        "RS_SANITIZE_UBSAN":       "OFF",
-        "RS_SANITIZE_TSAN":        "OFF",
-        "RS_SANITIZE_MSAN":        "OFF",
-        "RS_SANITIZE_LSAN":        "OFF"
+        "CMAKE_BUILD_TYPE": "Release",
+        "RS_ENABLE_LTO":    "ON"
       }
     },
     {
       "name": "relwithdebinfo",
-      "displayName": "RelWithDebInfo (Ninja)",
-      "description": "Optimized build retaining debug symbols. LTO enabled, sanitizers disabled.",
-      "inherits": "ninja",
-      "binaryDir": "${sourceDir}/build/ninja/relwithdebinfo",
+      "displayName": "RelWithDebInfo (Linux, Ninja)",
+      "description": "Optimized build retaining debug symbols and LTO. Sanitizers disabled.",
+      "inherits": ["base", "linux", "base-features", "base-sanitizers-off"],
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE":      "RelWithDebInfo",
-        "RS_BUILD_EXAMPLES":     "ON",
-        "RS_BUILD_SHARED":       "OFF",
-        "RS_ENABLE_PCH":         "ON",
-        "RS_WARNINGS_AS_ERRORS": "OFF",
-        "RS_ENABLE_COVERAGE":    "OFF",
-        "RS_ENABLE_PROFILE":     "OFF",
-        "RS_ENABLE_LTO":         "ON",
-        "RS_ENABLE_SANITIZERS":  "OFF",
-        "RS_SANITIZE_ASAN":        "OFF",
-        "RS_SANITIZE_UBSAN":       "OFF",
-        "RS_SANITIZE_TSAN":        "OFF",
-        "RS_SANITIZE_MSAN":        "OFF",
-        "RS_SANITIZE_LSAN":        "OFF"
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "RS_ENABLE_LTO":    "ON"
       }
     },
 
     {
       "name": "msvc-debug",
-      "displayName": "Debug (MSVC)",
-      "description": "Multi-config MSVC solution. MSVC does not support GCC/Clang sanitizers.",
-      "inherits": "msvc",
-      "binaryDir": "${sourceDir}/build/msvc",
+      "displayName": "Debug (Windows, MSVC)",
+      "description": "Multi-config MSVC solution. Debug configuration. Sanitizers not supported.",
+      "inherits": ["windows-vs", "base", "base-features", "base-sanitizers-off"],
       "cacheVariables": {
-        "RS_BUILD_EXAMPLES":     "ON",
-        "RS_BUILD_SHARED":       "OFF",
-        "RS_ENABLE_PCH":         "ON",
-        "RS_WARNINGS_AS_ERRORS": "OFF",
-        "RS_ENABLE_COVERAGE":    "OFF",
-        "RS_ENABLE_PROFILE":     "OFF",
-        "RS_ENABLE_LTO":         "OFF",
-        "RS_ENABLE_SANITIZERS":  "OFF",
-        "RS_SANITIZE_ASAN":        "OFF",
-        "RS_SANITIZE_UBSAN":       "OFF",
-        "RS_SANITIZE_TSAN":        "OFF",
-        "RS_SANITIZE_MSAN":        "OFF",
-        "RS_SANITIZE_LSAN":        "OFF"
+        "RS_ENABLE_LTO": "OFF"
       }
     },
     {
       "name": "msvc-release",
-      "displayName": "Release (MSVC)",
-      "description": "Multi-config MSVC solution with LTO. MSVC does not support GCC/Clang sanitizers.",
-      "inherits": "msvc",
-      "binaryDir": "${sourceDir}/build/msvc",
+      "displayName": "Release (Windows, MSVC)",
+      "description": "Multi-config MSVC solution. Release configuration with LTO.",
+      "inherits": ["windows-vs", "base", "base-features", "base-sanitizers-off"],
       "cacheVariables": {
-        "RS_BUILD_EXAMPLES":     "ON",
-        "RS_BUILD_SHARED":       "OFF",
-        "RS_ENABLE_PCH":         "ON",
-        "RS_WARNINGS_AS_ERRORS": "OFF",
-        "RS_ENABLE_COVERAGE":    "OFF",
-        "RS_ENABLE_PROFILE":     "OFF",
-        "RS_ENABLE_LTO":         "ON",
-        "RS_ENABLE_SANITIZERS":  "OFF",
-        "RS_SANITIZE_ASAN":        "OFF",
-        "RS_SANITIZE_UBSAN":       "OFF",
-        "RS_SANITIZE_TSAN":        "OFF",
-        "RS_SANITIZE_MSAN":        "OFF",
-        "RS_SANITIZE_LSAN":        "OFF"
+        "RS_ENABLE_LTO": "ON"
       }
     }
   ],
