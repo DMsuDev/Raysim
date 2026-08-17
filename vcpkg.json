@@ -1,7 +1,7 @@
 {
   "name": "raysim",
   "version": "0.94.2",
-  "builtin-baseline": "059d760472984042e1b4db0d40efd935a1adcbc9",
+  "builtin-baseline": "4fa14179cb8335f2288b10cd7ad4646224d08d42",
   "description": "C++ 2D graphics & simulation framework built on raylib.",
   "license": "Apache-2.0",
   "dependencies": [
