@@ -2,128 +2,174 @@
   <img src="docs/images/banner.png" alt="Raysim Banner" width="720" />
 </p>
 
+<div align="center">
+
 [![C++](https://img.shields.io/badge/Language-C%2B%2B-00599C?style=flat&logo=cplusplus&logoColor=white)](https://isocpp.org/)
 [![CMake](https://img.shields.io/badge/Build-CMake-064F8C?style=flat&logo=cmake&logoColor=white)](https://cmake.org/)
 ![Status](https://img.shields.io/badge/Status-Beta-blue?style=flat)
-[![Version](https://img.shields.io/badge/Version-0.94.2-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
-[![License](https://img.shields.io/badge/Licencia-Apache%202.0-lightgrey?style=flat)](LICENSE)
+[![CI Build](https://github.com/DMsuDev/Raysim/actions/workflows/ci-build.yml/badge.svg)](https://github.com/DMsuDev/Raysim/actions/workflows/ci-build.yml)
+[![Version](https://img.shields.io/github/v/release/DMsuDev/RaySim?style=flat&label=Version&color=brightgreen)](https://github.com/DMsuDev/RaySim/releases/latest)
+[![License Apache](https://img.shields.io/github/license/DMsuDev/RaySim?style=flat&label=License&color=lightgrey)](LICENSE)
+
+</div>
 
 [English Readme](https://github.com/DMsuDev/Raysim/blob/main/README.md)
 • [Readme Español](https://github.com/DMsuDev/Raysim/blob/main/README.es.md)
 • [Changelog](docs/CHANGELOG.md)
-• [Arquitectura](docs/ARCHITECTURE.es.md)
+• [Architecture](docs/ARCHITECTURE.md)
 
-Raysim es un framework de C++ para gráficos 2D y aplicaciones interactivas, construido sobre [raylib](https://www.raylib.com/).
+---
 
-Inspirado arquitectónicamente en el [**Hazel Engine de The Cherno**](https://github.com/TheCherno/Hazel), ofrece una API limpia basada en clases para dibujar formas, manejar entrada, gestionar el tiempo y ejecutar simulaciones con paso de tiempo fijo.
+**Raysim** es un framework experimental en C++ para gráficos 2D y aplicaciones interactivas, construido sobre [raylib](https://www.raylib.com/) e inspirado en la arquitectura de [**The Cherno's Hazel Engine**](https://github.com/TheCherno/Hazel).
 
-Útil para aprender programación gráfica, prototipar ideas o construir pequeños juegos y simulaciones.
+Nació como un proyecto personal de aprendizaje para explorar patrones de diseño en motores gráficos, abstraer pipelines de renderizado y profundizar en el desarrollo con C++.
 
-Comentarios y contribuciones son bienvenidos. ❤️
+Ofrece una capa de abstracción orientada a objetos que simplifica la creación de ventanas, el manejo de entrada, la gestión de estados mediante escenas y el control del bucle de tiempo fijo (*fixed timestep*). Su objetivo es proporcionar una base lista para prototipar ideas, simular físicas o desarrollar pequeños juegos sin perder tiempo montando la infraestructura básica.
 
-> [!NOTE]
-> Este proyecto está en **Beta**. La API principal es estable pero puede seguir evolucionando. Algunas funcionalidades aún están en implementación.
-
-## Demos Rápidos
-
-<p align="center">
-  <img src="docs/gif/Mouse2D.gif" alt="Mouse2D" width="720" /><br />
-  <b>Mouse2D</b>
-</p>
-
-<p align="center">
-  <img src="docs/gif/NoiseLandscape.gif" alt="NoiseLandscape" width="720" /><br />
-  <b>NoiseLandscape</b>
-</p>
-
-<p align="center">
-  <img src="docs/gif/SceneShowcase.gif" alt="SceneShowcase" width="720" /><br />
-  <b>SceneShowcase</b>
-</p>
-
-| Ejemplo           | Descripción                                                                                                                                                                                                           |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `BouncingBalls`   | Simulación de física con gravedad, atracción/repulsión del mouse y generación de bolas. Genera bolas con clic izquierdo, activa o desactiva la gravedad con G y observa cómo colisionan y rebotan contra las paredes. |
-| `LissajousCurves` | Visualizador de curvas paramétricas con cambio de fase animado y presets de frecuencia. La curva evoluciona en tiempo real; prueba cambiar presets desde el panel ImGui para ver cómo se transforman los patrones.    |
-| `Mouse2D`         | Sigue la posición del mouse con interpolación exponencial suave y dibuja un círculo que lo persigue. Un buen punto de partida para entender el pipeline de entrada y renderizado.                                     |
-| `NoiseLandscape`  | Terreno con desplazamiento generado proceduralmente en capas usando ruido Perlin, Simplex, Cellular y Value. Pulsa R para regenerar todas las capas y obtener un paisaje completamente nuevo.                         |
-| `SceneShowcase`   | Tres escenas visuales independientes (StarField, PlasmaArt, ClockMandala) accesibles desde un overlay de navegación ImGui compartido. Muestra cómo cambiar escenas en tiempo de ejecución usando el SceneManager.     |
-
-Todos los ejemplos se compilan junto con la librería. Consulta la sección [Compilación](#-compilación) para las instrucciones de configuración.
-
-> [!TIP]
-> ¿Buscas la referencia completa de módulos, callbacks del ciclo de vida y el sistema de eventos? Consulta [docs/ARCHITECTURE.es.md](docs/ARCHITECTURE.es.md).
-
-## 🔧 Compilación
-
-Para obtener información detallada sobre requisitos del sistema, plataformas soportadas e información de dependencias, consulta el documento [System & Build Requirements](docs/REQUIREMENTS.md).
+Cualquier comentario o contribución es bienvenido. ❤️
 
 > [!NOTE]
-> El soporte para **macOS** no ha sido probado oficialmente. El sistema de compilación y las dependencias deberían funcionar en teoría, pero la compatibilidad no está garantizada.
+> Este proyecto está en estado **Beta** y en desarrollo activo. La API evoluciona continuamente a medida que se adoptan mejores prácticas.
 
-### 1. Clonar con submódulos
+## Galería
 
-vcpkg está incluido como submódulo de Git, por lo que es necesario inicializarlo después de clonar el repositorio. Si lo clonaste sin `--recurse-submodules`, ejecuta:
+<table>
+  <tr>
+    <td width="240" align="center">
+      <img src="docs/gif/Mouse2D.gif" alt="Mouse2D" width="100%" />
+    </td>
+    <td valign="top">
+
+**Mouse2D**
+
+Rastrea el cursor del ratón mediante una interpolación exponencial suave y dibuja un círculo seguidor. Excelente punto de entrada para comprender el flujo de trabajo de entrada y renderizado.
+
+`input` `interpolation` `rendering`
+
+</td>
+  </tr>
+  <tr>
+    <td width="240" align="center">
+      <img src="docs/gif/NoiseLandscape.gif" alt="NoiseLandscape" width="100%" />
+    </td>
+    <td valign="top">
+
+**NoiseLandscape**
+
+Terreno en desplazamiento generado procedimentalmente y renderizado en pases superpuestos utilizando ruido Perlin, Simplex, Celular y Value. Presiona `R` para reiniciar la semilla de todas las capas.
+
+`procedural` `noise` `perlin`
+
+</td>
+  </tr>
+  <tr>
+    <td width="240" align="center">
+      <img src="docs/gif/SceneShowcase.gif" alt="SceneShowcase" width="100%" />
+    </td>
+    <td valign="top">
+
+**SceneShowcase**
+
+Tres escenas visuales independientes (`StarField`, `PlasmaArt`, `ClockMandala`) accesibles desde un panel de navegación compartido de ImGui. Muestra el cambio dinámico de escenas en tiempo de ejecución utilizando `SceneManager`.
+
+`scene-manager` `imgui` `runtime`
+
+</td>
+  </tr>
+</table>
+
+## Requisitos
+
+| Herramienta | Versión | Notas |
+| :--- | :--- | :--- |
+| **CMake** | 3.28+ | Generador del sistema de compilación |
+| **Compilador C++** | C++20 | GCC 10+, Clang 12+ (Linux) · MSVC 2022 (Windows) |
+| **Ninja** | Cualquiera | Generador de compilación recomendado |
+| **vcpkg** | Cualquiera | Gestor de paquetes (requiere la variable de entorno `VCPKG_ROOT`) |
+
+## Compilación
+
+Raysim soporta oficialmente:
+
+- **Linux** (Debian/Ubuntu recomendado)
+- **Windows 10/11**
+- **macOS** (no probado oficialmente; teóricamente debería funcionar)
+
+### 1. Clonar el repositorio
 
 ```bash
-git submodule update --init --recursive
+git clone https://github.com/DMsuDev/raysim.git
+cd raysim
 ```
 
-### 2. Setup
+### 2. Compilar
 
-Una vez que el submódulo esté listo, el script de configuración inicializa vcpkg e instala automáticamente todas las dependencias requeridas:
+<details open>
+<summary><strong>Opción A: CMake Presets (Recomendado)</strong></summary>
+
+Los *presets* gestionan automáticamente la configuración, las rutas de la cadena de herramientas (*toolchain*) y las banderas de sanitizadores:
 
 ```bash
-./tools/setup_all.sh       # Linux / macOS
-.\tools\setup_all.ps1      # Windows (PowerShell)
+# Compilación en modo Debug (ASan + UBSan habilitados donde sea compatible)
+cmake --preset debug
+cmake --build --preset debug
+
+# Compilación en modo Release
+cmake --preset release
+cmake --build --preset release
 ```
-
-### 3. Build
-
-Usar CMake presets es la forma recomendada y más rápida de compilar:
-
-```bash
-cmake --preset debug              # Configurar Debug (Ninja)
-cmake --build --preset debug      # Compilar Debug
-
-cmake --preset release            # Configurar Release (Ninja)
-cmake --build --preset release    # Compilar Release
-```
-
-El preset `debug` habilita ASan y UBSan por defecto.
 
 > [!WARNING]
-> El soporte de sanitizadores es experimental y puede no funcionar en todas las cadenas de herramientas. En MinGW se deshabilitan automáticamente.
+> El soporte de sanitizadores depende del compilador utilizado. En MinGW, los sanitizadores se desactivan automáticamente.
 
-### CMake Manual
+</details>
 
-Al no usar presets, pasa el archivo toolchain de vcpkg manualmente para que CMake encuentre los paquetes instalados.
+<details>
+<summary><strong>Opción B: Compilación personalizada</strong></summary>
 
-#### Con Ninja (recomendado, todas las plataformas)
+Si prefieres un control explícito o no usas *presets*, especifica manualmente el archivo de la cadena de herramientas (*toolchain*) de vcpkg.
+
+**Linux / macOS / Windows (Generador Ninja)**
 
 ```bash
 cmake -B build -G Ninja \
-  -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake \
+  -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
   -DCMAKE_BUILD_TYPE=Release \
   -DRS_BUILD_EXAMPLES=ON
+
 cmake --build build
 ```
 
-#### Con Visual Studio (solo Windows)
+**Windows (PowerShell + Visual Studio)**
 
-```bash
-cmake -B build -G "Visual Studio 17 2022" -A x64 \
-  -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake \
+```powershell
+cmake -B build -G "Visual Studio 18 2026" -A x64 `
+  -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake" `
   -DRS_BUILD_EXAMPLES=ON
+
 cmake --build build --config Release
 ```
 
-Visual Studio es un generador multi-config. Ignora `-DCMAKE_BUILD_TYPE` en el tiempo de configuración y requiere `--config` en el tiempo de compilación.
+</details>
 
-## 🚀 Inicio Rápido
+## Inicio Rápido
 
-> [!TIP]
-> El ejemplo a continuación es intencionalmente mínimo. Para una visión más profunda del ciclo de vida de las escenas, layers, eventos y todos los módulos disponibles, consulta [docs/ARCHITECTURE.es.md](docs/ARCHITECTURE.es.md) y [docs/EXAMPLES.md](docs/EXAMPLES.md).
+Una aplicación en Raysim se construye alrededor de **escenas**. Cada escena gestiona su propio ciclo de vida, renderizado e interacción: basta con registrarla en la `Application`, activarla y el motor se encarga del resto.
+
+La macro `RS_SCENE` registra el tipo en el sistema de escenas y genera su constructor automáticamente. Sobrescribe únicamente las funciones que necesites; por defecto, todas son operaciones vacías (*no-ops*):
+
+| Callback | Cuándo se ejecuta |
+| :--- | :--- |
+| `OnAttach` | Una sola vez, al apilar la escena. Ideal para cargar recursos y suscribirse a eventos. |
+| `OnStart` | Cada vez que la escena pasa a estar activa. Úsalo para reiniciar el estado. |
+| `OnUpdate(dt)` | En cada fotograma. Para lectura de entradas (*polling*) y lógica con tasa variable. |
+| `OnFixedUpdate(fixedDt)` | Intervalo de tiempo fijo (*fixed timestep*). Para física y simulación determinista. |
+| `OnDraw(alpha)` | En cada fotograma, tras `OnUpdate`. Todo el renderizado se realiza aquí. |
+| `OnDetach` | Al remover la escena. Libera recursos y cancela suscripciones a eventos. |
+
+Para consultar la referencia completa del ciclo de vida, incluyendo eventos, capas y la interpolación física, revisa la documentación de [Arquitectura](docs/ARCHITECTURE.md).
+
+El siguiente ejemplo crea una pelota que rebota dentro de los límites de la ventana:
 
 ```cpp
 #include "Raysim/Raysim.hpp"
@@ -157,7 +203,7 @@ private:
 RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
 {
     RS::ApplicationConfig config;
-    config.Window.Title  = "Mi Primera Escena";
+    config.Window.Title  = "My First Scene";
     config.Window.Width  = 800;
     config.Window.Height = 600;
 
@@ -168,11 +214,25 @@ RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
 }
 ```
 
-La semilla es auto-aleatoria al inicio. Llama a `Math::Random::Seed(value)` en `OnAttach()` solo si necesitas reproducibilidad.
+La lógica física pertenece a `OnFixedUpdate`: el motor la ejecuta a un paso de tiempo fijo, de forma independiente a la tasa de fotogramas. La función `OnDraw` recibe un factor de interpolación `alpha` para suavizar el renderizado entre pasos de física; en este ejemplo se omite la interpolación por brevedad.
+
+Para un uso detallado de cada módulo (entradas, eventos, capas, matemáticas, ImGui), consulta la [Guía](docs/GUIDE.md). Si buscas demostraciones ejecutables con código fuente completo, explora el directorio [`examples/`](examples/).
+
+## Contribuir
+
+¡Las contribuciones son siempre bienvenidas! ❤️ Ya sea que quieras reportar errores, solucionar problemas, añadir nuevos ejemplos o mejorar la documentación, tu ayuda es apreciada.
+
+Antes de abrir un *pull request*:
+
+- Mantén las solicitudes enfocadas: prioriza PRs pequeñas y atómicas que resuelvan una sola característica o corrección.
+- Escribe mensajes de commit claros usando [Conventional Commits](https://www.conventionalcommits.org/).
+- Asegúrate de que el proyecto compile limpiamente sin introducir nuevos avisos (warnings) del compilador.
+
+Para cambios mayores o nuevas características, abre una *issue* primero para discutir lo que te gustaría cambiar.
 
 ## Licencia
 
-Este proyecto está licenciado bajo la **Apache License 2.0**.
+Este proyecto está bajo la licencia **Apache License 2.0**.
 Consulta el archivo [LICENSE](LICENSE) para más detalles.
 
 <p align="center">

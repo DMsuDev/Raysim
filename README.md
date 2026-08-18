@@ -2,128 +2,174 @@
   <img src="docs/images/banner.png" alt="Raysim Banner" width="720" />
 </p>
 
+<div align="center">
+
 [![C++](https://img.shields.io/badge/Language-C%2B%2B-00599C?style=flat&logo=cplusplus&logoColor=white)](https://isocpp.org/)
 [![CMake](https://img.shields.io/badge/Build-CMake-064F8C?style=flat&logo=cmake&logoColor=white)](https://cmake.org/)
 ![Status](https://img.shields.io/badge/Status-Beta-blue?style=flat)
-[![Version](https://img.shields.io/badge/Version-0.94.2-brightgreen?style=flat)](https://github.com/DMsuDev/Raysim/releases)
-[![License](https://img.shields.io/badge/License-Apache%202.0-lightgrey?style=flat)](LICENSE)
+[![CI Build](https://github.com/DMsuDev/Raysim/actions/workflows/ci-build.yml/badge.svg)](https://github.com/DMsuDev/Raysim/actions/workflows/ci-build.yml)
+[![Version](https://img.shields.io/github/v/release/DMsuDev/RaySim?style=flat&label=Version&color=brightgreen)](https://github.com/DMsuDev/RaySim/releases/latest)
+[![License Apache](https://img.shields.io/github/license/DMsuDev/RaySim?style=flat&label=License&color=lightgrey)](LICENSE)
+
+</div>
 
 [English Readme](https://github.com/DMsuDev/Raysim/blob/main/README.md)
 • [Readme Español](https://github.com/DMsuDev/Raysim/blob/main/README.es.md)
 • [Changelog](docs/CHANGELOG.md)
 • [Architecture](docs/ARCHITECTURE.md)
 
-Raysim is a C++ framework for 2D graphics and interactive applications, built on top of [raylib](https://www.raylib.com/).
+---
 
-Architecturally inspired by [**The Cherno's Hazel Engine**](https://github.com/TheCherno/Hazel), it provides a clean, class-based API for drawing shapes, handling input, managing time, and running fixed-timestep simulations.
+**Raysim** is an experimental C++ framework for 2D graphics and interactive applications, built on top of [raylib](https://www.raylib.com/) and inspired by the architecture of [**The Cherno's Hazel Engine**](https://github.com/TheCherno/Hazel).
 
-Useful for learning graphics programming, prototyping ideas, or building small games and simulations.
+It started as a personal learning project to explore game engine design patterns, abstract rendering pipelines, and deepen modern C++ development skills.
+
+It provides an object-oriented abstraction layer that simplifies window creation, input handling, scene state management, and fixed-timestep loop control. Its goal is to offer a ready-to-use foundation for prototyping ideas, simulating physics, or developing small games without wasting time setting up basic infrastructure.
 
 Feedback and contributions are welcome. ❤️
 
 > [!NOTE]
-> This project is in **Beta**. The core API is stable but may still evolve. Some features are still being implemented.
+> This project is in **Beta** and under active development. The API continuously evolves as best practices are adopted.
 
-## Quick Demos
+## Gallery
 
-<p align="center">
-  <img src="docs/gif/Mouse2D.gif" alt="Mouse2D" width="720" /><br />
-  <b>Mouse2D</b>
-</p>
+<table>
+  <tr>
+    <td width="240" align="center">
+      <img src="docs/gif/Mouse2D.gif" alt="Mouse2D" width="100%" />
+    </td>
+    <td valign="top">
 
-<p align="center">
-  <img src="docs/gif/NoiseLandscape.gif" alt="NoiseLandscape" width="720" /><br />
-  <b>NoiseLandscape</b>
-</p>
+**Mouse2D**
 
-<p align="center">
-  <img src="docs/gif/SceneShowcase.gif" alt="SceneShowcase" width="720" /><br />
-  <b>SceneShowcase</b>
-</p>
+Tracks the mouse with smooth exponential interpolation and draws a trailing circle. Good entry point for understanding the input and rendering pipeline.
 
-| Example           | Description                                                                                                                                                                                       |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `BouncingBalls`   | Physics simulation with gravity, mouse attraction/repulsion, and ball spawning. Spawn balls with left click, toggle gravity with G, and watch them collide and bounce against the walls.          |
-| `LissajousCurves` | Parametric curve visualiser with animated phase shift and selectable frequency presets. The curve evolves in real time; try switching presets with the ImGui panel to see the patterns transform. |
-| `Mouse2D`         | Tracks the mouse position with smooth exponential interpolation and draws a trailing circle. A good starting point to understand the input and rendering pipeline.                                |
-| `NoiseLandscape`  | Procedurally generated scrolling terrain rendered in layered passes using Perlin, Simplex, Cellular, and Value noise. Press R to reseed all layers and get a completely new landscape.            |
-| `SceneShowcase`   | Three independent visual scenes (StarField, PlasmaArt, ClockMandala) accessible from a shared ImGui navigation overlay. Shows how to switch scenes at runtime using the SceneManager.             |
+`input` `interpolation` `rendering`
 
-All examples are built alongside the library. See the [Building](#-building) section for setup instructions.
+</td>
+  </tr>
+  <tr>
+    <td width="240" align="center">
+      <img src="docs/gif/NoiseLandscape.gif" alt="NoiseLandscape" width="100%" />
+    </td>
+    <td valign="top">
 
-> [!TIP]
-> Looking for the full module reference, lifecycle callbacks, and event system details? See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+**NoiseLandscape**
 
-## 🔧 Building
+Procedurally generated scrolling terrain rendered in layered passes using Perlin, Simplex, Cellular, and Value noise. Press `R` to reseed all layers.
 
-For detailed system requirements, supported platforms, and dependency information, see the [System & Build Requirements](docs/REQUIREMENTS.md) document.
+`procedural` `noise` `perlin`
 
-> [!NOTE]
-> **macOS** support has not been officially tested. The build system and dependencies should work in theory, but compatibility is not guaranteed.
+</td>
+  </tr>
+  <tr>
+    <td width="240" align="center">
+      <img src="docs/gif/SceneShowcase.gif" alt="SceneShowcase" width="100%" />
+    </td>
+    <td valign="top">
 
-### 1. Clone with submodules
+**SceneShowcase**
 
-vcpkg is included as a Git submodule, so you need to initialise it after cloning. If you cloned the repo without `--recurse-submodules`, run:
+Three independent visual scenes (`StarField`, `PlasmaArt`, `ClockMandala`) accessible from a shared ImGui navigation overlay. Shows dynamic runtime scene switching using the `SceneManager`.
+
+`scene-manager` `imgui` `runtime`
+
+</td>
+  </tr>
+</table>
+
+## Requirements
+
+| Tool             | Version | Notes                                                        |
+| :--------------- | :------ | :----------------------------------------------------------- |
+| **CMake**        | 3.28+   | Build system generator                                       |
+| **C++ Compiler** | C++20   | GCC 10+, Clang 12+ (Linux) · MSVC 2022 (Windows)             |
+| **Ninja**        | Any     | Recommended build generator                                  |
+| **vcpkg**        | Any     | Package manager (`VCPKG_ROOT` environment variable required) |
+
+## Building
+
+Raysim officially supports:
+
+- **Linux** (Debian/Ubuntu recommended)
+- **Windows 10/11**
+- **macOS** (not officially tested; expected to work in theory)
+
+### 1. Clone the Repository
 
 ```bash
-git submodule update --init --recursive
+git clone https://github.com/DMsuDev/raysim.git
+cd raysim
 ```
 
-### 2. Setup
+### 2. Build
 
-Once the submodule is ready, the setup script bootstraps vcpkg and installs all required dependencies automatically:
+<details open>
+<summary><strong>Option A: CMake Presets (Recommended)</strong></summary>
+
+Presets handle configuration, toolchain paths, and sanitizer flags automatically:
 
 ```bash
-./tools/setup_all.sh       # Linux / macOS
-.\tools\setup_all.ps1      # Windows (PowerShell)
+# Debug build (ASan + UBSan enabled where supported)
+cmake --preset debug
+cmake --build --preset debug
+
+# Release build
+cmake --preset release
+cmake --build --preset release
 ```
-
-### 3. Build
-
-Using CMake presets is the recommended and quickest way to build:
-
-```bash
-cmake --preset debug              # Configure Debug (Ninja)
-cmake --build --preset debug      # Build Debug
-
-cmake --preset release            # Configure Release (Ninja)
-cmake --build --preset release    # Build Release
-```
-
-The `debug` preset enables ASan and UBSan by default.
 
 > [!WARNING]
-> Sanitizer support is experimental and may not work on all toolchains. On MinGW they are automatically disabled.
+> Sanitizer support depends on the compiler toolchain. On MinGW, sanitizers are disabled automatically.
 
-### Manual CMake
+</details>
 
-When not using presets, pass the vcpkg toolchain file manually so CMake can locate the installed packages.
+<details>
+<summary><strong>Option B: Custom Build</strong></summary>
 
-#### With Ninja (recommended, all platforms)
+If you prefer explicit control or aren't using presets, specify the vcpkg toolchain file manually.
+
+**Linux / macOS / Windows (Ninja Generator)**
 
 ```bash
 cmake -B build -G Ninja \
-  -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake \
+  -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
   -DCMAKE_BUILD_TYPE=Release \
   -DRS_BUILD_EXAMPLES=ON
+
 cmake --build build
 ```
 
-#### With Visual Studio (Windows only)
+**Windows (PowerShell + Visual Studio)**
 
-```bash
-cmake -B build -G "Visual Studio 17 2022" -A x64 \
-  -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake \
+```powershell
+cmake -B build -G "Visual Studio 18 2026" -A x64 `
+  -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake" `
   -DRS_BUILD_EXAMPLES=ON
+
 cmake --build build --config Release
 ```
 
-Visual Studio is a multi-config generator. It ignores `-DCMAKE_BUILD_TYPE` at configure time and requires `--config` at build time instead.
+</details>
 
-## 🚀 Quick Start
+## Quick Start
 
-> [!TIP]
-> The example below is intentionally minimal. For a deeper look at the scene lifecycle, layers, events, and all available modules, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [docs/EXAMPLES.md](docs/EXAMPLES.md).
+A Raysim application is built around **scenes**. Each scene manages its own lifecycle, rendering, and input: register it with `Application`, activate it, and the engine handles the rest.
+
+The `RS_SCENE` macro registers the type with the scene system and generates its constructor automatically. Override only the callbacks you need: all are no-ops by default.
+
+| Callback                 | Execution Timing                                                         |
+| :----------------------- | :----------------------------------------------------------------------- |
+| `OnAttach`               | Once, on scene push. Ideal for loading assets and subscribing to events. |
+| `OnStart`                | Every time the scene becomes active. Use this to reset state.            |
+| `OnUpdate(dt)`           | Every frame. Input polling and variable-rate logic.                      |
+| `OnFixedUpdate(fixedDt)` | Fixed timestep. Physics and deterministic simulation.                    |
+| `OnDraw(alpha)`          | Every frame, after `OnUpdate`. All rendering logic belongs here.         |
+| `OnDetach`               | On scene removal. Release resources and unsubscribe from events.         |
+
+For the full lifecycle reference including events, layers, and physics interpolation, see [Architecture](docs/ARCHITECTURE.md).
+
+The example below creates a bouncing ball that reflects off the window bounds:
 
 ```cpp
 #include "Raysim/Raysim.hpp"
@@ -168,7 +214,21 @@ RS::Application* RS::CreateApplication(RS::ApplicationCommandLineArgs args)
 }
 ```
 
-The seed is auto-random on startup. Call `Math::Random::Seed(value)` in `OnAttach()` only if you need a reproducible sequence.
+Physics logic lives in `OnFixedUpdate`: the engine executes it at a fixed timestep independent of the frame rate. `OnDraw` receives an `alpha` interpolation factor for smooth rendering between physics steps; this example omits interpolation for brevity.
+
+For in-depth usage of every module (input, events, layers, math, ImGui), see the [GUIDE.md](docs/GUIDE.md). For runnable demos with full source code, see the [`examples/`](examples/) directory.
+
+## Contributing
+
+Contributions are always welcome! ❤️ Whether you are reporting bugs, fixing issues, adding new examples, or improving the documentation, your help is appreciated.
+
+Before opening a pull request:
+
+- Keep pull requests focused: prefer small, atomic PRs that address a single feature or fix.
+- Write clear commit messages using [Conventional Commits](https://www.conventionalcommits.org/).
+- Ensure the project builds cleanly without introducing new compiler warnings.
+
+For major changes or new features, please open an issue first to discuss what you would like to change.
 
 ## License
 
