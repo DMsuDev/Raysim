@@ -47,7 +47,7 @@ jobs:
     steps:
       # Checkout repository and initialize submodules (vcpkg).
       - name: Checkout repository (with submodules)
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # Install system dependencies required by Raylib, GLFW and related libraries.
           submodules: recursive
@@ -65,7 +65,7 @@ jobs:
             pkg-config
 
       - name: Cache vcpkg packages
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             ${{ github.workspace }}/vcpkg_installed
@@ -78,7 +78,7 @@ jobs:
         run: ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@v4.37.3
         with:
           languages: c-cpp
           queries: security-and-quality
@@ -101,7 +101,7 @@ jobs:
 
       # Upload SARIF results to GitHub Security.
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@v4.37.3
         with:
           category: "/language:c-cpp"
           # Upload results to GitHub Security (requires security-events: write permission).
