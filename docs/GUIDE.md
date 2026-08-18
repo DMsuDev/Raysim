@@ -1,4 +1,4 @@
-# Examples
+# GUIDE
 
 Practical, in-depth examples for every module in the Raysim framework. Each section explains the underlying mechanism first, then shows the corresponding code.
 
