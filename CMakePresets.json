@@ -9,23 +9,10 @@
       "hidden": true,
       "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
     },
 
-    {
-      "name": "base-features",
-      "hidden": true,
-      "cacheVariables": {
-        "RS_BUILD_EXAMPLES":     "ON",
-        "RS_BUILD_SHARED":       "OFF",
-        "RS_ENABLE_PCH":         "ON",
-        "RS_WARNINGS_AS_ERRORS": "OFF",
-        "RS_ENABLE_COVERAGE":    "OFF",
-        "RS_ENABLE_PROFILE":     "OFF"
-      }
-    },
     {
       "name": "base-sanitizers-on",
       "hidden": true,
@@ -89,7 +76,7 @@
       "name": "debug",
       "displayName": "Debug (Linux, Ninja)",
       "description": "Debug build with ASan + UBSan. Targets Linux/GCC or Clang via Ninja.",
-      "inherits": ["base", "linux", "base-features", "base-sanitizers-on"],
+      "inherits": ["base", "linux", "base-sanitizers-on"],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "RS_ENABLE_LTO":    "OFF"
@@ -99,7 +86,7 @@
       "name": "release",
       "displayName": "Release (Linux, Ninja)",
       "description": "Optimized release build with LTO. Sanitizers disabled.",
-      "inherits": ["base", "linux", "base-features", "base-sanitizers-off"],
+      "inherits": ["base", "linux", "base-sanitizers-off"],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "RS_ENABLE_LTO":    "ON"
@@ -109,7 +96,7 @@
       "name": "relwithdebinfo",
       "displayName": "RelWithDebInfo (Linux, Ninja)",
       "description": "Optimized build retaining debug symbols and LTO. Sanitizers disabled.",
-      "inherits": ["base", "linux", "base-features", "base-sanitizers-off"],
+      "inherits": ["base", "linux", "base-sanitizers-off"],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo",
         "RS_ENABLE_LTO":    "ON"
@@ -120,7 +107,7 @@
       "name": "msvc-debug",
       "displayName": "Debug (Windows, MSVC)",
       "description": "Multi-config MSVC solution. Debug configuration. Sanitizers not supported.",
-      "inherits": ["windows-vs", "base", "base-features", "base-sanitizers-off"],
+      "inherits": ["windows-vs", "base", "base-sanitizers-off"],
       "cacheVariables": {
         "RS_ENABLE_LTO": "OFF"
       }
@@ -129,7 +116,7 @@
       "name": "msvc-release",
       "displayName": "Release (Windows, MSVC)",
       "description": "Multi-config MSVC solution. Release configuration with LTO.",
-      "inherits": ["windows-vs", "base", "base-features", "base-sanitizers-off"],
+      "inherits": ["windows-vs", "base", "base-sanitizers-off"],
       "cacheVariables": {
         "RS_ENABLE_LTO": "ON"
       }
