@@ -5,9 +5,14 @@
 #               OpenGL function pointer loading.
 #
 #  Creates:
-#    rs::windowing      - INTERFACE: links glfw + OpenGL::GL
-#    rs::graphics       - INTERFACE: links glad + OpenGL::GL
-#    rs::imgui_backend  - ALIAS for imgui_backend_glfw_opengl (STATIC)
+#    rs::windowing      -- INTERFACE: links glfw + OpenGL::GL
+#    rs::graphics       -- INTERFACE: links glad + OpenGL::GL
+#    rs::imgui_backend  -- ALIAS for imgui_backend_glfw_opengl (STATIC)
+#
+#  Prerequisites (resolved by ThirdParty.cmake before BackendRegistry):
+#    glfw        -- from deps/glfw  (bundled submodule or vcpkg)
+#    glad        -- from modules/add_glad  (always built from source)
+#    OpenGL::GL  -- resolved here directly (always system, never bundled)
 #
 #  Copyright (c) 2026 Dayron Mustelier (@DMsuDev)
 #  Licensed under the Apache License, Version 2.0.
@@ -16,14 +21,27 @@
 include_guard()
 
 # ----------------------------------------------------------------------------
+# Prerequisite guards
+# ----------------------------------------------------------------------------
+
+if(NOT TARGET glfw)
+  message(FATAL_ERROR
+    "[rs] Backend 'glfw_opengl' requires target glfw.\n"
+    "     Include deps/glfw before BackendRegistry in ThirdParty.cmake.")
+endif()
+
+if(NOT TARGET glad)
+  message(FATAL_ERROR
+    "[rs] Backend 'glfw_opengl' requires target glad.\n"
+    "     Include modules/add_glad before BackendRegistry in ThirdParty.cmake.")
+endif()
+
+# ----------------------------------------------------------------------------
 # Dependencies
 # ----------------------------------------------------------------------------
 
-find_package(glfw3 CONFIG REQUIRED)
-find_package(OpenGL       REQUIRED)
-
-# GLAD (built from third_party/)
-include(add_glad)
+# OpenGL is always a system dependency.
+find_package(OpenGL REQUIRED)
 
 # ----------------------------------------------------------------------------
 # rs::windowing  (GLFW + OpenGL)

@@ -41,6 +41,9 @@ option(RS_SANITIZE_TSAN  "Enable ThreadSanitizer"               OFF)
 option(RS_SANITIZE_MSAN  "Enable MemorySanitizer (Clang only)"  OFF)
 option(RS_SANITIZE_LSAN  "Enable LeakSanitizer"                 OFF)
 
+option(RS_SYSTEM_RAYLIB "Use system-installed raylib instead of building from source" OFF)
+option(RS_SYSTEM_GLFW   "Use system-installed GLFW instead of building from source" OFF)
+
 # ------------------------------------------------------------------------------
 #  Sanitizer consistency
 # ------------------------------------------------------------------------------
@@ -189,10 +192,7 @@ configure_file(
 #  Global Core Modules & System Paths
 # ------------------------------------------------------------------------------
 
-list(APPEND CMAKE_MODULE_PATH
-  ${CMAKE_CURRENT_SOURCE_DIR}/cmake
-  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules
-)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 # Set platform-specific variables and options
 include(PlatformDetection)
