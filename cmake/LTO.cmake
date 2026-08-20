@@ -10,6 +10,10 @@
 
 include_guard()
 
+# Check if IPO is supported outside of the function to avoid multiple checks for multiple targets.
+include(CheckIPOSupported)
+check_ipo_supported(RESULT _RS_IPO_SUPPORTED OUTPUT _RS_IPO_OUTPUT LANGUAGES CXX)
+
 function(rs_enable_lto target_name)
 
   if(NOT TARGET "${target_name}")
@@ -22,19 +26,11 @@ function(rs_enable_lto target_name)
     return()
   endif()
 
-  include(CheckIPOSupported)
-
-  check_ipo_supported(
-    RESULT _ipo_supported
-    OUTPUT _ipo_output
-    LANGUAGES CXX
-  )
-
-  if(NOT _ipo_supported)
+  if(NOT _RS_IPO_SUPPORTED)
     message(WARNING
       "[rs] LTO: IPO is not supported by this toolchain — "
       "skipping '${target_name}'.\n"
-      "Details: ${_ipo_output}"
+      "Details: ${_RS_IPO_OUTPUT}"
     )
 
     set("RS_LTO_ENABLED_FOR_${target_name}" FALSE PARENT_SCOPE)

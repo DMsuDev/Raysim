@@ -11,7 +11,7 @@
 
 include_guard()
 
-message(STATUS "[rs] Backend selected: ${RS_BACKEND}")
+message(STATUS "Backend selected: ${RS_BACKEND}")
 
 # ----------------------------------------------------------------------------
 #  Common Dependencies  (required by all backends)

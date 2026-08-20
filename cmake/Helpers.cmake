@@ -1,12 +1,11 @@
-# ===========================================================================
-# Project-wide CMake utility functions.
-# Include once from the top-level CMakeLists.txt - include_guard() ensures
-# it is never processed twice.
+# ==============================================================================
+#  RAYSIM - PROJECT-WIDE CMAKE UTILITY FUNCTIONS
+# ==============================================================================
+#  Description: Contains utility functions that can be used throughout the project.
 #
-# Functions provided:
-#   rs_third_party_setup(<target>)   - silence warnings on third-party targets
-#   rs_target_set_warnings(<target>) - apply project warning policy
-# ===========================================================================
+#  Copyright (c) 2026 Dayron Mustelier (@DMsuDev)
+#  Licensed under the Apache License, Version 2.0.
+# ==============================================================================
 
 include_guard()
 

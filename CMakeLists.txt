@@ -139,12 +139,19 @@ if(PROJECT_IS_TOP_LEVEL)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${RS_OUTPUT_CONFIG_DIR})
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/${RS_OUTPUT_CONFIG_DIR})
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/${RS_OUTPUT_CONFIG_DIR})
+endif()
 
-  # Default to Debug for single-config generators when no build type is given.
-  if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type." FORCE)
-    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-      "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+# Default to Debug for single-config generators when no build type is given.
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  if(PROJECT_IS_TOP_LEVEL)
+    set(default_build_type "Debug")
+
+    message(STATUS "[rs] Setting build type to '${default_build_type}' as none was specified.")
+
+    set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE STRING "Choose the build type." FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+  else()
+    message(WARNING "[rs] Default build type is not set (CMAKE_BUILD_TYPE).")
   endif()
 endif()
 
@@ -179,7 +186,8 @@ include(ThirdParty)
 # SOURCES
 # ============================================================================
 
-add_subdirectory(src)
+# Main sources directory (the second parameter sets the output directory name to raylib)
+add_subdirectory(src raysim)
 
 # ============================================================================
 # EXAMPLES

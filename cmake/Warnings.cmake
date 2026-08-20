@@ -49,7 +49,6 @@ set(_RS_GCC_WARNINGS
 
 set(_RS_MSVC_WARNINGS
   /W4                         # High warning level (recommended baseline)
-  /permissive-                # Enforce standards conformance (also set globally)
   # --- Type safety / conversions ---
   /w14242                     # Possible data loss during conversion
   /w14254                     # Bitfield conversion may lose data

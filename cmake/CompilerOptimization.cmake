@@ -37,9 +37,6 @@ function(rs_enable_optimizations target)
     # MSVC: function-level linking in Release; enables safer /OPT:REF at link time
     $<$<AND:${_rel},${_is_msvc}>:/Gy>
 
-    # GCC/Clang: frame pointer in Debug for profiler/sanitizer compatibility
-    $<$<AND:${_dbg},${_is_gcc_clang}>:-fno-omit-frame-pointer>
-
     # GCC/Clang: section splitting in Release/RelWithDebInfo enables dead-strip
     $<$<AND:$<OR:${_rel},${_rwdi}>,${_is_gcc_clang}>:-ffunction-sections>
     $<$<AND:$<OR:${_rel},${_rwdi}>,${_is_gcc_clang}>:-fdata-sections>

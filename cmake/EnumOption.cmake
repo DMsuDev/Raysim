@@ -45,6 +45,7 @@ macro(enum_option var values description)
   if(NOT ";${${var}_VALUES};" MATCHES ";${${var}};")
     message(FATAL_ERROR
       "[EnumOption] Invalid value '${${var}}' for ${var}.\n"
-      "  Allowed: -D${var}=${${var}_VALUES}")
+      "  Allowed: ${_enum_values_str}\n"
+      "  Usage:   -D${var}=<value>")
   endif()
 endmacro()

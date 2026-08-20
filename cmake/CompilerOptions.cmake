@@ -40,30 +40,20 @@ function(rs_set_compiler_options target)
       _CRT_SECURE_NO_WARNINGS  # Suppress MSVC's "use _s variants" noise
       VC_EXTRALEAN             # Exclude even more rarely-used Windows headers
     )
+  elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
 
-    # VS 17.4+ (cl 19.40)
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "19.40")
-      target_compile_options(${target} PRIVATE
-        /Zc:enumTypes             # Strongly type enums (disallow implicit int conversions)
-      )
-    endif()
-
-    # VS 17.5+ (cl 19.41)
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "19.41")
-      target_compile_options(${target} PRIVATE
-        /Zc:templateScope         # Fix template parameter shadowing
-      )
-    endif()
-
-  # ----------------------------------------------------------------------------
-  # GCC / Clang / AppleClang
-  # ----------------------------------------------------------------------------
-  else()
     target_compile_options(${target} PRIVATE
-      -finput-charset=UTF-8                      # Source files are UTF-8
-      -fexec-charset=UTF-8                       # String literals encoded as UTF-8
-      $<$<CONFIG:Release>:-D_FORTIFY_SOURCE=2>   # Buffer overflow checks in libc calls
+      -finput-charset=UTF-8 # Source files are UTF-8
+      -fexec-charset=UTF-8  # String literals encoded as UTF-8
     )
+
+    # Add buffer overflow checks in libc calls for Release builds (GCC / Clang only)
+    # Requirest -O1 or higher, so we only apply it to Release and RelWithDebInfo.
+    target_compile_definitions(${target} PRIVATE
+      $<$<CONFIG:Release,RelWithDebInfo>:_FORTIFY_SOURCE=2>
+    )
+  else()
+    message(WARNING "[rs] Unknown compiler '${CMAKE_CXX_COMPILER_ID}', skipping compiler options.")
   endif()
 
 endfunction()
