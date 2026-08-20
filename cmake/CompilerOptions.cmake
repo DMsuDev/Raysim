@@ -38,8 +38,6 @@ function(rs_set_compiler_options target)
 
     target_compile_definitions(${target} PRIVATE
       _CRT_SECURE_NO_WARNINGS  # Suppress MSVC's "use _s variants" noise
-      NOMINMAX                 # Prevent <windows.h> from defining min/max macros
-      WIN32_LEAN_AND_MEAN      # Exclude rarely-used Windows headers
       VC_EXTRALEAN             # Exclude even more rarely-used Windows headers
     )
 

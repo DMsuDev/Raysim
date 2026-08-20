@@ -161,7 +161,6 @@ configure_file(
 #  Global Core Modules & System Paths
 # ------------------------------------------------------------------------------
 
-include(PlatformDetection)   # RS_PLATFORM_* variables and preprocessor defines
 include(Helpers)             # Utility functions for third-party setup
 include(Warnings)            # Compiler warning flags
 include(CompilerOptimization)

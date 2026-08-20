@@ -42,7 +42,6 @@ It covers the purpose of the abstraction, the responsibilities of each interface
     - [8. Wire Up BackendFactory](#8-wire-up-backendfactory)
     - [9. Update CMake Configuration](#9-update-cmake-configuration)
   - [Platform-Specific Considerations](#platform-specific-considerations)
-    - [Win32](#win32)
     - [macOS](#macos)
     - [Linux](#linux)
 
@@ -86,7 +85,6 @@ This choice is fixed for the lifetime of the build directory, `Raysim` does not 
 
 ```bash
 cmake -B build -G Ninja \
-  -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake \
   -DRS_BACKEND=raylib     # raylib (default), sdl2, glfw, etc.
 ```
 
@@ -888,44 +886,10 @@ endif()
 
 ## Platform-Specific Considerations
 
-### Win32
-
-> [!WARNING]
-> Windows introduces several macro collisions that affect backend code. Before including any Raysim or raylib header inside a backend `.cpp` or `.hpp` file, ensure the following defines are in place:
-
-```cpp
-#if defined(_WIN32)
-    #ifndef WIN32_LEAN_AND_MEAN
-        #define WIN32_LEAN_AND_MEAN
-    #endif
-    #ifndef NOMINMAX
-        #define NOMINMAX
-    #endif
-    #undef DrawTextEx
-    #undef DrawText
-    #undef CreateWindow
-#endif
-```
-
-> [!IMPORTANT]
-> `DrawText` and `CreateWindow` are defined as macros by `<windows.h>` and clash with Raysim and raylib symbols of the same name. `NOMINMAX` prevents `<windows.h>` from defining `min`/`max` macros that collide with `std::min`/`std::max`.
-
-<!-- -->
-
-> [!NOTE]
-> These guards are already applied in the engine's `Application.hpp` for user-facing code, but backend `.cpp` files that pull in both `<windows.h>` and raylib headers must apply them manually.
-
-<!-- -->
-
-> [!NOTE]
-> `RS_DEBUGBREAK()` expands to `__debugbreak()` on MSVC, which signals the debugger without terminating the process.
-
----
-
 ### macOS
 
 > [!CAUTION]
-> macOS is **not officially tested**. The build system and vcpkg dependencies are cross-platform and should work in theory, but compatibility is not guaranteed.
+> macOS is **not officially tested**. The build system is cross-platform and should work in theory, but compatibility is not guaranteed.
 
 **Known gaps:**
 

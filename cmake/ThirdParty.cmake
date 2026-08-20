@@ -33,6 +33,14 @@ if(RS_BACKEND STREQUAL "raylib")
 
 elseif(RS_BACKEND STREQUAL "glfw_opengl")
 
+  if(APPLE)
+    message(WARNING
+      "[rs] Backend 'glfw_opengl' on macOS uses OpenGL, which "
+      "Apple has deprecated since macOS 10.14 and no longer actively supports. "
+      "Functionality may be limited or broken on recent macOS versions. "
+      "Consider using the 'raylib' backend instead.")
+  endif()
+
   message(FATAL_ERROR
     "[rs] Backend 'glfw_opengl' is not yet implemented. Use 'raylib' for now.")
 

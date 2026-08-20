@@ -21,41 +21,6 @@
 
 #pragma once
 
-//----------------------------------------------------------------------------------
-// Exclude conflicting Win32 definitions
-//----------------------------------------------------------------------------------
-#if defined(_WIN32)
-    // Reduce Windows.h footprint
-    #ifndef WIN32_LEAN_AND_MEAN
-        #define WIN32_LEAN_AND_MEAN
-    #endif
-    #ifndef NOMINMAX
-        #define NOMINMAX
-    #endif
-    #ifndef NOGDI // excludes GDI macros: DrawText, DrawTextEx, etc.
-        #define NOGDI
-    #endif
-    #ifndef NOUSER // excludes USER macros: CreateWindow, etc.
-        #define NOUSER
-    #endif
-
-    // Safety net: undefine only if already defined by a previously included
-    // windows.h (e.g. pulled in transitively by a third-party header).
-    #ifdef DrawTextEx
-        #undef DrawTextEx
-    #endif
-    #ifdef DrawText
-        #undef DrawText
-    #endif
-    #ifdef CreateWindow
-        #undef CreateWindow
-    #endif
-#endif
-
-#ifdef _MSC_VER
-    #define _CRT_SECURE_NO_WARNINGS
-#endif
-
 // Standard library common includes for implementation files
 #include <iostream>
 #include <memory>
@@ -71,5 +36,4 @@
 #include <unordered_set>
 
 // Useful includes of Raysim
-
 #include "Raysim/Core/Base.hpp"
