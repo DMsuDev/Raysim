@@ -1,6 +1,10 @@
 # =============================================================================
-# CodeQL Security Analysis
-# Analyzes C/C++ source code for security vulnerabilities
+#  CODEQL SECURITY ANALYSIS
+# =============================================================================
+#  Description: Analyze C/C++ source code for security vulnerabilities using GitHub CodeQL.
+#
+#  Copyright (c) 2026 Dayron Mustelier (@DMsuDev)
+#  Licensed under the Apache License, Version 2.0.
 # =============================================================================
 name: CodeQL Security Analysis
 
@@ -11,9 +15,9 @@ on:
       - "src/**"
       - "include/**"
       - "examples/**"
+      - "cmake/**"
       - "CMakeLists.txt"
       - "CMakePresets.json"
-      - "vcpkg.json"
       - ".github/workflows/security-codeql.yml"
 
   pull_request:
@@ -22,9 +26,9 @@ on:
       - "src/**"
       - "include/**"
       - "examples/**"
+      - "cmake/**"
       - "CMakeLists.txt"
       - "CMakePresets.json"
-      - "vcpkg.json"
       - ".github/workflows/security-codeql.yml"
 
   workflow_dispatch:
@@ -59,9 +63,6 @@ jobs:
             libglu1-mesa-dev libwayland-dev libxkbcommon-dev \
             pkg-config
 
-      - name: Setup vcpkg
-        uses: lukka/run-vcpkg@b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2 # v11.6
-
       - name: Initialize CodeQL
         uses: github/codeql-action/init@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4.37.7
         with:
@@ -70,8 +71,6 @@ jobs:
           queries: security-extended
           config: |
             paths-ignore:
-              - vcpkg/**
-              - vcpkg_installed/**
               - build/**
               - third_party/**
               - docs/**

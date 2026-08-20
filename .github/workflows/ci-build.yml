@@ -1,6 +1,10 @@
 # =============================================================================
-# CI Build - Cross-platform (Windows + Linux) compilation with vcpkg
-# Uses native shell commands (no third-party actions) for reliability
+#  CI BUILD - Windows + Linux
+# =============================================================================
+#  Description: Build and test the project on Windows and Linux using GitHub Actions.
+#
+#  Copyright (c) 2026 Dayron Mustelier (@DMsuDev)
+#  Licensed under the Apache License, Version 2.0.
 # =============================================================================
 name: CI Build
 
@@ -11,9 +15,9 @@ on:
       - "src/**"
       - "include/**"
       - "examples/**"
+      - "cmake/**"
       - "CMakeLists.txt"
       - "CMakePresets.json"
-      - "vcpkg.json"
       - ".github/workflows/ci-build.yml"
 
   pull_request:
@@ -22,9 +26,9 @@ on:
       - "src/**"
       - "include/**"
       - "examples/**"
+      - "cmake/**"
       - "CMakeLists.txt"
       - "CMakePresets.json"
-      - "vcpkg.json"
       - ".github/workflows/ci-build.yml"
 
   workflow_dispatch:
@@ -77,9 +81,6 @@ jobs:
             libgl1-mesa-dev \
             libwayland-dev libxkbcommon-dev \
             pkg-config
-
-      - name: Setup vcpkg
-        uses: lukka/run-vcpkg@b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2 # v11.6
 
       - name: Configure CMake
         run: cmake --preset "${{ matrix.preset }}"

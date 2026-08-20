@@ -1,5 +1,10 @@
 # =============================================================================
-# Code Quality - Static Analysis & Linting
+#  CODE QUALITY ANALYSIS
+# =============================================================================
+#  Description: Analyze C/C++ source code for quality issues.
+#
+#  Copyright (c) 2026 Dayron Mustelier (@DMsuDev)
+#  Licensed under the Apache License, Version 2.0.
 # =============================================================================
 name: Code Quality
 
@@ -27,8 +32,7 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
 
@@ -71,7 +75,7 @@ jobs:
       - name: Run codespell
         uses: codespell-project/actions-codespell@8f01853be192eb0f849a5c7d721450e7a467c579 # v2.2
         with:
-          skip: build,_deps,vendor,third_party,vcpkg,cmake,*.lock,*.json,*.es.md
+          skip: build,_deps,vendor,third_party,cmake,*.lock,*.json,*.es.md
           ignore_words_list: nd,ot,te,ThirdParty,raysim
           check_filenames: true
 
