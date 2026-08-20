@@ -10,7 +10,7 @@
 cmake_minimum_required(VERSION 3.28)
 
 project(Raysim
-  VERSION 0.94.2
+  VERSION 0.95.0
   LANGUAGES CXX C
   DESCRIPTION "C++ 2D graphics & simulation framework built on raylib."
 )

@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.95.0] - 2026-08-20
+
+### Added
+
+- **Git Submodules Migration**: Replaced `vcpkg` with Git submodules (`third_party/raylib`) for managing dependencies, eliminating external package manager requirements.
+- **Unified Unix Preset**: Grouped Linux and macOS build configurations under a single `unix` CMake preset.
+- **Engine Version Header**: Added auto-generated `Version.hpp` for querying version info at compile time.
+- **Community & Governance**: Added security policy, issue templates, funding configuration, and `CODEOWNERS`.
+
+### Changed
+
+- **Build System & Compiler Modules**: Simplified CMake architecture, utilizing native CMake Interprocedural Optimization (IPO) for LTO, isolated target scoping for sanitizers, and streamlined coverage flags.
+- **Backend Architecture**: Modernized `BackendRegistry` and backend modules (`cmake/Backends/`) with self-contained dependency resolution.
+- **CI/CD Pipelines**: Updated GitHub Actions workflows for submodule checkouts, SHA-pinned actions, and cleaned up Dependabot rules.
+
+### Fixed
+
+- **Linux Linker Fixes**: Resolved GLFW linking errors on Linux by improving dependency checks and platform-specific flags.
+- **Sanitizer Isolation**: Ensured sanitizer flags apply strictly to target components without bleeding into unrelated dependencies.
+
+### Removed
+
+- Removed `vcpkg` submodules, update workflows, and legacy setup scripts (`tools/`).
+- Removed `clang-tidy` config, `REQUIREMENTS.md`, unused presets (`base-features`), and redundant CMake status prints.
+
+### Breaking Changes
+
+- **Submodule Initialization Required**: `vcpkg` is no longer supported. Existing local setups must initialize submodules via `git submodule update --init --recursive`.
+- **Toolchain Updates**: Custom scripts referencing `vcpkg.cmake` or vcpkg toolchains must be updated to target standard CMake CMakeLists.
+
 ## [0.94.2] - 2026-06-06
 
 ### Added
