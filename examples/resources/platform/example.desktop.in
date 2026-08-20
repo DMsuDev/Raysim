@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=@RAYSIM_EXAMPLE_NAME@
+Comment=@RAYSIM_EXAMPLE_DESCRIPTION@
+Exec=@CMAKE_INSTALL_PREFIX@/bin/@RAYSIM_EXAMPLE_TARGET@
+Icon=@CMAKE_INSTALL_PREFIX@/share/raysim/icons/raysim.png
+Terminal=false
+Categories=Graphics;Simulation;Education;
+Keywords=raysim;simulation;graphics;

@@ -10,7 +10,7 @@
 # ------------------------------------------------------------------------------
 #  Shared Assets Directories
 # ------------------------------------------------------------------------------
-set(EXAMPLES_ASSETS_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/shared/assets")
+set(EXAMPLES_ASSETS_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/resources/assets")
 set(EXAMPLES_ASSETS_DEST   "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets")
 
 # ------------------------------------------------------------------------------
@@ -20,22 +20,30 @@ add_custom_target(copy_shared_assets ALL
   COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${EXAMPLES_ASSETS_SOURCE}"
     "${EXAMPLES_ASSETS_DEST}"
-  COMMENT "Copying shared assets to output directory"
+  COMMENT "[rs] Copying shared assets to output directory"
 )
 
 # ------------------------------------------------------------------------------
 #  Example Targets
 # ------------------------------------------------------------------------------
+
+# Include helper functions for building examples
+include("${CMAKE_CURRENT_SOURCE_DIR}/resources/cmake/ExampleHelpers.cmake")
+
 set(RS_EXAMPLES
-  LissajousCurves
-  Mouse2D
-  NoiseLandscape
-  BouncingBalls
-  SceneShowcase
+  demos/LissajousCurves
+  demos/Mouse2D
+  demos/NoiseLandscape
+  demos/BouncingBalls
+  demos/SceneShowcase
 )
 
 foreach(example IN LISTS RS_EXAMPLES)
+  # Extract just the target name (last path component)
+  cmake_path(GET example FILENAME _example_name)
+
   add_subdirectory(${example})
-  # Add dependency to ensure shared assets are copied before building the example
-  add_dependencies(${example} copy_shared_assets)
+
+  # Ensure shared assets are copied before building the example
+  add_dependencies(${_example_name} copy_shared_assets)
 endforeach()
