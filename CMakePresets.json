@@ -17,7 +17,6 @@
       "name": "base-sanitizers-on",
       "hidden": true,
       "cacheVariables": {
-        "RS_ENABLE_SANITIZERS": "ON",
         "RS_SANITIZE_ASAN":     "ON",
         "RS_SANITIZE_UBSAN":    "ON",
         "RS_SANITIZE_TSAN":     "OFF",
@@ -29,7 +28,6 @@
       "name": "base-sanitizers-off",
       "hidden": true,
       "cacheVariables": {
-        "RS_ENABLE_SANITIZERS": "OFF",
         "RS_SANITIZE_ASAN":     "OFF",
         "RS_SANITIZE_UBSAN":    "OFF",
         "RS_SANITIZE_TSAN":     "OFF",

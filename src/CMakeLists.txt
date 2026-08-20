@@ -61,8 +61,10 @@ set(RAYSIM_SOURCES
 # Target
 # ------------------------------------------------------------------------------
 if(RS_BUILD_SHARED)
+  message(STATUS "[rs] Building shared library")
   add_library(Raysim SHARED ${RAYSIM_SOURCES})
 else()
+  message(STATUS "[rs] Building static library")
   add_library(Raysim STATIC ${RAYSIM_SOURCES})
 endif()
 
@@ -95,12 +97,11 @@ set_target_properties(Raysim PROPERTIES
 # ------------------------------------------------------------------------------
 #  Precompiled header
 # ------------------------------------------------------------------------------
-if(RS_ENABLE_PCH)
-  target_precompile_headers(Raysim
-    PRIVATE
-      ${CMAKE_CURRENT_SOURCE_DIR}/rspch.hpp
-  )
-endif()
+
+target_precompile_headers(Raysim
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/rspch.hpp
+)
 
 # ------------------------------------------------------------------------------
 #  Preprocessor Compile Definitions

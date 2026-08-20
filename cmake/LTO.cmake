@@ -22,16 +22,6 @@ function(rs_enable_lto target_name)
     return()
   endif()
 
-  if(RS_ENABLE_SANITIZERS)
-    message(STATUS
-      "[rs] LTO: disabled for '${target_name}' — "
-      "sanitizers are active (disabled by project policy)."
-    )
-
-    set("RS_LTO_ENABLED_FOR_${target_name}" FALSE PARENT_SCOPE)
-    return()
-  endif()
-
   include(CheckIPOSupported)
 
   check_ipo_supported(
@@ -57,11 +47,6 @@ function(rs_enable_lto target_name)
     INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL     FALSE
     INTERPROCEDURAL_OPTIMIZATION_RELEASE        TRUE
     INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO TRUE
-  )
-
-  message(STATUS
-    "[rs] LTO: IPO enabled for '${target_name}' "
-    "(Release / RelWithDebInfo)."
   )
 
   set("RS_LTO_ENABLED_FOR_${target_name}" TRUE PARENT_SCOPE)

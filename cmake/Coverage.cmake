@@ -31,18 +31,6 @@ function(rs_enable_coverage target)
   endif()
 
   # ----------------------------------------------------------------------------
-  #  Sanitizer Interaction Warning
-  # ----------------------------------------------------------------------------
-  if(RS_ENABLE_SANITIZERS)
-    message(WARNING
-      "[rs] Coverage is enabled together with sanitizers; "
-      "coverage results may be affected."
-    )
-  endif()
-
-  message(STATUS "[rs] Code coverage enabled for '${target}'")
-
-  # ----------------------------------------------------------------------------
   #  Instrumentation Options
   # ----------------------------------------------------------------------------
   target_compile_options(${target}
