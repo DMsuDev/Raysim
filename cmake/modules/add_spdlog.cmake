@@ -47,5 +47,3 @@ rs_third_party_setup(spdlog)
 set_target_properties(spdlog PROPERTIES
   FOLDER "ThirdParty/SPDLOG"
 )
-
-message(STATUS "[rs] spdlog configured (HEADER-ONLY) : (${SPDLOG_DIR})")

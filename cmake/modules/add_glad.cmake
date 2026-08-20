@@ -53,5 +53,3 @@ rs_third_party_setup(glad)
 set_target_properties(glad PROPERTIES
   FOLDER "ThirdParty/GLAD"
 )
-
-message(STATUS "[rs] GLAD configured (${GLAD_DIR})")

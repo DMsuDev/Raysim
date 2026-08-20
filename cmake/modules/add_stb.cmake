@@ -60,5 +60,3 @@ rs_third_party_setup(stb)
 set_target_properties(stb PROPERTIES
   FOLDER "ThirdParty/STB"
 )
-
-message(STATUS "[rs] stb configured (HEADER-ONLY) : (${STB_DIR})")

@@ -58,5 +58,3 @@ rs_third_party_setup(imgui)
 set_target_properties(imgui PROPERTIES
   FOLDER "ThirdParty/ImGui"
 )
-
-message(STATUS "[rs] ImGui core configured (${IMGUI_DIR})")
