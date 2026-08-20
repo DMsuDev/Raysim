@@ -80,12 +80,11 @@ Tres escenas visuales independientes (`StarField`, `PlasmaArt`, `ClockMandala`) 
 
 ## Requisitos
 
-| Herramienta | Versión | Notas |
-| :--- | :--- | :--- |
-| **CMake** | 3.28+ | Generador del sistema de compilación |
-| **Compilador C++** | C++20 | GCC 10+, Clang 12+ (Linux) · MSVC 2022 (Windows) |
-| **Ninja** | Cualquiera | Generador de compilación recomendado |
-| **vcpkg** | Cualquiera | Gestor de paquetes (requiere la variable de entorno `VCPKG_ROOT`) |
+| Herramienta        | Versión    | Notas                                             |
+| :----------------- | :--------- | :------------------------------------------------ |
+| **CMake**          | 3.28+      | Generador del sistema de compilación              |
+| **Compilador C++** | C++20      | GCC 11+, Clang 12+ (Linux) · MSVC 2022+ (Windows) |
+| **Ninja**          | Cualquiera | Generador de compilación recomendado              |
 
 ## Compilación
 
@@ -98,8 +97,14 @@ Raysim soporta oficialmente:
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/DMsuDev/raysim.git
+git clone --recurse-submodules https://github.com/DMsuDev/raysim.git
 cd raysim
+```
+
+Si ya clonaste sin submódulos, ejecuta:
+
+```bash
+git submodule update --init --recursive
 ```
 
 ### 2. Compilar
@@ -107,7 +112,9 @@ cd raysim
 <details open>
 <summary><strong>Opción A: CMake Presets (Recomendado)</strong></summary>
 
-Los *presets* gestionan automáticamente la configuración, las rutas de la cadena de herramientas (*toolchain*) y las banderas de sanitizadores:
+Los *presets* gestionan automáticamente la configuración y las banderas de sanitizadores:
+
+**Linux / macOS**
 
 ```bash
 # Compilación en modo Debug (ASan + UBSan habilitados donde sea compatible)
@@ -119,21 +126,30 @@ cmake --preset release
 cmake --build --preset release
 ```
 
-> [!WARNING]
-> El soporte de sanitizadores depende del compilador utilizado. En MinGW, los sanitizadores se desactivan automáticamente.
+**Windows (MSVC)**
+
+```bash
+cmake --preset msvc-debug
+cmake --build --preset msvc-debug
+
+cmake --preset msvc-release
+cmake --build --preset msvc-release
+```
+
+> [!NOTE]
+> El soporte de sanitizadores varía según la plataforma y la cadena de herramientas. En Windows, solo ASan está disponible con Clang (no Cl). Los sanitizadores de MinGW y MSVC aún no son compatibles.
 
 </details>
 
 <details>
 <summary><strong>Opción B: Compilación personalizada</strong></summary>
 
-Si prefieres un control explícito o no usas *presets*, especifica manualmente el archivo de la cadena de herramientas (*toolchain*) de vcpkg.
+Si prefieres un control explícito o no usas *presets*, puedes configurar y compilar manualmente.
 
 **Linux / macOS / Windows (Generador Ninja)**
 
 ```bash
 cmake -B build -G Ninja \
-  -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
   -DCMAKE_BUILD_TYPE=Release \
   -DRS_BUILD_EXAMPLES=ON
 
@@ -144,7 +160,6 @@ cmake --build build
 
 ```powershell
 cmake -B build -G "Visual Studio 18 2026" -A x64 `
-  -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake" `
   -DRS_BUILD_EXAMPLES=ON
 
 cmake --build build --config Release
@@ -158,14 +173,14 @@ Una aplicación en Raysim se construye alrededor de **escenas**. Cada escena ges
 
 La macro `RS_SCENE` registra el tipo en el sistema de escenas y genera su constructor automáticamente. Sobrescribe únicamente las funciones que necesites; por defecto, todas son operaciones vacías (*no-ops*):
 
-| Callback | Cuándo se ejecuta |
-| :--- | :--- |
-| `OnAttach` | Una sola vez, al apilar la escena. Ideal para cargar recursos y suscribirse a eventos. |
-| `OnStart` | Cada vez que la escena pasa a estar activa. Úsalo para reiniciar el estado. |
-| `OnUpdate(dt)` | En cada fotograma. Para lectura de entradas (*polling*) y lógica con tasa variable. |
-| `OnFixedUpdate(fixedDt)` | Intervalo de tiempo fijo (*fixed timestep*). Para física y simulación determinista. |
-| `OnDraw(alpha)` | En cada fotograma, tras `OnUpdate`. Todo el renderizado se realiza aquí. |
-| `OnDetach` | Al remover la escena. Libera recursos y cancela suscripciones a eventos. |
+| Callback                 | Cuándo se ejecuta                                                                      |
+| :----------------------- | :------------------------------------------------------------------------------------- |
+| `OnAttach`               | Una sola vez, al apilar la escena. Ideal para cargar recursos y suscribirse a eventos. |
+| `OnStart`                | Cada vez que la escena pasa a estar activa. Úsalo para reiniciar el estado.            |
+| `OnUpdate(dt)`           | En cada fotograma. Para lectura de entradas (*polling*) y lógica con tasa variable.    |
+| `OnFixedUpdate(fixedDt)` | Intervalo de tiempo fijo (*fixed timestep*). Para física y simulación determinista.    |
+| `OnDraw(alpha)`          | En cada fotograma, tras `OnUpdate`. Todo el renderizado se realiza aquí.               |
+| `OnDetach`               | Al remover la escena. Libera recursos y cancela suscripciones a eventos.               |
 
 Para consultar la referencia completa del ciclo de vida, incluyendo eventos, capas y la interpolación física, revisa la documentación de [Arquitectura](docs/ARCHITECTURE.md).
 

@@ -80,12 +80,11 @@ Three independent visual scenes (`StarField`, `PlasmaArt`, `ClockMandala`) acces
 
 ## Requirements
 
-| Tool             | Version | Notes                                                        |
-| :--------------- | :------ | :----------------------------------------------------------- |
-| **CMake**        | 3.28+   | Build system generator                                       |
-| **C++ Compiler** | C++20   | GCC 10+, Clang 12+ (Linux) · MSVC 2022 (Windows)             |
-| **Ninja**        | Any     | Recommended build generator                                  |
-| **vcpkg**        | Any     | Package manager (`VCPKG_ROOT` environment variable required) |
+| Tool             | Version | Notes                                             |
+| :--------------- | :------ | :------------------------------------------------ |
+| **CMake**        | 3.28+   | Build system generator                            |
+| **C++ Compiler** | C++20   | GCC 11+, Clang 12+ (Linux) · MSVC 2022+ (Windows) |
+| **Ninja**        | Any     | Recommended build generator                       |
 
 ## Building
 
@@ -98,8 +97,14 @@ Raysim officially supports:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/DMsuDev/raysim.git
+git clone --recurse-submodules https://github.com/DMsuDev/raysim.git
 cd raysim
+```
+
+If you already cloned without submodules, run:
+
+```bash
+git submodule update --init --recursive
 ```
 
 ### 2. Build
@@ -107,7 +112,9 @@ cd raysim
 <details open>
 <summary><strong>Option A: CMake Presets (Recommended)</strong></summary>
 
-Presets handle configuration, toolchain paths, and sanitizer flags automatically:
+Presets handle configuration, and sanitizer flags automatically:
+
+**Linux / macOS**
 
 ```bash
 # Debug build (ASan + UBSan enabled where supported)
@@ -119,21 +126,32 @@ cmake --preset release
 cmake --build --preset release
 ```
 
-> [!WARNING]
-> Sanitizer support depends on the compiler toolchain. On MinGW, sanitizers are disabled automatically.
+**Windows (MSVC)**
+
+```bash
+# Debug build
+cmake --preset msvc-debug
+cmake --build --preset msvc-debug
+
+# Release build
+cmake --preset msvc-release
+cmake --build --preset msvc-release
+```
+
+> [!NOTE]
+> Sanitizer support varies by platform and toolchain. On Windows, only ASan is available with Clang (non-cl). MinGW and MSVC sanitizers are not yet supported.
 
 </details>
 
 <details>
 <summary><strong>Option B: Custom Build</strong></summary>
 
-If you prefer explicit control or aren't using presets, specify the vcpkg toolchain file manually.
+If you prefer explicit control or aren't using presets, you can configure and build manually.
 
 **Linux / macOS / Windows (Ninja Generator)**
 
 ```bash
 cmake -B build -G Ninja \
-  -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
   -DCMAKE_BUILD_TYPE=Release \
   -DRS_BUILD_EXAMPLES=ON
 
@@ -144,7 +162,6 @@ cmake --build build
 
 ```powershell
 cmake -B build -G "Visual Studio 18 2026" -A x64 `
-  -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake" `
   -DRS_BUILD_EXAMPLES=ON
 
 cmake --build build --config Release
