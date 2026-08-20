@@ -1,20 +1,25 @@
-# ===========================================================================
-# Detects the host OS, sets platform variables and preprocessor definitions,
-# and validates that the selected RS_BACKEND is supported on this platform.
+# ============================================================================
+#  RAYSIM - PLATFORM DETECTION MODULE
+# ============================================================================
+#  Description: Detects the host OS, sets RS_PLATFORM_* CMake variables,
+#               injects the corresponding preprocessor definition into all
+#               targets, and validates backend/platform compatibility.
 #
-# Output variables (all BOOL, exactly one is ON):
-#   RS_PLATFORM_WINDOWS
-#   RS_PLATFORM_MACOS
-#   RS_PLATFORM_LINUX
+#  Output variables (BOOL, exactly one is ON):
+#    RS_PLATFORM_WINDOWS
+#    RS_PLATFORM_MACOS
+#    RS_PLATFORM_LINUX
 #
-# Preprocessor definitions added globally:
-#   RS_PLATFORM_WINDOWS / RS_PLATFORM_MACOS / RS_PLATFORM_LINUX
-# ===========================================================================
-
+#  Preprocessor definition injected (matches the ON variable):
+#    RS_PLATFORM_WINDOWS | RS_PLATFORM_MACOS | RS_PLATFORM_LINUX
+#
+#  Copyright (c) 2026 Dayron Mustelier (@DMsuDev)
+#  Licensed under the Apache License, Version 2.0.
+# ============================================================================
 include_guard()
 
 # ---------------------------------------------------------------------------
-# Detect platform
+#  Detect platform
 # ---------------------------------------------------------------------------
 
 if(WIN32)
@@ -40,36 +45,22 @@ elseif(UNIX)
 
 else()
   message(FATAL_ERROR
-    "[rs] PlatformDetection: unsupported platform.\n"
-    "CMAKE_SYSTEM_NAME = '${CMAKE_SYSTEM_NAME}'")
+    "[PlatformDetection] Unsupported platform: '${CMAKE_SYSTEM_NAME}'.\n"
+    "Supported targets: Windows x64, Linux x86_64, macOS (experimental).")
 endif()
 
-# ---------------------------------------------------------------------------
-# Backend / platform compatibility matrix
-#
-# Add rows here when a new backend or platform constraint is introduced.
-# Format: "<backend>;<platform_var>" the pair is UNSUPPORTED.
-# ---------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+#  Backend / platform compatibility
+# ------------------------------------------------------------------------------
+#  Add entries here when a new backend introduces a platform restriction.
+#  Warnings are preferred over FATAL_ERROR to allow CI to surface all issues
+#  at once rather than aborting on the first mismatch.
+# ------------------------------------------------------------------------------
 
-set(_RS_UNSUPPORTED_COMBINATIONS
-  # MemorySanitizer is Clang-only and unavailable on Windows
-  # (not a backend, but kept here as a model for future constraints)
-)
-
-# Backend-level restrictions
-if(RS_PLATFORM_WINDOWS)
-  # glfw_opengl works on Windows but MSan is unsupported; no backend
-  # restrictions currently - placeholder kept for future use.
-elseif(RS_PLATFORM_MACOS)
-  if(RS_BACKEND STREQUAL "glfw_opengl")
-    message(WARNING
-      "[rs] PlatformDetection: backend 'glfw_opengl' on macOS requires "
-      "the OpenGL Compatibility profile. Consider 'raylib' instead.")
-  endif()
+if(RS_PLATFORM_MACOS AND RS_BACKEND STREQUAL "glfw_opengl")
+  message(WARNING
+    "[PlatformDetection] Backend 'glfw_opengl' on macOS uses OpenGL, which "
+    "Apple has deprecated since macOS 10.14 and no longer actively supports. "
+    "Functionality may be limited or broken on recent macOS versions. "
+    "Consider using the 'raylib' backend instead.")
 endif()
-
-# ---------------------------------------------------------------------------
-# Summary
-# ---------------------------------------------------------------------------
-
-message(STATUS "[rs] Platform detected: ${_RS_PLATFORM_NAME}")

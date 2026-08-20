@@ -24,13 +24,11 @@
 // ============================================================================
 // Platform Detection
 // ----------------------------------------------------------------------------
-// Preferred path: CMake defines RS_PLATFORM_* via target_compile_definitions,
-// which means the detection below is skipped entirely in normal builds.
+// Preferred path: CMake injects RS_PLATFORM_* via target_compile_definitions.
 //
-// Fallback path: if CMake didn't inject any platform macro (e.g. the header
-// is used outside the CMake build system), we derive the platform from
-// standard compiler-predefined macros. This keeps the header self-contained
-// and usable in third-party projects that include it directly.
+// Fallback path: derived from compiler-predefined macros when CMake is not
+// involved (static analysers, clangd, direct inclusion by tooling).
+// Note: consuming Raysim outside its CMake build system is not supported.
 // ============================================================================
 
 #if !defined(RS_PLATFORM_WINDOWS) && !defined(RS_PLATFORM_LINUX) && !defined(RS_PLATFORM_MACOS)
@@ -53,9 +51,8 @@
 // ============================================================================
 // Platform Validation
 // ----------------------------------------------------------------------------
-// Enforces architecture and toolchain requirements per supported platform.
-// Emits a compile-time error with a clear message rather than producing a
-// binary that would silently misbehave at runtime.
+// Enforces architecture requirements per supported platform at compile time,
+// rather than producing a binary that would silently misbehave at runtime.
 //
 // RS_PLATFORM_NAME is defined here so that diagnostic and logging code can
 // embed the platform string without repeating these preprocessor checks.
@@ -71,9 +68,9 @@
 
 #elif defined(RS_PLATFORM_MACOS)
 
-    // macOS support is experimental: the Raylib backend and Metal/OpenGL
+    // macOS support is experimental: the Raylib backend and the OpenGL
     // abstraction layer have not been fully validated on Apple Silicon or
-    // Intel Macs.  Expect rough edges and please report issues at:
+    // Intel Macs. Expect rough edges and please report issues at:
     // https://github.com/DMsuDev/Raysim/issues
     #pragma message("[Raysim] macOS support is experimental and may be unstable. Use at your own risk.")
 
