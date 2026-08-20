@@ -37,16 +37,10 @@
     },
 
     {
-      "name": "linux",
+      "name": "unix",
       "hidden": true,
       "generator": "Ninja",
-      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" }
-    },
-    {
-      "name": "macos",
-      "hidden": true,
-      "generator": "Ninja",
-      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Darwin" }
+      "condition": { "type": "inList", "string": "${hostSystemName}", "list": ["Linux", "Darwin"] }
     },
     {
       "name": "windows-ninja",
@@ -74,7 +68,7 @@
       "name": "debug",
       "displayName": "Debug (Linux, Ninja)",
       "description": "Debug build with ASan + UBSan. Targets Linux/GCC or Clang via Ninja.",
-      "inherits": ["base", "linux", "base-sanitizers-on"],
+      "inherits": ["base", "unix", "base-sanitizers-on"],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "RS_ENABLE_LTO":    "OFF"
@@ -84,7 +78,7 @@
       "name": "release",
       "displayName": "Release (Linux, Ninja)",
       "description": "Optimized release build with LTO. Sanitizers disabled.",
-      "inherits": ["base", "linux", "base-sanitizers-off"],
+      "inherits": ["base", "unix", "base-sanitizers-off"],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "RS_ENABLE_LTO":    "ON"
@@ -94,7 +88,7 @@
       "name": "relwithdebinfo",
       "displayName": "RelWithDebInfo (Linux, Ninja)",
       "description": "Optimized build retaining debug symbols and LTO. Sanitizers disabled.",
-      "inherits": ["base", "linux", "base-sanitizers-off"],
+      "inherits": ["base", "unix", "base-sanitizers-off"],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo",
         "RS_ENABLE_LTO":    "ON"
