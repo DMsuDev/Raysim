@@ -67,14 +67,19 @@ jobs:
         uses: github/codeql-action/init@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4.37.7
         with:
           languages: c-cpp
+          build-mode: none
           # security-extended: security alerts only, without code quality noise
           queries: security-extended
           config: |
+            paths:
+              - src
+              - include
+              - examples
             paths-ignore:
-              - build/**
-              - third_party/**
-              - docs/**
-              - tools/**
+              - build
+              - third_party
+              - docs
+              - tools
 
       - name: Configure CMake
         run: cmake --preset release
